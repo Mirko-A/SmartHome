@@ -1,0 +1,5 @@
+text: #d7d9de
+background: #1f232a
+accent1: #2c313c
+accent2: #343b47
+mint-graph: #82b59d; 
