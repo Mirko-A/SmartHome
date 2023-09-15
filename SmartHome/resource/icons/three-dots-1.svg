@@ -1,0 +1,9 @@
+<?xml version="1.0" standalone="no"?>
+<svg contentScriptType="text/ecmascript" zoomAndPan="magnify" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="full"
+    contentStyleType="text/css" stroke="currentColor" stroke-linecap="round" version="1.0" width="24" fill="none"
+    preserveAspectRatio="xMidYMid meet" stroke-width="2" viewBox="0 0 24 24" height="24" class="feather feather-toggle-right"
+    xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round">
+    <circle fill="#eeeeee" r="2" stroke-width="2" cx="4" cy="12" stroke="#eeeeee"/>
+    <circle fill="#cfcfcf" r="2" cx="12" cy="12" stroke="#cfcfcf" stroke-width="2"/>
+    <circle fill="#eeeeee" r="2" stroke-width="2" cx="20" cy="12" stroke="#eeeeee"/>
+</svg>
