@@ -1,0 +1,23 @@
+{
+    "AC": {
+        "Mode": 0,
+        "On": true,
+        "Temperature": 24
+    },
+    "Dirty": false,
+    "Lights": {
+        "Bedroom": false,
+        "Kitchen": true,
+        "LivingRoom": true
+    },
+    "Sensors": {
+        "Brightness": 0,
+        "Humidity": 0,
+        "Temperature": 0
+    },
+    "Speakers": {
+        "Bass": 0,
+        "Pitch": 0,
+        "Volume": 0
+    }
+}

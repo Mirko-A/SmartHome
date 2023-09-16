@@ -1,20 +1,65 @@
 #include "home_config.h"
 
-HomeConfig::HomeConfig()
+void HomeConfig::readHardwareInputs()
 {
-    settings.lights.livingRoomLightOn = false;
-    settings.lights.bedroomLightOn = false;
-    settings.lights.kitchenLightOn = false;
+    // Sensors (this should make the cfg dirty)
+}
 
-    settings.sensors.temperature = 0;
-    settings.sensors.humidity = 0;
-    settings.sensors.brightness = 0;
+void HomeConfig::sendHardwareOutputs()
+{
+    // Lights
+    // AC
+}
 
-    settings.AC.ACOn = false;
-    settings.AC.temperature = 20;
-    settings.AC.mode = ACMode::NORMAL;
+void HomeConfig::onUpdate()
+{
+    // TODO: continue this
+    readHardwareInputs();
+    sendHardwareOutputs();
+}
 
-    settings.speakers.volume = 0;
-    settings.speakers.bass = 0;
-    settings.speakers.pitch = 0;
+void HomeConfig::fromJSON(nlohmann::json thisAsJson)
+{
+    lights.fromJSON(thisAsJson["Lights"]);
+    sensors.fromJSON(thisAsJson["Sensors"]);
+    AC.fromJSON(thisAsJson["AC"]);
+    speakers.fromJSON(thisAsJson["Speakers"]);
+    isDirty = thisAsJson["Dirty"];
+}
+
+nlohmann::json HomeConfig::toJSON()
+{
+    nlohmann::json thisAsJSON =
+    {
+        lights.toJSON(),
+        sensors.toJSON(),
+        AC.toJSON(),
+        speakers.toJSON(),
+        { "Dirty", isDirty },
+    };
+
+    return thisAsJSON;
+}
+
+QString ACModeToString(ACMode mode)
+{
+    QString modeStr;
+
+    switch (mode)
+    {
+        case ACMode::NORMAL:
+            modeStr = "Normal";
+        break;
+        case ACMode::FAST:
+            modeStr = "Fast";
+        break;
+        case ACMode::TURBO:
+            modeStr = "Turbo";
+        break;
+        default:
+            modeStr = "Error";
+        break;
+    }
+
+    return modeStr;
 }

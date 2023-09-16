@@ -4,6 +4,7 @@
 #include "home_config.h"
 
 #include <QMainWindow>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -25,6 +26,7 @@ public:
     ~MainWindow();
 
 private slots:
+    void onUpdate();
 
     /* Navigation bar button callbacks */
     void on_devicesBtn_clicked();
@@ -42,11 +44,25 @@ private slots:
     void on_ACTemperatureUp_clicked();
     void on_ACTemperatureDown_clicked();
 
+    void on_ACModeUp_clicked();
+    void on_ACModeDown_clicked();
+
 private:
     void updateCurrentPage(PageIndex index);
+    void updateDateTimeWidget();
+
+    void loadCfgFromJSON();
+    void saveCfgAsJSON();
+
+    void updateLightsUI();
+    void updateSensorsUI();
+    void updateACUI();
+    void updateSpeakersUI();
+    void updateUI();
 
 private:
     Ui::MainWindow *ui;
     HomeConfig* homeCfg;
+    QTimer* updateTimer;
 };
 #endif // MAINWINDOW_H
