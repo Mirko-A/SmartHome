@@ -3,12 +3,20 @@
 
 #include <QDateTime>
 
+#include <fstream>
+
+#define CFG_JSON_FILE_PATH CFG_JSON_FILE_PATH_QSTR.toStdString().c_str()
+#define INI_JSON_FILE_PATH INI_JSON_FILE_PATH_QSTR.toStdString().c_str()
+
 const QVector<QString> PAGE_ICON_PATHS =
 {
-  "resource/icons/three-dots-0.svg",
-  "resource/icons/three-dots-1.svg",
-  "resource/icons/three-dots-2.svg",
+  "../resource/icons/three-dots-0-purple.svg",
+  "../resource/icons/three-dots-1-purple.svg",
+  "../resource/icons/three-dots-2-purple.svg",
 };
+
+const QString CFG_JSON_FILE_PATH_QSTR = "../resource/home_cfg.json";
+const QString INI_JSON_FILE_PATH_QSTR = "../resource/ini_cfg.json";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,9 +26,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pages->setCurrentIndex(static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
 
     homeCfg = new HomeConfig;
+    loadCfgFromJSON();
+    homeCfg->isDirty = true;
 
-    QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
-    ui->dateTimeLabel->setText(currentDateTime.toString());
+    updateTimer = new QTimer(this);
+    connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
+    updateTimer->start(50);
+
+    updateDateTimeWidget();
 }
 
 MainWindow::~MainWindow()
@@ -29,18 +42,89 @@ MainWindow::~MainWindow()
     delete homeCfg;
 }
 
+void MainWindow::updateLightsUI()
+{
+    ui->livingRoomLightBtn->setChecked(homeCfg->lights.livingRoomLightOn);
+    ui->bedroomLightBtn->setChecked(homeCfg->lights.bedroomLightOn);
+    ui->kitchenLightBtn->setChecked(homeCfg->lights.kitchenLightOn);
+}
+void MainWindow::updateSensorsUI()
+{
+    ui->temperatureSensorValueLabel->setText(QString::number(homeCfg->sensors.temperature));
+    ui->humiditySensorValueLabel->setText(QString::number(homeCfg->sensors.humidity));
+    ui->brightnessSensorValueLabel->setText(QString::number(homeCfg->sensors.brightness));
+}
+void MainWindow::updateACUI()
+{
+    ui->ACOnBtn->setChecked(homeCfg->AC.on);
+    ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
+    ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
+}
+void MainWindow::updateSpeakersUI()
+{
+
+}
+
+void MainWindow::updateUI()
+{
+    updateDateTimeWidget();
+
+    // Config has been updated by 3rd party (python or HW)
+    if (homeCfg->isDirty)
+    {
+        updateLightsUI();
+        updateSensorsUI();
+        updateACUI();
+        updateSpeakersUI();
+
+        homeCfg->isDirty = false;
+    }
+}
+
+void MainWindow::onUpdate()
+{
+    homeCfg->onUpdate();
+    updateUI();
+
+    // TODO: JSON file handling
+    saveCfgAsJSON();
+}
+
+void MainWindow::saveCfgAsJSON()
+{
+    std::ofstream o(CFG_JSON_FILE_PATH);
+    o << std::setw(4) << homeCfg->toJSON() << std::endl;
+}
+
+void MainWindow::loadCfgFromJSON()
+{
+    std::ifstream i;
+    i.open(CFG_JSON_FILE_PATH);
+
+    if (!i.good())
+        i.open(INI_JSON_FILE_PATH);
+
+    nlohmann::json j;
+    i >> j;
+
+    homeCfg->fromJSON(j);
+}
+
 void MainWindow::updateCurrentPage(PageIndex index)
 {
     ui->pages->setCurrentIndex(static_cast<int>(index)); // reveal the home page
     ui->buttonsCurrentButton->setIcon(QIcon(PAGE_ICON_PATHS.at(static_cast<int>(index)))); // update current page icon
 }
 
+void MainWindow::updateDateTimeWidget()
+{
+    QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
+    ui->dateTimeLabel->setText(currentDateTime.toString());
+}
+
 void MainWindow::on_devicesBtn_clicked()
 {
     updateCurrentPage(PageIndex::HOME);
-    // TODO: MOVE THIS TO SEPARATE FUNCTION
-    QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
-    ui->dateTimeLabel->setText(currentDateTime.toString());
 }
 
 void MainWindow::on_musicBtn_clicked()
@@ -60,11 +144,11 @@ void MainWindow::on_livingRoomLightBtn_toggled(bool checked)
 
     if (checked)
     {
-        ui->livingRoomLightBtn->setIcon(QIcon("resource/icons/toggle-on-colored.svg"));
+        ui->livingRoomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
     }
     else
     {
-        ui->livingRoomLightBtn->setIcon(QIcon("resource/icons/toggle-off-colored.svg"));
+        ui->livingRoomLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
@@ -75,11 +159,11 @@ void MainWindow::on_bedroomLightBtn_toggled(bool checked)
 
     if (checked)
     {
-        ui->bedroomLightBtn->setIcon(QIcon("resource/icons/toggle-on-colored.svg"));
+        ui->bedroomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
     }
     else
     {
-        ui->bedroomLightBtn->setIcon(QIcon("resource/icons/toggle-off-colored.svg"));
+        ui->bedroomLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
@@ -90,11 +174,11 @@ void MainWindow::on_kitchenLightBtn_toggled(bool checked)
 
     if (checked)
     {
-        ui->kitchenLightBtn->setIcon(QIcon("resource/icons/toggle-on-colored.svg"));
+        ui->kitchenLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
     }
     else
     {
-        ui->kitchenLightBtn->setIcon(QIcon("resource/icons/toggle-off-colored.svg"));
+        ui->kitchenLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
@@ -105,11 +189,11 @@ void MainWindow::on_ACOnBtn_toggled(bool checked)
 
     if (checked)
     {
-        ui->ACOnBtn->setIcon(QIcon("resource/icons/toggle-on-colored.svg"));
+        ui->ACOnBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
     }
     else
     {
-        ui->ACOnBtn->setIcon(QIcon("resource/icons/toggle-off-colored.svg"));
+        ui->ACOnBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
@@ -134,4 +218,33 @@ void MainWindow::on_ACTemperatureDown_clicked()
 
     ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
 }
+
+void MainWindow::on_ACModeUp_clicked()
+{
+    uint8_t currentMode = static_cast<uint8_t>(homeCfg->AC.mode);
+
+    uint8_t modeCnt = static_cast<uint8_t>(ACMode::AC_MODE_CNT);
+
+    if (currentMode < (modeCnt - 1))
+    {
+        currentMode++;
+    }
+
+    homeCfg->AC.mode = static_cast<ACMode>(currentMode);
+    ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
+}
+
+void MainWindow::on_ACModeDown_clicked()
+{
+    uint8_t currentMode = static_cast<uint8_t>(homeCfg->AC.mode);
+
+    if (currentMode > 0)
+    {
+        currentMode--;
+    }
+
+    homeCfg->AC.mode = static_cast<ACMode>(currentMode);
+    ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
+}
+
 
