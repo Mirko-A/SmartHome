@@ -16,8 +16,8 @@
         "Temperature": 0
     },
     "Speakers": {
-        "Bass": 0,
-        "Pitch": 0,
-        "Volume": 0
+        "Bass": 50,
+        "Pitch": 50,
+        "Volume": 50
     }
 }

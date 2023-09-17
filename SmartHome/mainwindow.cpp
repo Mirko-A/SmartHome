@@ -308,3 +308,9 @@ void MainWindow::on_pitchSlider_valueChanged(int value)
     homeCfg->speakers.pitch = value;
     ui->pitchSliderValueLabel->setText(QString::number(value));
 }
+
+void MainWindow::on_musicPlaylistRemoveBtn_clicked()
+{
+
+}
+
