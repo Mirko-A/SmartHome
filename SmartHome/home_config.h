@@ -11,12 +11,6 @@ constexpr int MAX_AC_TEMP  = 30;
 constexpr int MIN_AC_TEMP  = 15;
 constexpr int AC_TEMP_STEP = 1;
 
-/* NOTE: Mirko A.
- * These values are not tied to the label values
- * Must be changed separately */
-constexpr int DEFAULT_SPEAKER_SETTINGS_VALUE = 50;
-constexpr int DEFAULT_AC_TEMPERATURE_VALUE = 20;
-
 struct LightSettings
 {
     bool livingRoomLightOn;
@@ -100,7 +94,7 @@ struct ACSettings
     ACSettings()
     {
         on = false;
-        temperature = DEFAULT_AC_TEMPERATURE_VALUE;
+        temperature = 0;
         mode = ACMode::NORMAL;
     }
 
@@ -132,9 +126,9 @@ struct SpeakerSettings
 
     SpeakerSettings()
     {
-        volume = DEFAULT_SPEAKER_SETTINGS_VALUE;
-        bass = DEFAULT_SPEAKER_SETTINGS_VALUE;
-        pitch = DEFAULT_SPEAKER_SETTINGS_VALUE;
+        volume = 0;
+        bass = 0;
+        pitch = 0;
     }
 
     nlohmann::json toJSON()

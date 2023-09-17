@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QMediaPlayer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -58,6 +59,8 @@ private slots:
     void on_pitchSlider_valueChanged(int value);
 
 
+    void on_musicPlaylistRemoveBtn_clicked();
+
 private:
     void updateCurrentPage(PageIndex index);
     void updateDateTimeWidget();
@@ -78,7 +81,8 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    HomeConfig* homeCfg;
     QTimer* updateTimer;
+
+    HomeConfig* homeCfg;
 };
 #endif // MAINWINDOW_H
