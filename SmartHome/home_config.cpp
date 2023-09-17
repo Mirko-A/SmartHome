@@ -18,12 +18,16 @@ void HomeConfig::onUpdate()
     sendHardwareOutputs();
 }
 
-void HomeConfig::fromJSON(nlohmann::json thisAsJson)
+void HomeConfig::fromJSON(const nlohmann::json& thisAsJson)
 {
     lights.fromJSON(thisAsJson["Lights"]);
     sensors.fromJSON(thisAsJson["Sensors"]);
     AC.fromJSON(thisAsJson["AC"]);
     speakers.fromJSON(thisAsJson["Speakers"]);
+}
+
+void HomeConfig::loadDirtyFlag(const nlohmann::json& thisAsJson)
+{
     isDirty = thisAsJson["Dirty"];
 }
 

@@ -26,8 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->pages->setCurrentIndex(static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
 
     homeCfg = new HomeConfig;
-    loadCfgFromJSON();
-    homeCfg->isDirty = true;
+    loadHomeCfgWidgets();
 
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
@@ -62,23 +61,30 @@ void MainWindow::updateACUI()
 }
 void MainWindow::updateSpeakersUI()
 {
+    ui->volumeSlider->setValue(homeCfg->speakers.volume);
+    ui->volumeSliderValueLabel->setText(QString::number(homeCfg->speakers.volume));
 
+    ui->bassSlider->setValue(homeCfg->speakers.bass);
+    ui->bassSliderValueLabel->setText(QString::number(homeCfg->speakers.bass));
+
+    ui->pitchSlider->setValue(homeCfg->speakers.pitch);
+    ui->pitchSliderValueLabel->setText(QString::number(homeCfg->speakers.pitch));
+}
+
+void MainWindow::updateHomeCfgWidgets()
+{
+    updateLightsUI();
+    updateSensorsUI();
+    updateACUI();
+    updateSpeakersUI();
 }
 
 void MainWindow::updateUI()
 {
     updateDateTimeWidget();
 
-    // Config has been updated by 3rd party (python or HW)
-    if (homeCfg->isDirty)
-    {
-        updateLightsUI();
-        updateSensorsUI();
-        updateACUI();
-        updateSpeakersUI();
-
-        homeCfg->isDirty = false;
-    }
+    // Config has been updated by 3rd party (python script)
+    reloadHomeCfgWidgetsIfDirty();
 }
 
 void MainWindow::onUpdate()
@@ -87,27 +93,47 @@ void MainWindow::onUpdate()
     updateUI();
 
     // TODO: JSON file handling
-    saveCfgAsJSON();
+    saveHomeCfgAsJSON();
 }
 
-void MainWindow::saveCfgAsJSON()
+void MainWindow::saveHomeCfgAsJSON()
 {
     std::ofstream o(CFG_JSON_FILE_PATH);
     o << std::setw(4) << homeCfg->toJSON() << std::endl;
 }
 
-void MainWindow::loadCfgFromJSON()
+nlohmann::json MainWindow::loadHomeCfgAsJson()
 {
-    std::ifstream i;
-    i.open(CFG_JSON_FILE_PATH);
+     std::ifstream i;
+     i.open(CFG_JSON_FILE_PATH);
 
-    if (!i.good())
-        i.open(INI_JSON_FILE_PATH);
+     if (!i.good())
+         i.open(INI_JSON_FILE_PATH);
 
-    nlohmann::json j;
-    i >> j;
+     nlohmann::json j;
+     i >> j;
 
+     return j;
+}
+
+void MainWindow::loadHomeCfgWidgets()
+{
+    nlohmann::json j = loadHomeCfgAsJson();
     homeCfg->fromJSON(j);
+    updateHomeCfgWidgets();
+}
+
+void MainWindow::reloadHomeCfgWidgetsIfDirty()
+{
+    nlohmann::json j = loadHomeCfgAsJson();
+
+    homeCfg->loadDirtyFlag(j);
+    if (homeCfg->isDirty)
+    {
+        homeCfg->fromJSON(j);
+        updateHomeCfgWidgets();
+        homeCfg->isDirty = false;
+    }
 }
 
 void MainWindow::updateCurrentPage(PageIndex index)
@@ -247,4 +273,38 @@ void MainWindow::on_ACModeDown_clicked()
     ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
 }
 
+void MainWindow::on_volumeSlider_sliderMoved(int position)
+{
+    homeCfg->speakers.volume = position;
+    ui->volumeSliderValueLabel->setText(QString::number(position));
+}
 
+void MainWindow::on_volumeSlider_valueChanged(int value)
+{
+    homeCfg->speakers.volume = value;
+    ui->volumeSliderValueLabel->setText(QString::number(value));
+}
+
+void MainWindow::on_bassSlider_sliderMoved(int position)
+{
+    homeCfg->speakers.bass = position;
+    ui->bassSliderValueLabel->setText(QString::number(position));
+}
+
+void MainWindow::on_bassSlider_valueChanged(int value)
+{
+    homeCfg->speakers.bass = value;
+    ui->bassSliderValueLabel->setText(QString::number(value));
+}
+
+void MainWindow::on_pitchSlider_sliderMoved(int position)
+{
+    homeCfg->speakers.pitch = position;
+    ui->pitchSliderValueLabel->setText(QString::number(position));
+}
+
+void MainWindow::on_pitchSlider_valueChanged(int value)
+{
+    homeCfg->speakers.pitch = value;
+    ui->pitchSliderValueLabel->setText(QString::number(value));
+}

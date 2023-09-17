@@ -369,7 +369,7 @@
                               <widget class="QLabel" name="temperatureSensorValueLabel">
                                <property name="font">
                                 <font>
-                                 <pointsize>18</pointsize>
+                                 <pointsize>16</pointsize>
                                 </font>
                                </property>
                                <property name="text">
@@ -450,7 +450,7 @@
                               <widget class="QLabel" name="humiditySensorValueLabel">
                                <property name="font">
                                 <font>
-                                 <pointsize>18</pointsize>
+                                 <pointsize>16</pointsize>
                                 </font>
                                </property>
                                <property name="text">
@@ -531,7 +531,7 @@
                               <widget class="QLabel" name="brightnessSensorValueLabel">
                                <property name="font">
                                 <font>
-                                 <pointsize>18</pointsize>
+                                 <pointsize>16</pointsize>
                                 </font>
                                </property>
                                <property name="text">
@@ -708,7 +708,7 @@
                               <widget class="QLabel" name="ACTemperatureValueLabel">
                                <property name="font">
                                 <font>
-                                 <pointsize>18</pointsize>
+                                 <pointsize>16</pointsize>
                                 </font>
                                </property>
                                <property name="text">
@@ -835,7 +835,7 @@
                               <widget class="QLabel" name="ACModeValueLabel">
                                <property name="font">
                                 <font>
-                                 <pointsize>18</pointsize>
+                                 <pointsize>16</pointsize>
                                 </font>
                                </property>
                                <property name="text">
@@ -934,17 +934,233 @@
                    </layout>
                   </widget>
                  </item>
-                 <item>
+                 <item alignment="Qt::AlignTop">
                   <widget class="QWidget" name="speakersOptions" native="true">
                    <layout class="QVBoxLayout" name="verticalLayout_14">
-                    <item>
-                     <widget class="QWidget" name="volume" native="true"/>
+                    <item alignment="Qt::AlignTop">
+                     <widget class="QWidget" name="volume" native="true">
+                      <layout class="QVBoxLayout" name="verticalLayout_16">
+                       <item>
+                        <widget class="QLabel" name="volumeLabel">
+                         <property name="font">
+                          <font>
+                           <pointsize>16</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string>Volume</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QWidget" name="volumeControl" native="true">
+                         <layout class="QHBoxLayout" name="horizontalLayout_31">
+                          <property name="leftMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>10</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>0</number>
+                          </property>
+                          <item alignment="Qt::AlignLeft">
+                           <widget class="QSlider" name="volumeSlider">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>180</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximum">
+                             <number>100</number>
+                            </property>
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                           </widget>
+                          </item>
+                          <item alignment="Qt::AlignRight">
+                           <widget class="QLabel" name="volumeSliderValueLabel">
+                            <property name="font">
+                             <font>
+                              <pointsize>16</pointsize>
+                             </font>
+                            </property>
+                            <property name="text">
+                             <string>50</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
                     </item>
-                    <item>
-                     <widget class="QWidget" name="bass" native="true"/>
+                    <item alignment="Qt::AlignTop">
+                     <widget class="QWidget" name="bass" native="true">
+                      <layout class="QVBoxLayout" name="verticalLayout_19">
+                       <item>
+                        <widget class="QLabel" name="bassLabel">
+                         <property name="font">
+                          <font>
+                           <pointsize>16</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string>Bass</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QWidget" name="bassControl" native="true">
+                         <layout class="QHBoxLayout" name="horizontalLayout_32">
+                          <property name="leftMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>10</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>0</number>
+                          </property>
+                          <item alignment="Qt::AlignLeft">
+                           <widget class="QSlider" name="bassSlider">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>180</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximum">
+                             <number>100</number>
+                            </property>
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                           </widget>
+                          </item>
+                          <item alignment="Qt::AlignRight">
+                           <widget class="QLabel" name="bassSliderValueLabel">
+                            <property name="font">
+                             <font>
+                              <pointsize>16</pointsize>
+                             </font>
+                            </property>
+                            <property name="text">
+                             <string>50</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
                     </item>
-                    <item>
-                     <widget class="QWidget" name="pitch" native="true"/>
+                    <item alignment="Qt::AlignTop">
+                     <widget class="QWidget" name="pitch" native="true">
+                      <layout class="QVBoxLayout" name="verticalLayout_17">
+                       <item>
+                        <widget class="QLabel" name="pitchLabel">
+                         <property name="font">
+                          <font>
+                           <pointsize>16</pointsize>
+                          </font>
+                         </property>
+                         <property name="text">
+                          <string>Pitch</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QWidget" name="pitchControl" native="true">
+                         <layout class="QHBoxLayout" name="horizontalLayout_33">
+                          <property name="leftMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>10</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>0</number>
+                          </property>
+                          <item alignment="Qt::AlignLeft">
+                           <widget class="QSlider" name="pitchSlider">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>180</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximum">
+                             <number>100</number>
+                            </property>
+                            <property name="value">
+                             <number>50</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Horizontal</enum>
+                            </property>
+                            <property name="invertedAppearance">
+                             <bool>false</bool>
+                            </property>
+                            <property name="invertedControls">
+                             <bool>false</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item alignment="Qt::AlignRight">
+                           <widget class="QLabel" name="pitchSliderValueLabel">
+                            <property name="font">
+                             <font>
+                              <pointsize>16</pointsize>
+                             </font>
+                            </property>
+                            <property name="text">
+                             <string>50</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
                     </item>
                    </layout>
                   </widget>
