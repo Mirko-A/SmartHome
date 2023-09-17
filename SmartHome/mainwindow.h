@@ -47,17 +47,33 @@ private slots:
     void on_ACModeUp_clicked();
     void on_ACModeDown_clicked();
 
+    /* Speaker slider callbacks */
+    void on_volumeSlider_sliderMoved(int position);
+    void on_volumeSlider_valueChanged(int value);
+
+    void on_bassSlider_sliderMoved(int position);
+    void on_bassSlider_valueChanged(int value);
+
+    void on_pitchSlider_sliderMoved(int position);
+    void on_pitchSlider_valueChanged(int value);
+
+
 private:
     void updateCurrentPage(PageIndex index);
     void updateDateTimeWidget();
 
-    void loadCfgFromJSON();
-    void saveCfgAsJSON();
+    nlohmann::json loadHomeCfgAsJson();
+    void saveHomeCfgAsJSON();
 
     void updateLightsUI();
     void updateSensorsUI();
     void updateACUI();
     void updateSpeakersUI();
+    void updateHomeCfgWidgets();
+
+    void loadHomeCfgWidgets();
+    void reloadHomeCfgWidgetsIfDirty();
+
     void updateUI();
 
 private:

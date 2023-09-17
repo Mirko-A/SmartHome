@@ -7,9 +7,15 @@
 
 #include <QString>
 
-#define MAX_AC_TEMP   (30)
-#define MIN_AC_TEMP   (15)
-#define AC_TEMP_STEP  (1)
+constexpr int MAX_AC_TEMP  = 30;
+constexpr int MIN_AC_TEMP  = 15;
+constexpr int AC_TEMP_STEP = 1;
+
+/* NOTE: Mirko A.
+ * These values are not tied to the label values
+ * Must be changed separately */
+constexpr int DEFAULT_SPEAKER_SETTINGS_VALUE = 50;
+constexpr int DEFAULT_AC_TEMPERATURE_VALUE = 20;
 
 struct LightSettings
 {
@@ -36,7 +42,7 @@ struct LightSettings
         return thisAsJSON;
     }
 
-    void fromJSON(nlohmann::json thisAsJson)
+    void fromJSON(const nlohmann::json& thisAsJson)
     {
         livingRoomLightOn = thisAsJson["LivingRoom"];
         bedroomLightOn = thisAsJson["Bedroom"];
@@ -69,7 +75,7 @@ struct Sensors
         return thisAsJSON;
     }
 
-    void fromJSON(nlohmann::json thisAsJson)
+    void fromJSON(const nlohmann::json& thisAsJson)
     {
         temperature = thisAsJson["Temperature"];
         humidity = thisAsJson["Humidity"];
@@ -94,7 +100,7 @@ struct ACSettings
     ACSettings()
     {
         on = false;
-        temperature = 20;
+        temperature = DEFAULT_AC_TEMPERATURE_VALUE;
         mode = ACMode::NORMAL;
     }
 
@@ -110,7 +116,7 @@ struct ACSettings
         return thisAsJSON;
     }
 
-    void fromJSON(nlohmann::json thisAsJson)
+    void fromJSON(const nlohmann::json& thisAsJson)
     {
         on = thisAsJson["On"];
         temperature = thisAsJson["Temperature"];
@@ -126,9 +132,9 @@ struct SpeakerSettings
 
     SpeakerSettings()
     {
-        volume = 0;
-        bass = 0;
-        pitch = 0;
+        volume = DEFAULT_SPEAKER_SETTINGS_VALUE;
+        bass = DEFAULT_SPEAKER_SETTINGS_VALUE;
+        pitch = DEFAULT_SPEAKER_SETTINGS_VALUE;
     }
 
     nlohmann::json toJSON()
@@ -168,7 +174,8 @@ struct HomeConfig
 
     void onUpdate();
 
-    void fromJSON(nlohmann::json thisAsJson);
+    void loadDirtyFlag(const nlohmann::json& thisAsJson);
+    void fromJSON(const nlohmann::json& thisAsJson);
     nlohmann::json toJSON();
 
 private:
