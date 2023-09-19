@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QDateTime>
+#include <QFileDialog>
 
 #include <fstream>
 
@@ -28,17 +29,23 @@ MainWindow::MainWindow(QWidget *parent)
     homeCfg = new HomeConfig;
     loadHomeCfgWidgets();
 
+    mediaPlayer = new MediaPlayer;
+    ui->musicBodyLayout->addWidget(mediaPlayer);
+
+
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
     updateTimer->start(50);
-
-    updateDateTimeWidget();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+
     delete homeCfg;
+    delete mediaPlayer;
+
+    delete updateTimer;
 }
 
 void MainWindow::updateLightsUI()
@@ -308,9 +315,3 @@ void MainWindow::on_pitchSlider_valueChanged(int value)
     homeCfg->speakers.pitch = value;
     ui->pitchSliderValueLabel->setText(QString::number(value));
 }
-
-void MainWindow::on_musicPlaylistRemoveBtn_clicked()
-{
-
-}
-
