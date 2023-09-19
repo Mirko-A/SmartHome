@@ -1,7 +1,9 @@
-QT += core gui
-QT += multimedia
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += core gui          \
+      multimedia        \
+      multimediawidgets \
+      widgets           \
+      network           \
+      xml               \
 
 CONFIG += c++11
 
@@ -11,14 +13,24 @@ CONFIG += c++11
 
 SOURCES += \
     hal.cpp \
+    histogram_widget.cpp \
     home_config.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    media_player.cpp \
+    player_controls.cpp \
+    playlist_model.cpp \
+    video_widget.cpp
 
 HEADERS += \
     hal.h \
+    histogram_widget.h \
     home_config.h \
-    mainwindow.h
+    mainwindow.h \
+    media_player.h \
+    player_controls.h \
+    playlist_model.h \
+    video_widget.h
 
 FORMS += \
     mainwindow.ui
