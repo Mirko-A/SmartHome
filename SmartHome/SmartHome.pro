@@ -13,7 +13,6 @@ CONFIG += c++11
 
 SOURCES += \
     hal.cpp \
-    histogram_widget.cpp \
     home_config.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -24,7 +23,6 @@ SOURCES += \
 
 HEADERS += \
     hal.h \
-    histogram_widget.h \
     home_config.h \
     mainwindow.h \
     media_player.h \
