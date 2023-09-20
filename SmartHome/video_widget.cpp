@@ -3,7 +3,7 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 
-VideoWidget::VideoWidget(QWidget *parent)
+VideoWidget::VideoWidget(QWidget* parent)
     : QVideoWidget(parent)
 {
     setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);

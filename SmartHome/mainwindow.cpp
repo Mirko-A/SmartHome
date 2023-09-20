@@ -30,8 +30,10 @@ MainWindow::MainWindow(QWidget *parent)
     loadHomeCfgWidgets();
 
     mediaPlayer = new MediaPlayer;
-    ui->musicBodyLayout->addWidget(mediaPlayer);
+    mediaPlayer->m_playlistView->setMaximumWidth(400);
+    ui->mediaPlaylistContainer->addWidget(mediaPlayer->m_playlistView);
 
+    ui->mediaPlayerContainer->addWidget(mediaPlayer);
 
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));

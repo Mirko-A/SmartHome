@@ -2,10 +2,11 @@
 #define MEDIAPLAYER_H
 
 #include "playlist_model.h"
-#include "histogram_widget.h"
 #include "video_widget.h"
+#include "player_controls.h"
 
 #include <QWidget>
+#include <QtWidgets>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 
@@ -51,37 +52,31 @@ private slots:
 
     void displayErrorMessage();
 
-#ifndef PLAYER_NO_COLOROPTIONS
-    void showColorDialog();
-#endif
-
 private:
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);
     void handleCursor(QMediaPlayer::MediaStatus status);
     void updateDurationInfo(qint64 currentInfo);
 
-    QMediaPlayer *player;
-    QMediaPlaylist *playlist;
-    VideoWidget *videoWidget;
-    QLabel *coverLabel;
-    QSlider *slider;
-    QLabel *labelDuration;
-    QPushButton *fullScreenButton;
-#ifndef PLAYER_NO_COLOROPTIONS
-    QPushButton *colorButton;
-    QDialog *colorDialog;
-#endif
+public:
+    QMediaPlayer* m_player;
 
-    QLabel *labelHistogram;
-    HistogramWidget *histogram;
-    QVideoProbe *probe;
+    QMediaPlaylist* m_playlist;
+    PlaylistModel* m_playlistModel;
+    QListView* m_playlistView;
 
-    PlaylistModel *playlistModel;
-    QAbstractItemView *playlistView;
-    QString trackInfo;
-    QString statusInfo;
-    qint64 duration;
+    VideoWidget* m_videoWidget;
+
+    PlayerControls* m_controls;
+    QPushButton* m_fullScreenButton;
+
+    QLabel* m_coverLabel;
+    QLabel* m_labelDuration;
+    QSlider* m_slider;
+
+    QString m_trackInfo;
+    QString m_statusInfo;
+    qint64 m_duration;
 };
 
 #endif // MEDIAPLAYER_H

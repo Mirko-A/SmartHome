@@ -13,7 +13,7 @@ class PlayerControls : public QWidget
     Q_OBJECT
 
 public:
-    PlayerControls(QWidget *parent = 0);
+    PlayerControls(QWidget* parent = nullptr);
 
     QMediaPlayer::State state() const;
     int volume() const;
@@ -42,15 +42,16 @@ private slots:
     void updateRate();
 
 private:
-    QMediaPlayer::State playerState;
-    bool playerMuted;
-    QAbstractButton *playButton;
-    QAbstractButton *stopButton;
-    QAbstractButton *nextButton;
-    QAbstractButton *previousButton;
-    QAbstractButton *muteButton;
-    QAbstractSlider *volumeSlider;
-    QComboBox *rateBox;
+    QMediaPlayer::State m_playerState;
+    bool m_playerMuted;
+
+    QAbstractButton* m_playButton;
+    QAbstractButton* m_stopButton;
+    QAbstractButton* m_nextButton;
+    QAbstractButton* m_previousButton;
+    QAbstractButton* m_muteButton;
+    QAbstractSlider* m_volumeSlider;
+    QComboBox* m_rateBox;
 };
 
 #endif // PLAYER_CONTROLS_H

@@ -1,125 +1,99 @@
 #include "media_player.h"
 
 #include "playlist_model.h"
-#include "histogram_widget.h"
-#include "player_controls.h"
 
 #include <QMediaService>
 #include <QMediaPlaylist>
 #include <QVideoProbe>
 #include <QMediaMetaData>
-#include <QtWidgets>
 
 MediaPlayer::MediaPlayer(QWidget *parent)
-    : QWidget(parent)
-    , videoWidget(0)
-    , coverLabel(0)
-    , slider(0)
-#ifndef PLAYER_NO_COLOROPTIONS
-    , colorDialog(0)
-#endif
+    : QWidget(parent),
+      m_videoWidget(nullptr),
+      m_controls(nullptr),
+      m_coverLabel(nullptr),
+      m_slider(nullptr)
 {
-  player = new QMediaPlayer(this);
-  // owned by PlaylistModel
-  playlist = new QMediaPlaylist();
-  player->setPlaylist(playlist);
 
-  connect(player, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
-  connect(player, SIGNAL(positionChanged(qint64)), SLOT(positionChanged(qint64)));
-  connect(player, SIGNAL(metaDataChanged()), SLOT(metaDataChanged()));
-  connect(playlist, SIGNAL(currentIndexChanged(int)), SLOT(playlistPositionChanged(int)));
-  connect(player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),
-          this, SLOT(statusChanged(QMediaPlayer::MediaStatus)));
-  connect(player, SIGNAL(bufferStatusChanged(int)), this, SLOT(bufferingProgress(int)));
-  connect(player, SIGNAL(videoAvailableChanged(bool)), this, SLOT(videoAvailableChanged(bool)));
-  connect(player, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(displayErrorMessage()));
+    m_player = new QMediaPlayer(this);
+    // owned by PlaylistModel
+    m_playlist = new QMediaPlaylist();
+    m_player->setPlaylist(m_playlist);
 
-  videoWidget = new VideoWidget(this);
-  player->setVideoOutput(videoWidget);
+    connect(m_player, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
+    connect(m_player, SIGNAL(positionChanged(qint64)), SLOT(positionChanged(qint64)));
+    connect(m_player, SIGNAL(metaDataChanged()), SLOT(metaDataChanged()));
+    connect(m_playlist, SIGNAL(currentIndexChanged(int)), SLOT(playlistPositionChanged(int)));
+    connect(m_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),
+            this, SLOT(statusChanged(QMediaPlayer::MediaStatus)));
+    connect(m_player, SIGNAL(bufferStatusChanged(int)), this, SLOT(bufferingProgress(int)));
+    connect(m_player, SIGNAL(videoAvailableChanged(bool)), this, SLOT(videoAvailableChanged(bool)));
+    connect(m_player, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(displayErrorMessage()));
 
-  playlistModel = new PlaylistModel(this);
-  playlistModel->setPlaylist(playlist);
+    m_videoWidget = new VideoWidget(this);
+    m_player->setVideoOutput(m_videoWidget);
 
-  playlistView = new QListView(this);
-  playlistView->setModel(playlistModel);
-  playlistView->setCurrentIndex(playlistModel->index(playlist->currentIndex(), 0));
+    m_playlistModel = new PlaylistModel(this);
+    m_playlistModel->setPlaylist(m_playlist);
 
-  connect(playlistView, SIGNAL(activated(QModelIndex)), this, SLOT(jump(QModelIndex)));
+    m_playlistView = new QListView(this);
+    m_playlistView->setModel(m_playlistModel);
+    m_playlistView->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
 
-  slider = new QSlider(Qt::Horizontal, this);
-  slider->setRange(0, player->duration() / 1000);
+    connect(m_playlistView, SIGNAL(activated(QModelIndex)), this, SLOT(jump(QModelIndex)));
 
-  labelDuration = new QLabel(this);
-  connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(seek(int)));
+    m_slider = new QSlider(Qt::Horizontal, this);
+    m_slider->setRange(0, m_player->duration() / 1000);
 
-  labelHistogram = new QLabel(this);
-  labelHistogram->setText("Histogram:");
-  histogram = new HistogramWidget(this);
-  QHBoxLayout *histogramLayout = new QHBoxLayout;
-  histogramLayout->addWidget(labelHistogram);
-  histogramLayout->addWidget(histogram, 1);
+    m_labelDuration = new QLabel(this);
+    connect(m_slider, SIGNAL(sliderMoved(int)), this, SLOT(seek(int)));
 
-  probe = new QVideoProbe(this);
-  connect(probe, SIGNAL(videoFrameProbed(QVideoFrame)), histogram, SLOT(processFrame(QVideoFrame)));
-  probe->setSource(player);
+    QPushButton *openButton = new QPushButton(tr("Open"), this);
 
-  QPushButton *openButton = new QPushButton(tr("Open"), this);
+    connect(openButton, SIGNAL(clicked()), this, SLOT(open()));
 
-  connect(openButton, SIGNAL(clicked()), this, SLOT(open()));
+    m_controls = new PlayerControls(this);
+    m_controls->setState(m_player->state());
+    m_controls->setVolume(m_player->volume());
+    m_controls->setMuted(m_controls->isMuted());
 
-  PlayerControls *controls = new PlayerControls(this);
-  controls->setState(player->state());
-  controls->setVolume(player->volume());
-  controls->setMuted(controls->isMuted());
+    connect(m_controls, SIGNAL(play()), m_player, SLOT(play()));
+    connect(m_controls, SIGNAL(pause()), m_player, SLOT(pause()));
+    connect(m_controls, SIGNAL(stop()), m_player, SLOT(stop()));
+    connect(m_controls, SIGNAL(next()), m_playlist, SLOT(next()));
+    connect(m_controls, SIGNAL(previous()), this, SLOT(previousClicked()));
+    connect(m_controls, SIGNAL(changeVolume(int)), m_player, SLOT(setVolume(int)));
+    connect(m_controls, SIGNAL(changeMuting(bool)), m_player, SLOT(setMuted(bool)));
+    connect(m_controls, SIGNAL(changeRate(qreal)), m_player, SLOT(setPlaybackRate(qreal)));
 
-  connect(controls, SIGNAL(play()), player, SLOT(play()));
-  connect(controls, SIGNAL(pause()), player, SLOT(pause()));
-  connect(controls, SIGNAL(stop()), player, SLOT(stop()));
-  connect(controls, SIGNAL(next()), playlist, SLOT(next()));
-  connect(controls, SIGNAL(previous()), this, SLOT(previousClicked()));
-  connect(controls, SIGNAL(changeVolume(int)), player, SLOT(setVolume(int)));
-  connect(controls, SIGNAL(changeMuting(bool)), player, SLOT(setMuted(bool)));
-  connect(controls, SIGNAL(changeRate(qreal)), player, SLOT(setPlaybackRate(qreal)));
+    connect(m_controls, SIGNAL(stop()), m_videoWidget, SLOT(update()));
 
-  connect(controls, SIGNAL(stop()), videoWidget, SLOT(update()));
+    connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)),
+            m_controls, SLOT(setState(QMediaPlayer::State)));
+    connect(m_player, SIGNAL(volumeChanged(int)), m_controls, SLOT(setVolume(int)));
+    connect(m_player, SIGNAL(mutedChanged(bool)), m_controls, SLOT(setMuted(bool)));
 
-  connect(player, SIGNAL(stateChanged(QMediaPlayer::State)),
-          controls, SLOT(setState(QMediaPlayer::State)));
-  connect(player, SIGNAL(volumeChanged(int)), controls, SLOT(setVolume(int)));
-  connect(player, SIGNAL(mutedChanged(bool)), controls, SLOT(setMuted(bool)));
-
-  fullScreenButton = new QPushButton(tr("FullScreen"), this);
-  fullScreenButton->setCheckable(true);
-
-#ifndef PLAYER_NO_COLOROPTIONS
-    colorButton = new QPushButton(tr("Color Options..."), this);
-    colorButton->setEnabled(false);
-    connect(colorButton, SIGNAL(clicked()), this, SLOT(showColorDialog()));
-#endif
+    m_fullScreenButton = new QPushButton(tr("FullScreen"), this);
+    m_fullScreenButton->setCheckable(true);
 
     QBoxLayout *displayLayout = new QHBoxLayout;
-    displayLayout->addWidget(videoWidget, 2);
-    displayLayout->addWidget(playlistView);
+    displayLayout->addWidget(m_videoWidget, 2);
 
     QBoxLayout *controlLayout = new QHBoxLayout;
     controlLayout->setMargin(0);
     controlLayout->addWidget(openButton);
     controlLayout->addStretch(1);
-    controlLayout->addWidget(controls);
+    controlLayout->addWidget(m_controls);
     controlLayout->addStretch(1);
-    controlLayout->addWidget(fullScreenButton);
-#ifndef PLAYER_NO_COLOROPTIONS
-    controlLayout->addWidget(colorButton);
-#endif
+    controlLayout->addWidget(m_fullScreenButton);
 
     QBoxLayout *layout = new QVBoxLayout;
     layout->addLayout(displayLayout);
     QHBoxLayout *hLayout = new QHBoxLayout;
-    hLayout->addWidget(slider);
-    hLayout->addWidget(labelDuration);
+    hLayout->addWidget(m_slider);
+    hLayout->addWidget(m_labelDuration);
     layout->addLayout(hLayout);
     layout->addLayout(controlLayout);
-    layout->addLayout(histogramLayout);
 
     setLayout(layout);
 
@@ -128,13 +102,10 @@ MediaPlayer::MediaPlayer(QWidget *parent)
                              tr("The QMediaPlayer object does not have a valid service.\n"\
                                 "Please check the media service plugins are installed."));
 
-        controls->setEnabled(false);
-        playlistView->setEnabled(false);
+        m_controls->setEnabled(false);
+        m_playlistView->setEnabled(false);
         openButton->setEnabled(false);
-#ifndef PLAYER_NO_COLOROPTIONS
-        colorButton->setEnabled(false);
-#endif
-        fullScreenButton->setEnabled(false);
+        m_fullScreenButton->setEnabled(false);
     }
 
     metaDataChanged();
@@ -146,20 +117,26 @@ MediaPlayer::~MediaPlayer()
 
 bool MediaPlayer::isPlayerAvailable() const
 {
-    return player->isAvailable();
+    return m_player->isAvailable();
 }
 
 void MediaPlayer::open()
 {
     QFileDialog fileDialog(this);
+
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     fileDialog.setWindowTitle(tr("Open Files"));
-    QStringList supportedMimeTypes = player->supportedMimeTypes();
-    if (!supportedMimeTypes.isEmpty()) {
+
+    QStringList supportedMimeTypes = m_player->supportedMimeTypes();
+
+    if (!supportedMimeTypes.isEmpty())
+    {
         supportedMimeTypes.append("audio/x-m3u"); // MP3 playlists
         fileDialog.setMimeTypeFilters(supportedMimeTypes);
     }
+
     fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MoviesLocation).value(0, QDir::homePath()));
+
     if (fileDialog.exec() == QDialog::Accepted)
         addToPlaylist(fileDialog.selectedUrls());
 }
@@ -176,37 +153,37 @@ void MediaPlayer::addToPlaylist(const QList<QUrl> urls)
 {
     foreach (const QUrl &url, urls) {
         if (isPlaylist(url))
-            playlist->load(url);
+            m_playlist->load(url);
         else
-            playlist->addMedia(url);
+            m_playlist->addMedia(url);
     }
 }
 
 void MediaPlayer::durationChanged(qint64 duration)
 {
-    this->duration = duration/1000;
-    slider->setMaximum(duration / 1000);
+    this->m_duration = duration/1000;
+    m_slider->setMaximum(duration / 1000);
 }
 
 void MediaPlayer::positionChanged(qint64 progress)
 {
-    if (!slider->isSliderDown()) {
-        slider->setValue(progress / 1000);
+    if (!m_slider->isSliderDown()) {
+        m_slider->setValue(progress / 1000);
     }
     updateDurationInfo(progress / 1000);
 }
 
 void MediaPlayer::metaDataChanged()
 {
-    if (player->isMetaDataAvailable()) {
+    if (m_player->isMetaDataAvailable()) {
         setTrackInfo(QString("%1 - %2")
-                .arg(player->metaData(QMediaMetaData::AlbumArtist).toString())
-                .arg(player->metaData(QMediaMetaData::Title).toString()));
+                .arg(m_player->metaData(QMediaMetaData::AlbumArtist).toString())
+                .arg(m_player->metaData(QMediaMetaData::Title).toString()));
 
-        if (coverLabel) {
-            QUrl url = player->metaData(QMediaMetaData::CoverArtUrlLarge).value<QUrl>();
+        if (m_coverLabel) {
+            QUrl url = m_player->metaData(QMediaMetaData::CoverArtUrlLarge).value<QUrl>();
 
-            coverLabel->setPixmap(!url.isEmpty()
+            m_coverLabel->setPixmap(!url.isEmpty()
                     ? QPixmap(url.toString())
                     : QPixmap());
         }
@@ -217,28 +194,28 @@ void MediaPlayer::previousClicked()
 {
     // Go to previous track if we are within the first 5 seconds of playback
     // Otherwise, seek to the beginning.
-    if(player->position() <= 5000)
-        playlist->previous();
+    if(m_player->position() <= 5000)
+        m_playlist->previous();
     else
-        player->setPosition(0);
+        m_player->setPosition(0);
 }
 
 void MediaPlayer::jump(const QModelIndex &index)
 {
     if (index.isValid()) {
-        playlist->setCurrentIndex(index.row());
-        player->play();
+        m_playlist->setCurrentIndex(index.row());
+        m_player->play();
     }
 }
 
 void MediaPlayer::playlistPositionChanged(int currentItem)
 {
-    playlistView->setCurrentIndex(playlistModel->index(currentItem, 0));
+    m_playlistView->setCurrentIndex(m_playlistModel->index(currentItem, 0));
 }
 
 void MediaPlayer::seek(int seconds)
 {
-    player->setPosition(seconds * 1000);
+    m_player->setPosition(seconds * 1000);
 }
 
 void MediaPlayer::statusChanged(QMediaPlayer::MediaStatus status)
@@ -289,105 +266,55 @@ void MediaPlayer::bufferingProgress(int progress)
 void MediaPlayer::videoAvailableChanged(bool available)
 {
     if (!available) {
-        disconnect(fullScreenButton, SIGNAL(clicked(bool)),
-                    videoWidget, SLOT(setFullScreen(bool)));
-        disconnect(videoWidget, SIGNAL(fullScreenChanged(bool)),
-                fullScreenButton, SLOT(setChecked(bool)));
-        videoWidget->setFullScreen(false);
+        disconnect(m_fullScreenButton, SIGNAL(clicked(bool)),
+                    m_videoWidget, SLOT(setFullScreen(bool)));
+        disconnect(m_videoWidget, SIGNAL(fullScreenChanged(bool)),
+                m_fullScreenButton, SLOT(setChecked(bool)));
+        m_videoWidget->setFullScreen(false);
     } else {
-        connect(fullScreenButton, SIGNAL(clicked(bool)),
-                videoWidget, SLOT(setFullScreen(bool)));
-        connect(videoWidget, SIGNAL(fullScreenChanged(bool)),
-                fullScreenButton, SLOT(setChecked(bool)));
+        connect(m_fullScreenButton, SIGNAL(clicked(bool)),
+                m_videoWidget, SLOT(setFullScreen(bool)));
+        connect(m_videoWidget, SIGNAL(fullScreenChanged(bool)),
+                m_fullScreenButton, SLOT(setChecked(bool)));
 
-        if (fullScreenButton->isChecked())
-            videoWidget->setFullScreen(true);
+        if (m_fullScreenButton->isChecked())
+            m_videoWidget->setFullScreen(true);
     }
-#ifndef PLAYER_NO_COLOROPTIONS
-    colorButton->setEnabled(available);
-#endif
 }
 
 void MediaPlayer::setTrackInfo(const QString &info)
 {
-    trackInfo = info;
-    if (!statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(trackInfo).arg(statusInfo));
+    m_trackInfo = info;
+    if (!m_statusInfo.isEmpty())
+        setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
     else
-        setWindowTitle(trackInfo);
+        setWindowTitle(m_trackInfo);
 }
 
 void MediaPlayer::setStatusInfo(const QString &info)
 {
-    statusInfo = info;
-    if (!statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(trackInfo).arg(statusInfo));
+    m_statusInfo = info;
+    if (!m_statusInfo.isEmpty())
+        setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
     else
-        setWindowTitle(trackInfo);
+        setWindowTitle(m_trackInfo);
 }
 
 void MediaPlayer::displayErrorMessage()
 {
-    setStatusInfo(player->errorString());
+    setStatusInfo(m_player->errorString());
 }
 
 void MediaPlayer::updateDurationInfo(qint64 currentInfo)
 {
     QString tStr;
-    if (currentInfo || duration) {
+    if (currentInfo || m_duration) {
         QTime currentTime((currentInfo/3600)%60, (currentInfo/60)%60, currentInfo%60, (currentInfo*1000)%1000);
-        QTime totalTime((duration/3600)%60, (duration/60)%60, duration%60, (duration*1000)%1000);
+        QTime totalTime((m_duration/3600)%60, (m_duration/60)%60, m_duration%60, (m_duration*1000)%1000);
         QString format = "mm:ss";
-        if (duration > 3600)
+        if (m_duration > 3600)
             format = "hh:mm:ss";
         tStr = currentTime.toString(format) + " / " + totalTime.toString(format);
     }
-    labelDuration->setText(tStr);
+    m_labelDuration->setText(tStr);
 }
-
-#ifndef PLAYER_NO_COLOROPTIONS
-void MediaPlayer::showColorDialog()
-{
-    if (!colorDialog) {
-        QSlider *brightnessSlider = new QSlider(Qt::Horizontal);
-        brightnessSlider->setRange(-100, 100);
-        brightnessSlider->setValue(videoWidget->brightness());
-        connect(brightnessSlider, SIGNAL(sliderMoved(int)), videoWidget, SLOT(setBrightness(int)));
-        connect(videoWidget, SIGNAL(brightnessChanged(int)), brightnessSlider, SLOT(setValue(int)));
-
-        QSlider *contrastSlider = new QSlider(Qt::Horizontal);
-        contrastSlider->setRange(-100, 100);
-        contrastSlider->setValue(videoWidget->contrast());
-        connect(contrastSlider, SIGNAL(sliderMoved(int)), videoWidget, SLOT(setContrast(int)));
-        connect(videoWidget, SIGNAL(contrastChanged(int)), contrastSlider, SLOT(setValue(int)));
-
-        QSlider *hueSlider = new QSlider(Qt::Horizontal);
-        hueSlider->setRange(-100, 100);
-        hueSlider->setValue(videoWidget->hue());
-        connect(hueSlider, SIGNAL(sliderMoved(int)), videoWidget, SLOT(setHue(int)));
-        connect(videoWidget, SIGNAL(hueChanged(int)), hueSlider, SLOT(setValue(int)));
-
-        QSlider *saturationSlider = new QSlider(Qt::Horizontal);
-        saturationSlider->setRange(-100, 100);
-        saturationSlider->setValue(videoWidget->saturation());
-        connect(saturationSlider, SIGNAL(sliderMoved(int)), videoWidget, SLOT(setSaturation(int)));
-        connect(videoWidget, SIGNAL(saturationChanged(int)), saturationSlider, SLOT(setValue(int)));
-
-        QFormLayout *layout = new QFormLayout;
-        layout->addRow(tr("Brightness"), brightnessSlider);
-        layout->addRow(tr("Contrast"), contrastSlider);
-        layout->addRow(tr("Hue"), hueSlider);
-        layout->addRow(tr("Saturation"), saturationSlider);
-
-        QPushButton *button = new QPushButton(tr("Close"));
-        layout->addRow(button);
-
-        colorDialog = new QDialog(this);
-        colorDialog->setWindowTitle(tr("Color Options"));
-        colorDialog->setLayout(layout);
-
-        connect(button, SIGNAL(clicked()), colorDialog, SLOT(close()));
-    }
-    colorDialog->show();
-}
-#endif

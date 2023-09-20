@@ -16,7 +16,7 @@ public:
         ColumnCount
     };
 
-    PlaylistModel(QObject *parent = 0);
+    PlaylistModel(QObject* parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -25,11 +25,10 @@ public:
     QModelIndex parent(const QModelIndex &child) const;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-
-    QMediaPlaylist *playlist() const;
-    void setPlaylist(QMediaPlaylist *playlist);
-
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::DisplayRole);
+
+    QMediaPlaylist* playlist() const;
+    void setPlaylist(QMediaPlaylist* playlist);
 
 private slots:
     void beginInsertItems(int start, int end);
@@ -39,7 +38,7 @@ private slots:
     void changeItems(int start, int end);
 
 private:
-    QMediaPlaylist *m_playlist;
+    QMediaPlaylist* m_playlist;
     QMap<QModelIndex, QVariant> m_data;
 };
 
