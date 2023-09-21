@@ -30,10 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     loadHomeCfgWidgets();
 
     mediaPlayer = new MediaPlayer;
-    mediaPlayer->m_playlistView->setMaximumWidth(400);
-    ui->mediaPlaylistContainer->addWidget(mediaPlayer->m_playlistView);
-
-    ui->mediaPlayerContainer->addWidget(mediaPlayer);
+    loadMediaPlayerWidgets();
 
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
@@ -86,6 +83,32 @@ void MainWindow::updateHomeCfgWidgets()
     updateSensorsUI();
     updateACUI();
     updateSpeakersUI();
+}
+
+void MainWindow::loadMediaPlayerWidgets()
+{
+     ui->mediaPlayerVideoWidgetContainer->addWidget(mediaPlayer->m_videoWidget);
+     mediaPlayer->m_playlistView = ui->mediaPlaylistListView;
+     mediaPlayer->m_labelDuration = ui->mediaPlayerDurationLabel;
+     mediaPlayer->m_seekSlider = ui->mediaPlayerSeekSlider;
+
+     loadMediaPlayerControlWidgets();
+
+     mediaPlayer->initializeUIElements();
+     mediaPlayer->m_controls->initializeUIElements();
+}
+
+void MainWindow::loadMediaPlayerControlWidgets()
+{
+    mediaPlayer->m_controls->m_playButton = ui->mediaPlayerPlayBtn;
+    mediaPlayer->m_controls->m_stopButton = ui->mediaPlayerStopBtn;
+    mediaPlayer->m_controls->m_nextButton = ui->mediaPlayerNextBtn;
+    mediaPlayer->m_controls->m_previousButton = ui->mediaPlayerPrevBtn;
+    mediaPlayer->m_controls->m_muteButton = ui->mediaPlayerMuteBtn;
+    mediaPlayer->m_controls->m_volumeSlider = ui->mediaPlayerVolumeSlider;
+
+    mediaPlayer->m_controls->m_openButton = ui->mediaPlaylistOpenBtn;
+    mediaPlayer->m_controls->m_removeButton = ui->mediaPlaylistRemoveBtn;
 }
 
 void MainWindow::updateUI()

@@ -1,5 +1,8 @@
-text: #d7d9de
-background: #1f232a
-accent1: #2c313c
-accent2: #343b47
+text: #d7d9de;
+background: #1f232a;
+accent1: #2c313c;
+accent2: #343b47;
+accent3: #22252e;
+purple-accent: #434158;
+dark-purple-accent: #221f2e;
 mint-graph: #82b59d; 

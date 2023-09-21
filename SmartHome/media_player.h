@@ -2,22 +2,19 @@
 #define MEDIAPLAYER_H
 
 #include "playlist_model.h"
-#include "video_widget.h"
 #include "player_controls.h"
 
 #include <QWidget>
 #include <QtWidgets>
+#include <QVideoWidget>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 
-class QAbstractItemView;
 class QLabel;
 class QMediaPlayer;
 class QModelIndex;
 class QPushButton;
 class QSlider;
-class QVideoProbe;
-class QVideoWidget;
 
 class MediaPlayer : public QWidget
 {
@@ -26,6 +23,9 @@ class MediaPlayer : public QWidget
 public:
     MediaPlayer(QWidget *parent = 0);
     ~MediaPlayer();
+
+    /* Must be called after pointers to UI elements have been assigned */
+    void initializeUIElements();
 
     bool isPlayerAvailable() const;
 
@@ -36,6 +36,7 @@ signals:
 
 private slots:
     void open();
+    void remove();
     void durationChanged(qint64 duration);
     void positionChanged(qint64 progress);
     void metaDataChanged();
@@ -48,7 +49,6 @@ private slots:
 
     void statusChanged(QMediaPlayer::MediaStatus status);
     void bufferingProgress(int progress);
-    void videoAvailableChanged(bool available);
 
     void displayErrorMessage();
 
@@ -65,14 +65,13 @@ public:
     PlaylistModel* m_playlistModel;
     QListView* m_playlistView;
 
-    VideoWidget* m_videoWidget;
+    QVideoWidget* m_videoWidget;
 
     PlayerControls* m_controls;
-    QPushButton* m_fullScreenButton;
 
     QLabel* m_coverLabel;
     QLabel* m_labelDuration;
-    QSlider* m_slider;
+    QSlider* m_seekSlider;
 
     QString m_trackInfo;
     QString m_statusInfo;

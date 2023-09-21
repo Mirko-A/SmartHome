@@ -18,8 +18,7 @@ SOURCES += \
     mainwindow.cpp \
     media_player.cpp \
     player_controls.cpp \
-    playlist_model.cpp \
-    video_widget.cpp
+    playlist_model.cpp
 
 HEADERS += \
     hal.h \
@@ -27,8 +26,7 @@ HEADERS += \
     mainwindow.h \
     media_player.h \
     player_controls.h \
-    playlist_model.h \
-    video_widget.h
+    playlist_model.h
 
 FORMS += \
     mainwindow.ui
