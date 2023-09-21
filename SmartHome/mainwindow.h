@@ -76,6 +76,9 @@ private:
     void loadHomeCfgWidgets();
     void reloadHomeCfgWidgetsIfDirty();
 
+    void loadMediaPlayerWidgets();
+    void loadMediaPlayerControlWidgets();
+
     void updateUI();
 
 private:
