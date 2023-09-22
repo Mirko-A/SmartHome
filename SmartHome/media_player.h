@@ -31,9 +31,6 @@ public:
 
     void addToPlaylist(const QList<QUrl> urls);
 
-signals:
-    void fullScreenChanged(bool fullScreen);
-
 private slots:
     void open();
     void remove();
