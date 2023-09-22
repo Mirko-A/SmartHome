@@ -2,6 +2,7 @@
 #define PLAYLIST_MODEL_H
 
 #include <QAbstractItemModel>
+#include <QAbstractButton>
 
 class QMediaPlaylist;
 
@@ -40,6 +41,10 @@ private slots:
 private:
     QMediaPlaylist* m_playlist;
     QMap<QModelIndex, QVariant> m_data;
+
+public:
+    QAbstractButton* m_openButton;
+    QAbstractButton* m_removeButton;
 };
 
 #endif // PLAYLIST_MODEL_H

@@ -71,8 +71,8 @@ void MediaPlayer::initializeUIElements()
     connect(m_player, SIGNAL(volumeChanged(int)), m_controls, SLOT(setVolume(int)));
     connect(m_player, SIGNAL(mutedChanged(bool)), m_controls, SLOT(setMuted(bool)));
 
-    connect(m_controls->m_openButton, SIGNAL(clicked()), this, SLOT(open()));
-    connect(m_controls->m_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(m_playlistModel->m_openButton, SIGNAL(clicked()), this, SLOT(open()));
+    connect(m_playlistModel->m_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
 
     connect(m_controls, SIGNAL(stop()), m_videoWidget, SLOT(update()));
 

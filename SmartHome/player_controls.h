@@ -50,10 +50,6 @@ public:
     QAbstractButton* m_previousButton;
     QAbstractButton* m_muteButton;
     QAbstractSlider* m_volumeSlider;
-
-    /* Part of playlist */
-    QAbstractButton* m_openButton;
-    QAbstractButton* m_removeButton;
 };
 
 #endif // PLAYER_CONTROLS_H

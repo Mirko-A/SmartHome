@@ -110,8 +110,8 @@ void MainWindow::loadMediaPlayerControlWidgets()
     mediaPlayer->m_controls->m_muteButton = ui->mediaPlayerMuteBtn;
     mediaPlayer->m_controls->m_volumeSlider = ui->mediaPlayerVolumeSlider;
 
-    mediaPlayer->m_controls->m_openButton = ui->mediaPlaylistOpenBtn;
-    mediaPlayer->m_controls->m_removeButton = ui->mediaPlaylistRemoveBtn;
+    mediaPlayer->m_playlistModel->m_openButton = ui->mediaPlaylistOpenBtn;
+    mediaPlayer->m_playlistModel->m_removeButton = ui->mediaPlaylistRemoveBtn;
 }
 
 void MainWindow::updateUI()

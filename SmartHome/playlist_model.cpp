@@ -5,8 +5,10 @@
 #include <QMediaPlaylist>
 
 PlaylistModel::PlaylistModel(QObject* parent)
-    : QAbstractItemModel(parent)
-    , m_playlist(nullptr)
+    : QAbstractItemModel(parent),
+      m_playlist(nullptr),
+      m_openButton(nullptr),
+      m_removeButton(nullptr)
 {
 }
 
@@ -122,7 +124,7 @@ void PlaylistModel::beginRemoveItems(int start, int end)
 
 void PlaylistModel::endRemoveItems()
 {
-    endInsertRows();
+    endRemoveRows();
 }
 
 void PlaylistModel::changeItems(int start, int end)
