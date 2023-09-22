@@ -15,9 +15,7 @@ PlayerControls::PlayerControls(QWidget* parent)
       m_nextButton(nullptr),
       m_previousButton(nullptr),
       m_muteButton(nullptr),
-      m_volumeSlider(nullptr),
-      m_openButton(nullptr),
-      m_removeButton(nullptr)
+      m_volumeSlider(nullptr)
 {
 
 }
