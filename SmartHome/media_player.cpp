@@ -116,7 +116,11 @@ void MediaPlayer::open()
 
 void MediaPlayer::remove()
 {
+    int indexToRemove = m_playlistView->currentIndex().row();
+    if (m_playlist->currentIndex() == indexToRemove)
+        m_player->stop();
 
+    m_playlist->removeMedia(indexToRemove);
 }
 
 static bool isPlaylist(const QUrl &url) // Check for ".m3u" playlists.
