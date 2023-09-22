@@ -1182,7 +1182,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="musicPage">
+         <widget class="QWidget" name="mediaPage">
           <property name="styleSheet">
            <string notr="true"/>
           </property>
@@ -1258,6 +1258,9 @@ QPushButton:hover {
                         <verstretch>0</verstretch>
                        </sizepolicy>
                       </property>
+                      <property name="cursor">
+                       <cursorShape>PointingHandCursor</cursorShape>
+                      </property>
                       <property name="text">
                        <string/>
                       </property>
@@ -1280,6 +1283,9 @@ QPushButton:hover {
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="cursor">
+                       <cursorShape>PointingHandCursor</cursorShape>
                       </property>
                       <property name="text">
                        <string/>
@@ -1368,6 +1374,9 @@ QPushButton:hover {
                        </property>
                        <item>
                         <widget class="QSlider" name="mediaPlayerSeekSlider">
+                         <property name="cursor">
+                          <cursorShape>PointingHandCursor</cursorShape>
+                         </property>
                          <property name="orientation">
                           <enum>Qt::Horizontal</enum>
                          </property>
@@ -1409,6 +1418,9 @@ QPushButton:hover {
                           </property>
                           <item>
                            <widget class="QPushButton" name="mediaPlayerPlayBtn">
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="text">
                              <string/>
                             </property>
@@ -1426,6 +1438,9 @@ QPushButton:hover {
                           </item>
                           <item>
                            <widget class="QPushButton" name="mediaPlayerPrevBtn">
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="text">
                              <string/>
                             </property>
@@ -1443,6 +1458,9 @@ QPushButton:hover {
                           </item>
                           <item>
                            <widget class="QPushButton" name="mediaPlayerStopBtn">
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="text">
                              <string/>
                             </property>
@@ -1460,6 +1478,9 @@ QPushButton:hover {
                           </item>
                           <item>
                            <widget class="QPushButton" name="mediaPlayerNextBtn">
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="text">
                              <string/>
                             </property>
@@ -1493,6 +1514,9 @@ QPushButton:hover {
                           </item>
                           <item>
                            <widget class="QPushButton" name="mediaPlayerMuteBtn">
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="text">
                              <string/>
                             </property>
@@ -1513,6 +1537,9 @@ QPushButton:hover {
                           </item>
                           <item>
                            <widget class="QSlider" name="mediaPlayerVolumeSlider">
+                            <property name="cursor">
+                             <cursorShape>PointingHandCursor</cursorShape>
+                            </property>
                             <property name="orientation">
                              <enum>Qt::Horizontal</enum>
                             </property>
@@ -1670,7 +1697,7 @@ QPushButton:hover {
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="musicBtn">
+              <widget class="QPushButton" name="mediaBtn">
                <property name="cursor">
                 <cursorShape>PointingHandCursor</cursorShape>
                </property>

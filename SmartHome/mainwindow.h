@@ -16,7 +16,7 @@ QT_END_NAMESPACE
 enum class PageIndex
 {
     HOME,
-    MUSIC,
+    MEDIA,
     ANALYTICS,
 };
 
@@ -33,7 +33,7 @@ private slots:
 
     /* Navigation bar button callbacks */
     void on_devicesBtn_clicked();
-    void on_musicBtn_clicked();
+    void on_mediaBtn_clicked();
     void on_analyticsBtn_clicked();
 
     /* Lights button callbacks */

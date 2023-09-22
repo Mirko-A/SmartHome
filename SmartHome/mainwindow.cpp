@@ -19,6 +19,8 @@ const QVector<QString> PAGE_ICON_PATHS =
 const QString CFG_JSON_FILE_PATH_QSTR = "../resource/home_cfg.json";
 const QString INI_JSON_FILE_PATH_QSTR = "../resource/ini_cfg.json";
 
+constexpr int INITIAL_PLAYER_VOLUME = 50;
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -31,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     mediaPlayer = new MediaPlayer;
     loadMediaPlayerWidgets();
+    mediaPlayer->m_player->setVolume(INITIAL_PLAYER_VOLUME);
 
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
@@ -185,9 +188,9 @@ void MainWindow::on_devicesBtn_clicked()
     updateCurrentPage(PageIndex::HOME);
 }
 
-void MainWindow::on_musicBtn_clicked()
+void MainWindow::on_mediaBtn_clicked()
 {
-    updateCurrentPage(PageIndex::MUSIC);
+    updateCurrentPage(PageIndex::MEDIA);
 }
 
 void MainWindow::on_analyticsBtn_clicked()
