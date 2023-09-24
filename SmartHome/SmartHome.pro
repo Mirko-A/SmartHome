@@ -2,6 +2,7 @@ QT += core gui          \
       multimedia        \
       multimediawidgets \
       widgets           \
+      charts            \
       network           \
       xml               \
 
@@ -12,6 +13,7 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    analytics_model.cpp \
     hal.cpp \
     home_config.cpp \
     main.cpp \
@@ -21,6 +23,7 @@ SOURCES += \
     playlist_model.cpp
 
 HEADERS += \
+    analytics_model.h \
     hal.h \
     home_config.h \
     mainwindow.h \

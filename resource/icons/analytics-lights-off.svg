@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+<svg contentScriptType="text/ecmascript" zoomAndPan="magnify" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="full"
+    contentStyleType="text/css" stroke="#c1c1c1" stroke-linecap="round" version="1.0" width="24" fill="none"
+    preserveAspectRatio="xMidYMid meet" stroke-width="2" viewBox="0 0 24 24" height="24" class="feather feather-sun"
+    xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round">
+    <circle r="5" cx="12" cy="12"/>
+    <line y2="3" x1="12" x2="12" y1="1"/>
+    <line y2="23" x1="12" x2="12" y1="21"/>
+    <line y2="5.64" x1="4.22" x2="5.64" y1="4.22"/>
+    <line y2="19.78" x1="18.36" x2="19.78" y1="18.36"/>
+    <line y2="12" x1="1" x2="3" y1="12"/>
+    <line y2="12" x1="21" x2="23" y1="12"/>
+    <line y2="18.36" x1="4.22" x2="5.64" y1="19.78"/>
+    <line y2="4.22" x1="18.36" x2="19.78" y1="5.64"/>
+</svg>

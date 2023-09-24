@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent)
     loadMediaPlayerWidgets();
     mediaPlayer->m_player->setVolume(INITIAL_PLAYER_VOLUME);
 
+    analyticsModel = new AnalyticsModel();
+
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
     updateTimer->start(50);
@@ -112,6 +114,34 @@ void MainWindow::loadMediaPlayerControlWidgets()
 
     mediaPlayer->m_playlistModel->m_openButton = ui->mediaPlaylistOpenBtn;
     mediaPlayer->m_playlistModel->m_removeButton = ui->mediaPlaylistRemoveBtn;
+}
+
+void MainWindow::initAnalyticsModel()
+{
+    setAnalyticsModelCharts();
+    loadAnalyticsModelWidgets();
+}
+
+void MainWindow::setAnalyticsModelCharts()
+{
+    ui->livingRoomLightChartView->setChart(analyticsModel->m_livingRoomLightChart);
+    ui->bedroomLightChartView->setChart(analyticsModel->m_bedroomLightChart);
+    ui->kitchenLightChartView->setChart(analyticsModel->m_kitchenLightChart);
+
+    ui->ACOnChartView->setChart(analyticsModel->m_ACOnChart);
+    ui->ACTemperatureChartView->setChart(analyticsModel->m_ACTemperatureChart);
+    ui->ACModeChartView->setChart(analyticsModel->m_ACModeChart);
+
+    ui->temperatureSensorChartView->setChart(analyticsModel->m_temperatureSensorChart);
+    ui->humiditySensorChartView->setChart(analyticsModel->m_humiditySensorChart);
+    ui->brightnessSensorChartView->setChart(analyticsModel->m_brightnessSensorChart);
+}
+
+void MainWindow::loadAnalyticsModelWidgets()
+{
+    analyticsModel->m_analyticsPageLightsBtn = ui->analyticsPageLightsBtn;
+    analyticsModel->m_analyticsPageACBtn = ui->analyticsPageACBtn;
+    analyticsModel->m_analyticsPageLightsBtn = ui->analyticsPageLightsBtn;
 }
 
 void MainWindow::updateUI()

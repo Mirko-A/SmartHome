@@ -46,8 +46,11 @@
        </property>
        <item>
         <widget class="QStackedWidget" name="pages">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="devicesPage">
           <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1575,33 +1578,489 @@ QPushButton:pressed {
           <property name="layoutDirection">
            <enum>Qt::LeftToRight</enum>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="styleSheet">
+           <string notr="true">#analyticsPageContainer
+{
+	background-color: #22252e;
+}</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_52">
            <item>
-            <widget class="QWidget" name="analyticsHeader" native="true">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <widget class="QFrame" name="analyticsPageContainer">
+             <property name="styleSheet">
+              <string notr="true">#analyticsPageBar
+{
+	background-color: #22252e;
+}
+
+#analyticsScrollAreaContainer
+{
+	background-color: #2c313c;
+}</string>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <item>
-               <widget class="QLabel" name="analyticsLabel">
-                <property name="font">
-                 <font>
-                  <pointsize>24</pointsize>
-                 </font>
+               <widget class="QFrame" name="analyticsPageBar">
+                <property name="styleSheet">
+                 <string notr="true"/>
                 </property>
-                <property name="text">
-                 <string>Analytics</string>
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
                 </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_36">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QFrame" name="analyticsPageIcons">
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton
+{
+	padding: 5px;
+	border-radius: 5px;
+}</string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_5">
+                    <item>
+                     <widget class="QPushButton" name="analyticsPageLightsBtn">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset>
+                        <normaloff>../resource/icons/analytics-lights-on.svg</normaloff>../resource/icons/analytics-lights-on.svg</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>40</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="analyticsPageACBtn">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset>
+                        <normaloff>../resource/icons/analytics-ac-off.svg</normaloff>../resource/icons/analytics-ac-off.svg</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>40</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="analyticsPageSensorsBtn">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset>
+                        <normaloff>../resource/icons/analytics-sensors-off.svg</normaloff>../resource/icons/analytics-sensors-off.svg</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>40</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>320</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QScrollArea" name="analyticsScrollAreaContainer">
+                <property name="styleSheet">
+                 <string notr="true">#analyticsScrollArea
+{
+	background-color: #2c313c;
+}</string>
+                </property>
+                <property name="verticalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAsNeeded</enum>
+                </property>
+                <property name="widgetResizable">
+                 <bool>true</bool>
+                </property>
+                <widget class="QWidget" name="analyticsScrollArea">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>1134</width>
+                   <height>1230</height>
+                  </rect>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">#analyticsStackedWidget
+{
+	background-color: #2c313c;
+}</string>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_23">
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="QStackedWidget" name="analyticsStackedWidget">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">#ACAnalyticsPage, #lightAnalyticsPage, #sensorsAnalyticsPage
+{
+	background-color: #2c313c;
+}</string>
+                    </property>
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <property name="currentIndex">
+                     <number>0</number>
+                    </property>
+                    <widget class="QWidget" name="ACAnalyticsPage">
+                     <layout class="QVBoxLayout" name="verticalLayout_27">
+                      <item>
+                       <widget class="QFrame" name="ACModeAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true"/>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_25">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QChartView" name="ACModeChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="ACOnAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_24">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QChartView" name="ACOnChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="ACTemperatureAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_26">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QChartView" name="ACTemperatureChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="lightAnalyticsPage">
+                     <layout class="QVBoxLayout" name="verticalLayout_28">
+                      <item>
+                       <widget class="QFrame" name="livingRoomLightAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_31">
+                         <item>
+                          <widget class="QChartView" name="livingRoomLightChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="bedroomLightAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_29">
+                         <item>
+                          <widget class="QChartView" name="bedroomLightChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="kitchenLightAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_30">
+                         <item>
+                          <widget class="QChartView" name="kitchenLightChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="sensorAnalyticsPage">
+                     <layout class="QVBoxLayout" name="verticalLayout_32">
+                      <item>
+                       <widget class="QFrame" name="temperatureSensorAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_35">
+                         <item>
+                          <widget class="QChartView" name="temperatureSensorChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="brightnessSensorAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_33">
+                         <item>
+                          <widget class="QChartView" name="brightnessSensorChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="humiditySensorAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_34">
+                         <item>
+                          <widget class="QChartView" name="humiditySensorChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
                </widget>
               </item>
              </layout>
             </widget>
-           </item>
-           <item>
-            <widget class="QWidget" name="analyticsBody" native="true"/>
            </item>
           </layout>
          </widget>
@@ -1616,6 +2075,18 @@ QPushButton:pressed {
        <string notr="true"/>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_27">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <spacer name="bottomBarLeftSpacer">
          <property name="orientation">
@@ -1788,6 +2259,13 @@ QPushButton:pressed {
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
