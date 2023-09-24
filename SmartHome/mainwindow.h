@@ -3,6 +3,7 @@
 
 #include "home_config.h"
 #include "media_player.h"
+#include "analytics_model.h"
 
 #include <QMainWindow>
 #include <QMediaPlayer>
@@ -79,6 +80,10 @@ private:
     void loadMediaPlayerWidgets();
     void loadMediaPlayerControlWidgets();
 
+    void initAnalyticsModel();
+    void setAnalyticsModelCharts();
+    void loadAnalyticsModelWidgets();
+
     void updateUI();
 
 private:
@@ -86,6 +91,7 @@ private:
 
     HomeConfig* homeCfg;
     MediaPlayer* mediaPlayer;
+    AnalyticsModel* analyticsModel;
 
     QTimer* updateTimer;
 };
