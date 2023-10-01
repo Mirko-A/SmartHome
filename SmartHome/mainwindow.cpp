@@ -38,6 +38,8 @@ const QString CFG_JSON_FILE_PATH_QSTR = "../resource/home_cfg.json";
 const QString INI_JSON_FILE_PATH_QSTR = "../resource/ini_cfg.json";
 
 constexpr int INITIAL_PLAYER_VOLUME = 50;
+//constexpr int ONE_SEC_IN_TICKS = 20;
+constexpr int ONE_SEC_IN_TICKS = 2;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -161,11 +163,18 @@ void MainWindow::updateUI()
 
 void MainWindow::onUpdate()
 {
+    static size_t tickCounter = 0;
+
+    if((tickCounter % ONE_SEC_IN_TICKS) == 0)
+        analyticsModel->updateAnalyticsData(*homeCfg);
+
     homeCfg->onUpdate();
     updateUI();
 
     // TODO: JSON file handling
     saveHomeCfgAsJSON();
+
+    tickCounter++;
 }
 
 void MainWindow::saveHomeCfgAsJSON()
