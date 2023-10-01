@@ -1,9 +1,9 @@
 <?xml version="1.0" standalone="no"?>
 <svg contentScriptType="text/ecmascript" zoomAndPan="magnify" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="full"
-    contentStyleType="text/css" stroke="#434158" stroke-linecap="round" version="1.0" width="24" fill="none"
+    contentStyleType="text/css" stroke="#010101" stroke-linecap="round" version="1.0" width="24" fill="none"
     preserveAspectRatio="xMidYMid meet" stroke-width="2" viewBox="0 0 24 24" height="24" class="feather feather-sun"
     xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round">
-    <circle r="5" cx="12" cy="12"/>
+    <circle cx="12" r="5" cy="12"/>
     <line y2="3" x1="12" x2="12" y1="1"/>
     <line y2="23" x1="12" x2="12" y1="21"/>
     <line y2="5.64" x1="4.22" x2="5.64" y1="4.22"/>

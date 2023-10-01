@@ -6,14 +6,32 @@
 
 #include <fstream>
 
+#include <assert.h>
+
 #define CFG_JSON_FILE_PATH CFG_JSON_FILE_PATH_QSTR.toStdString().c_str()
 #define INI_JSON_FILE_PATH INI_JSON_FILE_PATH_QSTR.toStdString().c_str()
 
 const QVector<QString> PAGE_ICON_PATHS =
 {
-  "../resource/icons/three-dots-0-purple.svg",
-  "../resource/icons/three-dots-1-purple.svg",
-  "../resource/icons/three-dots-2-purple.svg",
+    "../resource/icons/three-dots-0-purple.svg",
+    "../resource/icons/three-dots-1-purple.svg",
+    "../resource/icons/three-dots-2-purple.svg",
+};
+
+const QVector<QVector<QString>> ANALYTICS_PAGE_PATHS =
+{
+    // INACTIVE ICONS
+    {
+        "../resource/icons/analytics-lights-off.svg",
+        "../resource/icons/analytics-ac-off.svg",
+        "../resource/icons/analytics-sensors-off.svg",
+    },
+    // ACTIVE ICONS
+    {
+        "../resource/icons/analytics-lights-on.svg",
+        "../resource/icons/analytics-ac-on.svg",
+        "../resource/icons/analytics-sensors-on.svg",
+    },
 };
 
 const QString CFG_JSON_FILE_PATH_QSTR = "../resource/home_cfg.json";
@@ -36,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent)
     mediaPlayer->m_player->setVolume(INITIAL_PLAYER_VOLUME);
 
     analyticsModel = new AnalyticsModel();
+    initAnalyticsModel();
+    ui->analyticsPages->setCurrentIndex(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS));
 
     updateTimer = new QTimer(this);
     connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
@@ -118,12 +138,6 @@ void MainWindow::loadMediaPlayerControlWidgets()
 
 void MainWindow::initAnalyticsModel()
 {
-    setAnalyticsModelCharts();
-    loadAnalyticsModelWidgets();
-}
-
-void MainWindow::setAnalyticsModelCharts()
-{
     ui->livingRoomLightChartView->setChart(analyticsModel->m_livingRoomLightChart);
     ui->bedroomLightChartView->setChart(analyticsModel->m_bedroomLightChart);
     ui->kitchenLightChartView->setChart(analyticsModel->m_kitchenLightChart);
@@ -135,13 +149,6 @@ void MainWindow::setAnalyticsModelCharts()
     ui->temperatureSensorChartView->setChart(analyticsModel->m_temperatureSensorChart);
     ui->humiditySensorChartView->setChart(analyticsModel->m_humiditySensorChart);
     ui->brightnessSensorChartView->setChart(analyticsModel->m_brightnessSensorChart);
-}
-
-void MainWindow::loadAnalyticsModelWidgets()
-{
-    analyticsModel->m_analyticsPageLightsBtn = ui->analyticsPageLightsBtn;
-    analyticsModel->m_analyticsPageACBtn = ui->analyticsPageACBtn;
-    analyticsModel->m_analyticsPageLightsBtn = ui->analyticsPageLightsBtn;
 }
 
 void MainWindow::updateUI()
@@ -373,3 +380,74 @@ void MainWindow::on_pitchSlider_valueChanged(int value)
     homeCfg->speakers.pitch = value;
     ui->pitchSliderValueLabel->setText(QString::number(value));
 }
+
+void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex, AnalyticsPageState newState)
+{
+    switch(pageIndex)
+    {
+        case AnalyticsPageIndex::LIGHT_ANALYTICS:
+        {
+            ui->analyticsPageLightsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS
+                                                        .at(static_cast<int>(newState))
+                                                            .at(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS))));
+        }
+        break;
+        case AnalyticsPageIndex::AC_ANALYTICS:
+        {
+            ui->analyticsPageACBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS
+                                                        .at(static_cast<int>(newState))
+                                                            .at(static_cast<int>(AnalyticsPageIndex::AC_ANALYTICS))));
+        }
+        break;
+        case AnalyticsPageIndex::SENSORS_ANALYTICS:
+        {
+            ui->analyticsPageSensorsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS
+                                                        .at(static_cast<int>(newState))
+                                                            .at(static_cast<int>(AnalyticsPageIndex::SENSORS_ANALYTICS))));
+        }
+        break;
+        default:
+            assert(false && "Invalid analytics page index provided!");
+        break;
+    }
+}
+
+void MainWindow::deselectCurrentAnalyticsPage()
+{
+    updateAnalyticsPageIcon(static_cast<AnalyticsPageIndex>(ui->analyticsPages->currentIndex()),
+                            AnalyticsPageState::OFF);
+}
+void MainWindow::selectNewAnalyticsPage(AnalyticsPageIndex newPageIndex)
+{
+    updateAnalyticsPageIcon(newPageIndex,
+                            AnalyticsPageState::ON);
+
+    ui->analyticsPages->setCurrentIndex(static_cast<int>(newPageIndex));
+}
+
+void MainWindow::swapSelectedAnalyticsPage(AnalyticsPageIndex newPageIndex)
+{
+    if (static_cast<int>(newPageIndex) != ui->analyticsPages->currentIndex())
+    {
+        deselectCurrentAnalyticsPage();
+        selectNewAnalyticsPage(newPageIndex);
+    }
+}
+
+void MainWindow::on_analyticsPageLightsBtn_clicked()
+{
+    swapSelectedAnalyticsPage(AnalyticsPageIndex::LIGHT_ANALYTICS);
+}
+
+
+void MainWindow::on_analyticsPageACBtn_clicked()
+{
+    swapSelectedAnalyticsPage(AnalyticsPageIndex::AC_ANALYTICS);
+}
+
+
+void MainWindow::on_analyticsPageSensorsBtn_clicked()
+{
+    swapSelectedAnalyticsPage(AnalyticsPageIndex::SENSORS_ANALYTICS);
+}
+

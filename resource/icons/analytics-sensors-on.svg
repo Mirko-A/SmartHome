@@ -3,5 +3,5 @@
     contentStyleType="text/css" stroke="#434158" stroke-linecap="round" version="1.0" width="24" fill="none"
     preserveAspectRatio="xMidYMid meet" stroke-width="2" viewBox="0 0 24 24" height="24" class="feather feather-thermometer"
     xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round">
-    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+    <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" stroke="#010101"/>
 </svg>

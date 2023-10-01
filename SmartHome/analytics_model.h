@@ -1,10 +1,9 @@
 #ifndef ANALYTICS_MODEL_H
 #define ANALYTICS_MODEL_H
 
-#include <QPushButton>
 #include <QtCharts/QChart>
 
-#include <QAbstractItemModel>
+#include <QTimer>
 
 enum class AnalyticsPage
 {
@@ -21,11 +20,13 @@ public:
     AnalyticsModel();
     ~AnalyticsModel();
 
-private:
     void initCharts();
+private:
     void initLightCharts();
     void initACCharts();
     void initSensorCharts();
+
+    void onUpdate();
 
 public:
     QtCharts::QChart* m_livingRoomLightChart;
@@ -39,10 +40,6 @@ public:
     QtCharts::QChart* m_temperatureSensorChart;
     QtCharts::QChart* m_humiditySensorChart;
     QtCharts::QChart* m_brightnessSensorChart;
-
-    QPushButton* m_analyticsPageLightsBtn;
-    QPushButton* m_analyticsPageACBtn;
-    QPushButton* m_analyticsPageSensorsBtn;
 };
 
 #endif // ANALYTICS_MODEL_H
