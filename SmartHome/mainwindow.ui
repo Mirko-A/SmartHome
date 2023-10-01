@@ -1646,9 +1646,20 @@ QPushButton:pressed {
                    <property name="styleSheet">
                     <string notr="true">QPushButton
 {
-	padding: 5px;
+	padding: 7px;
 	border-radius: 5px;
-}</string>
+}
+
+QPushButton:hover 
+{
+	background-color: #434158;
+}
+
+QPushButton:pressed 
+{
+	background-color: #22252e;
+}
+</string>
                    </property>
                    <property name="frameShape">
                     <enum>QFrame::StyledPanel</enum>
@@ -1657,7 +1668,16 @@ QPushButton:pressed {
                     <enum>QFrame::Raised</enum>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_5">
-                    <item>
+                    <property name="leftMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>9</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>9</number>
+                    </property>
+                    <item alignment="Qt::AlignVCenter">
                      <widget class="QPushButton" name="analyticsPageLightsBtn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -1674,13 +1694,13 @@ QPushButton:pressed {
                       </property>
                       <property name="iconSize">
                        <size>
-                        <width>40</width>
-                        <height>40</height>
+                        <width>45</width>
+                        <height>45</height>
                        </size>
                       </property>
                      </widget>
                     </item>
-                    <item>
+                    <item alignment="Qt::AlignVCenter">
                      <widget class="QPushButton" name="analyticsPageACBtn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -1697,13 +1717,13 @@ QPushButton:pressed {
                       </property>
                       <property name="iconSize">
                        <size>
-                        <width>40</width>
-                        <height>40</height>
+                        <width>45</width>
+                        <height>45</height>
                        </size>
                       </property>
                      </widget>
                     </item>
-                    <item>
+                    <item alignment="Qt::AlignVCenter">
                      <widget class="QPushButton" name="analyticsPageSensorsBtn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -1720,8 +1740,8 @@ QPushButton:pressed {
                       </property>
                       <property name="iconSize">
                        <size>
-                        <width>40</width>
-                        <height>40</height>
+                        <width>45</width>
+                        <height>45</height>
                        </size>
                       </property>
                      </widget>
@@ -1767,7 +1787,7 @@ QPushButton:pressed {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>1134</width>
+                   <width>1125</width>
                    <height>1230</height>
                   </rect>
                  </property>
@@ -1791,7 +1811,7 @@ QPushButton:pressed {
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="QStackedWidget" name="analyticsStackedWidget">
+                   <widget class="QStackedWidget" name="analyticsPages">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -1813,6 +1833,109 @@ QPushButton:pressed {
                     <property name="currentIndex">
                      <number>0</number>
                     </property>
+                    <widget class="QWidget" name="lightAnalyticsPage">
+                     <layout class="QVBoxLayout" name="verticalLayout_28">
+                      <item>
+                       <widget class="QFrame" name="livingRoomLightAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_31">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QChartView" name="livingRoomLightChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="bedroomLightAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_29">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QChartView" name="bedroomLightChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QFrame" name="kitchenLightAnalytics">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>400</height>
+                         </size>
+                        </property>
+                        <property name="frameShape">
+                         <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_30">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QChartView" name="kitchenLightChartView"/>
+                         </item>
+                        </layout>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
                     <widget class="QWidget" name="ACAnalyticsPage">
                      <layout class="QVBoxLayout" name="verticalLayout_27">
                       <item>
@@ -1919,73 +2042,6 @@ QPushButton:pressed {
                       </item>
                      </layout>
                     </widget>
-                    <widget class="QWidget" name="lightAnalyticsPage">
-                     <layout class="QVBoxLayout" name="verticalLayout_28">
-                      <item>
-                       <widget class="QFrame" name="livingRoomLightAnalytics">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>400</height>
-                         </size>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::StyledPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                         <enum>QFrame::Raised</enum>
-                        </property>
-                        <layout class="QVBoxLayout" name="verticalLayout_31">
-                         <item>
-                          <widget class="QChartView" name="livingRoomLightChartView"/>
-                         </item>
-                        </layout>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QFrame" name="bedroomLightAnalytics">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>400</height>
-                         </size>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::StyledPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                         <enum>QFrame::Raised</enum>
-                        </property>
-                        <layout class="QVBoxLayout" name="verticalLayout_29">
-                         <item>
-                          <widget class="QChartView" name="bedroomLightChartView"/>
-                         </item>
-                        </layout>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QFrame" name="kitchenLightAnalytics">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>400</height>
-                         </size>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::StyledPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                         <enum>QFrame::Raised</enum>
-                        </property>
-                        <layout class="QVBoxLayout" name="verticalLayout_30">
-                         <item>
-                          <widget class="QChartView" name="kitchenLightChartView"/>
-                         </item>
-                        </layout>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
                     <widget class="QWidget" name="sensorAnalyticsPage">
                      <layout class="QVBoxLayout" name="verticalLayout_32">
                       <item>
@@ -2003,6 +2059,18 @@ QPushButton:pressed {
                          <enum>QFrame::Raised</enum>
                         </property>
                         <layout class="QVBoxLayout" name="verticalLayout_35">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
                          <item>
                           <widget class="QChartView" name="temperatureSensorChartView"/>
                          </item>
@@ -2024,6 +2092,18 @@ QPushButton:pressed {
                          <enum>QFrame::Raised</enum>
                         </property>
                         <layout class="QVBoxLayout" name="verticalLayout_33">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
                          <item>
                           <widget class="QChartView" name="brightnessSensorChartView"/>
                          </item>
@@ -2045,6 +2125,18 @@ QPushButton:pressed {
                          <enum>QFrame::Raised</enum>
                         </property>
                         <layout class="QVBoxLayout" name="verticalLayout_34">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
                          <item>
                           <widget class="QChartView" name="humiditySensorChartView"/>
                          </item>

@@ -21,6 +21,19 @@ enum class PageIndex
     ANALYTICS,
 };
 
+enum class AnalyticsPageState
+{
+    OFF,
+    ON,
+};
+
+enum class AnalyticsPageIndex
+{
+    LIGHT_ANALYTICS,
+    AC_ANALYTICS,
+    SENSORS_ANALYTICS,
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -61,6 +74,12 @@ private slots:
     void on_pitchSlider_sliderMoved(int position);
     void on_pitchSlider_valueChanged(int value);
 
+    void on_analyticsPageLightsBtn_clicked();
+
+    void on_analyticsPageACBtn_clicked();
+
+    void on_analyticsPageSensorsBtn_clicked();
+
 private:
     void updateCurrentPage(PageIndex index);
     void updateDateTimeWidget();
@@ -81,8 +100,11 @@ private:
     void loadMediaPlayerControlWidgets();
 
     void initAnalyticsModel();
-    void setAnalyticsModelCharts();
-    void loadAnalyticsModelWidgets();
+
+    void updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex, AnalyticsPageState newState);
+    void deselectCurrentAnalyticsPage();
+    void selectNewAnalyticsPage(AnalyticsPageIndex newPageIndex);
+    void swapSelectedAnalyticsPage(AnalyticsPageIndex newPageIndex);
 
     void updateUI();
 

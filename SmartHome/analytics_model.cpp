@@ -20,11 +20,6 @@ AnalyticsModel::AnalyticsModel()
     m_brightnessSensorChart = new QtCharts::QChart;
 
     initCharts();
-
-    // Not owned by analytics model
-    m_analyticsPageLightsBtn = nullptr;
-    m_analyticsPageACBtn = nullptr;
-    m_analyticsPageSensorsBtn = nullptr;
 }
 
 void AnalyticsModel::initCharts()
