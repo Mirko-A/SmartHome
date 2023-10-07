@@ -38,6 +38,7 @@ const QString CFG_JSON_FILE_PATH_QSTR = "../resource/home_cfg.json";
 const QString INI_JSON_FILE_PATH_QSTR = "../resource/ini_cfg.json";
 
 constexpr int INITIAL_PLAYER_VOLUME = 50;
+// TODO: Set to a lower value for easier testing
 //constexpr int ONE_SEC_IN_TICKS = 20;
 constexpr int ONE_SEC_IN_TICKS = 2;
 
@@ -145,7 +146,7 @@ void MainWindow::initAnalyticsModel()
     ui->kitchenLightChartView->setChart(analyticsModel->m_kitchenLightChart);
 
     ui->ACOnChartView->setChart(analyticsModel->m_ACOnChart);
-    //ui->ACTemperatureChartView->setChart(analyticsModel->m_ACTemperatureChart);
+    ui->ACTemperatureChartView->setChart(analyticsModel->m_ACTemperatureChart);
     //ui->ACModeChartView->setChart(analyticsModel->m_ACModeChart);
 
     //ui->temperatureSensorChartView->setChart(analyticsModel->m_temperatureSensorChart);
