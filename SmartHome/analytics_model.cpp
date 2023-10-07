@@ -40,17 +40,6 @@ void Histogram::shift()
 AnalyticsModel::AnalyticsModel()
     : histogramTickCount(0)
 {
-    // Owned by analytics model
-    m_livingRoomLightChart = new QtCharts::QChart;
-    m_bedroomLightChart = new QtCharts::QChart;
-    m_kitchenLightChart = new QtCharts::QChart;
-    m_ACOnChart = new QtCharts::QChart;
-    m_ACTemperatureChart = new QtCharts::QChart;
-    m_ACModeChart = new QtCharts::QChart;
-    m_temperatureSensorChart = new QtCharts::QChart;
-    m_humiditySensorChart = new QtCharts::QChart;
-    m_brightnessSensorChart = new QtCharts::QChart;
-
     m_analyticsData = new AnalyticsData;
     initCharts();
 }
@@ -78,95 +67,88 @@ void AnalyticsModel::initCharts()
 void AnalyticsModel::initChartsWithHistogram()
 {
     {
-        auto livingRoomLightAxisX = new QtCharts::QValueAxis;
-        auto livingRoomLightAxisY = new QtCharts::QValueAxis;
-        livingRoomLightAxisX->setRange(0, MAX_BARSET_COUNT);
-        livingRoomLightAxisY->setRange(0, MAX_HISTOGRAM_VALUE);
-        m_analyticsData->histograms.livingRoomLight = new Histogram("Living room light on per hour");
-        m_livingRoomLightChart->addSeries(m_analyticsData->histograms.livingRoomLight->barSeries);
-        m_livingRoomLightChart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
-        m_livingRoomLightChart->addAxis(livingRoomLightAxisX, Qt::AlignBottom);
-        m_livingRoomLightChart->addAxis(livingRoomLightAxisY, Qt::AlignLeft);
-        m_analyticsData->histograms.livingRoomLight->barSeries->attachAxis(livingRoomLightAxisX);
-        m_analyticsData->histograms.livingRoomLight->barSeries->attachAxis(livingRoomLightAxisY);
-        m_livingRoomLightChart->legend()->setVisible(true);
-        m_livingRoomLightChart->legend()->setAlignment(Qt::AlignBottom);
+        auto livingRoomChartWithHistogram = createChartWithHistogram("Living room light on per hour",
+                                                        QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
+                                                        QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+
+        m_livingRoomLightChart = livingRoomChartWithHistogram.first;
+        m_analyticsData->histograms->livingRoomLight = livingRoomChartWithHistogram.second;
     }
 
     {
-        auto bedroomLightAxisX = new QtCharts::QValueAxis;
-        auto bedroomLightAxisY = new QtCharts::QValueAxis;
-        bedroomLightAxisX->setRange(0, MAX_BARSET_COUNT);
-        bedroomLightAxisY->setRange(0, MAX_HISTOGRAM_VALUE);
-        m_analyticsData->histograms.bedroomLight = new Histogram("Bedroom room light on per hour");
-        m_bedroomLightChart->addSeries(m_analyticsData->histograms.bedroomLight->barSeries);
-        m_bedroomLightChart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
-        m_bedroomLightChart->addAxis(bedroomLightAxisX, Qt::AlignBottom);
-        m_bedroomLightChart->addAxis(bedroomLightAxisY, Qt::AlignLeft);
-        m_analyticsData->histograms.bedroomLight->barSeries->attachAxis(bedroomLightAxisX);
-        m_analyticsData->histograms.bedroomLight->barSeries->attachAxis(bedroomLightAxisY);
-        m_bedroomLightChart->legend()->setVisible(true);
-        m_bedroomLightChart->legend()->setAlignment(Qt::AlignBottom);
+        auto bedroomChartWithHistogram = createChartWithHistogram("Bedroom light on per hour",
+                                                                  QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
+                                                                  QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+
+        m_bedroomLightChart = bedroomChartWithHistogram.first;
+        m_analyticsData->histograms->bedroomLight = bedroomChartWithHistogram.second;
     }
 
     {
-        auto kitchenLightAxisX = new QtCharts::QValueAxis;
-        auto kitchenLightAxisY = new QtCharts::QValueAxis;
-        kitchenLightAxisX->setRange(0, MAX_BARSET_COUNT);
-        kitchenLightAxisY->setRange(0, MAX_HISTOGRAM_VALUE);
-        m_analyticsData->histograms.kitchenLight = new Histogram("Kitchen room light on per hour");
-        m_kitchenLightChart->addSeries(m_analyticsData->histograms.kitchenLight->barSeries);
-        m_kitchenLightChart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
-        m_kitchenLightChart->addAxis(kitchenLightAxisX, Qt::AlignBottom);
-        m_kitchenLightChart->addAxis(kitchenLightAxisY, Qt::AlignLeft);
-        m_analyticsData->histograms.kitchenLight->barSeries->attachAxis(kitchenLightAxisX);
-        m_analyticsData->histograms.kitchenLight->barSeries->attachAxis(kitchenLightAxisY);
-        m_kitchenLightChart->legend()->setVisible(true);
-        m_kitchenLightChart->legend()->setAlignment(Qt::AlignBottom);
+        auto kitchenChartWithHistogram = createChartWithHistogram("Kitchen light on per hour",
+                                                                  QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
+                                                                  QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+
+        m_kitchenLightChart = kitchenChartWithHistogram.first;
+        m_analyticsData->histograms->kitchenLight = kitchenChartWithHistogram.second;
     }
 
     {
-        auto ACOnAxisX = new QtCharts::QValueAxis;
-        auto ACOnAxisY = new QtCharts::QValueAxis;
-        ACOnAxisX->setRange(0, MAX_BARSET_COUNT);
-        ACOnAxisY->setRange(0, MAX_HISTOGRAM_VALUE);
-        m_analyticsData->histograms.ACOn = new Histogram("AC on per hour");
-        m_ACOnChart->addSeries(m_analyticsData->histograms.ACOn->barSeries);
-        m_ACOnChart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
-        m_ACOnChart->addAxis(ACOnAxisX, Qt::AlignBottom);
-        m_ACOnChart->addAxis(ACOnAxisY, Qt::AlignLeft);
-        m_analyticsData->histograms.ACOn->barSeries->attachAxis(ACOnAxisX);
-        m_analyticsData->histograms.ACOn->barSeries->attachAxis(ACOnAxisY);
-        m_ACOnChart->legend()->setVisible(true);
-        m_ACOnChart->legend()->setAlignment(Qt::AlignBottom);
+        auto ACOnChartWithHistogram = createChartWithHistogram("AC on per hour",
+                                                               QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
+                                                               QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+
+        m_ACOnChart = ACOnChartWithHistogram.first;
+        m_analyticsData->histograms->ACOn = ACOnChartWithHistogram.second;
     }
+}
+
+QPair<QtCharts::QChart*, Histogram*> AnalyticsModel::createChartWithHistogram(QString name, QPair<size_t, size_t> rangeX, QPair<size_t, size_t> rangeY)
+{
+    QtCharts::QChart* chart = new QtCharts::QChart;
+    Histogram* histogram = new Histogram(name);
+
+    auto axisX = new QtCharts::QValueAxis;
+    auto axisY = new QtCharts::QValueAxis;
+    axisX->setRange(rangeX.first, rangeX.second);
+    axisY->setRange(rangeY.first, rangeY.second);
+    chart->addSeries(histogram->barSeries);
+    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+    chart->addAxis(axisX, Qt::AlignBottom);
+    chart->addAxis(axisY, Qt::AlignLeft);
+    histogram->barSeries->attachAxis(axisX);
+    histogram->barSeries->attachAxis(axisY);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    return QPair<QtCharts::QChart*, Histogram*>(chart, histogram);
 }
 
 void AnalyticsModel::shiftHistograms()
 {
-    m_analyticsData->histograms.livingRoomLight->shift();
-    m_analyticsData->histograms.bedroomLight->shift();
-    m_analyticsData->histograms.kitchenLight->shift();
-    m_analyticsData->histograms.ACOn->shift();
+    m_analyticsData->histograms->livingRoomLight->shift();
+    m_analyticsData->histograms->bedroomLight->shift();
+    m_analyticsData->histograms->kitchenLight->shift();
+    m_analyticsData->histograms->ACOn->shift();
 }
 
 void AnalyticsModel::updateHistograms(const HomeConfig& homeCfg)
 {
     if(homeCfg.lights.livingRoomLightOn)
     {
-        m_analyticsData->histograms.livingRoomLight->update();
+        m_analyticsData->histograms->livingRoomLight->update();
     }
     if(homeCfg.lights.bedroomLightOn)
     {
-        m_analyticsData->histograms.bedroomLight->update();
+        m_analyticsData->histograms->bedroomLight->update();
     }
     if(homeCfg.lights.kitchenLightOn)
     {
-        m_analyticsData->histograms.kitchenLight->update();
+        m_analyticsData->histograms->kitchenLight->update();
     }
     if(homeCfg.AC.on)
     {
-        m_analyticsData->histograms.ACOn->update();
+        m_analyticsData->histograms->ACOn->update();
     }
 }
 

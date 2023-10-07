@@ -7,6 +7,8 @@
 #include <QtCharts/QBarSet>
 #include <QtCharts/QBarSeries>
 
+#include <QPair>
+
 enum class AnalyticsPage
 {
     LIGHTS = 0,
@@ -40,17 +42,34 @@ struct Histograms
     Histogram* bedroomLight;
     Histogram* kitchenLight;
     Histogram* ACOn;
+
+    ~Histograms()
+    {
+        delete livingRoomLight;
+        delete bedroomLight;
+        delete kitchenLight;
+        delete ACOn;
+    }
 };
 
 struct AnalyticsData
 {
-    Histograms histograms;
+    Histograms* histograms;
+
+    AnalyticsData()
+        : histograms(new Histograms)
+    {
+
+    }
+
+    ~AnalyticsData()
+    {
+        delete histograms;
+    }
 };
 
-// class AnalyticsModel : public QAbstractItemModel
 class AnalyticsModel
 {
-    //Q_OBJECT
 public:
     AnalyticsModel();
     ~AnalyticsModel();
@@ -66,6 +85,9 @@ private:
     void updateHistograms(const HomeConfig& homeCfg);
 
     void onUpdate();
+
+private:
+    QPair<QtCharts::QChart*, Histogram*> createChartWithHistogram(QString name, QPair<size_t, size_t> rangeX, QPair<size_t, size_t> rangeY);
 
 public:
     QtCharts::QChart* m_livingRoomLightChart;
