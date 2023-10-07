@@ -147,11 +147,10 @@ void MainWindow::initAnalyticsModel()
 
     ui->ACOnChartView->setChart(analyticsModel->m_ACOnChart);
     ui->ACTemperatureChartView->setChart(analyticsModel->m_ACTemperatureChart);
-    //ui->ACModeChartView->setChart(analyticsModel->m_ACModeChart);
 
-    //ui->temperatureSensorChartView->setChart(analyticsModel->m_temperatureSensorChart);
-    //ui->humiditySensorChartView->setChart(analyticsModel->m_humiditySensorChart);
-    //ui->brightnessSensorChartView->setChart(analyticsModel->m_brightnessSensorChart);
+    ui->temperatureSensorChartView->setChart(analyticsModel->m_temperatureSensorChart);
+    ui->humiditySensorChartView->setChart(analyticsModel->m_humiditySensorChart);
+    ui->brightnessSensorChartView->setChart(analyticsModel->m_brightnessSensorChart);
 }
 
 void MainWindow::updateUI()
