@@ -1831,7 +1831,7 @@ QPushButton:pressed
                      <enum>QFrame::Raised</enum>
                     </property>
                     <property name="currentIndex">
-                     <number>0</number>
+                     <number>1</number>
                     </property>
                     <widget class="QWidget" name="lightAnalyticsPage">
                      <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -1938,42 +1938,6 @@ QPushButton:pressed
                     </widget>
                     <widget class="QWidget" name="ACAnalyticsPage">
                      <layout class="QVBoxLayout" name="verticalLayout_27">
-                      <item>
-                       <widget class="QFrame" name="ACModeAnalytics">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>400</height>
-                         </size>
-                        </property>
-                        <property name="styleSheet">
-                         <string notr="true"/>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::StyledPanel</enum>
-                        </property>
-                        <property name="frameShadow">
-                         <enum>QFrame::Raised</enum>
-                        </property>
-                        <layout class="QVBoxLayout" name="verticalLayout_25">
-                         <property name="leftMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="topMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="rightMargin">
-                          <number>0</number>
-                         </property>
-                         <property name="bottomMargin">
-                          <number>0</number>
-                         </property>
-                         <item>
-                          <widget class="QChartView" name="ACModeChartView"/>
-                         </item>
-                        </layout>
-                       </widget>
-                      </item>
                       <item>
                        <widget class="QFrame" name="ACOnAnalytics">
                         <property name="minimumSize">

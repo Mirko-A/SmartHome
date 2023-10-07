@@ -81,10 +81,16 @@ struct Histograms
 struct LineGraphs
 {
     LineGraph* ACTemperature;
+    LineGraph* temperatureSensor;
+    LineGraph* humiditySensor;
+    LineGraph* brightnessSensor;
 
     ~LineGraphs()
     {
         delete ACTemperature;
+        delete temperatureSensor;
+        delete humiditySensor;
+        delete brightnessSensor;
     }
 };
 

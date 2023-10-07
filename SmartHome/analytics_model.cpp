@@ -171,9 +171,34 @@ void AnalyticsModel::initChartsWithLineGraph()
     {
         auto ACTemperatureChartWithLineGraph = createChartWithLineGraph("AC Temperature",
                                                                         QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
-                                                                        QPair<size_t, size_t>(MIN_AC_TEMP, MAX_AC_TEMP));
+                                                                        QPair<size_t, size_t>(0, MAX_AC_TEMP));
         m_ACTemperatureChart = ACTemperatureChartWithLineGraph.first;
         m_analyticsData->lineGraphs->ACTemperature = ACTemperatureChartWithLineGraph.second;
+    }
+
+    // TODO: Set correct max sensor values
+    {
+        auto temperatureSensorChartWithLineGraph = createChartWithLineGraph("Temperature sensor readings",
+                                                                            QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
+                                                                            QPair<size_t, size_t>(0, 100));
+        m_temperatureSensorChart = temperatureSensorChartWithLineGraph.first;
+        m_analyticsData->lineGraphs->temperatureSensor = temperatureSensorChartWithLineGraph.second;
+    }
+
+    {
+        auto humiditySensorChartWithLineGraph = createChartWithLineGraph("Humidity sensor readings",
+                                                                         QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
+                                                                         QPair<size_t, size_t>(0, 100));
+        m_humiditySensorChart = humiditySensorChartWithLineGraph.first;
+        m_analyticsData->lineGraphs->humiditySensor = humiditySensorChartWithLineGraph.second;
+    }
+
+    {
+        auto brightnessSensorChartWithLineGraph = createChartWithLineGraph("Brightness sensor readings",
+                                                                        QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
+                                                                        QPair<size_t, size_t>(0, 100));
+        m_brightnessSensorChart = brightnessSensorChartWithLineGraph.first;
+        m_analyticsData->lineGraphs->brightnessSensor = brightnessSensorChartWithLineGraph.second;
     }
 }
 
@@ -254,7 +279,18 @@ void AnalyticsModel::updateHistograms(const HomeConfig& homeCfg)
 
 void AnalyticsModel::updateLineGraphs(const HomeConfig& homeCfg)
 {
-    m_analyticsData->lineGraphs->ACTemperature->update(homeCfg.AC.temperature);
+    if(homeCfg.AC.on)
+    {
+        m_analyticsData->lineGraphs->ACTemperature->update(homeCfg.AC.temperature);
+    }
+    else
+    {
+        m_analyticsData->lineGraphs->ACTemperature->update(0);
+    }
+
+    m_analyticsData->lineGraphs->temperatureSensor->update(homeCfg.sensors.temperature);
+    m_analyticsData->lineGraphs->temperatureSensor->update(homeCfg.sensors.humidity);
+    m_analyticsData->lineGraphs->temperatureSensor->update(homeCfg.sensors.brightness);
 }
 
 void AnalyticsModel::updateAnalyticsData(const HomeConfig& homeCfg)
