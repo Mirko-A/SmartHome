@@ -244,7 +244,7 @@ QPair<QtCharts::QChart*, Histogram*> AnalyticsModel::createChartWithHistogram(QS
     chart->addSeries(histogram->barSeries);
     histogram->barSeries->attachAxis(axisX);
     histogram->barSeries->attachAxis(axisY);
-    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+    chart->setAnimationOptions(QtCharts::QChart::NoAnimation);
     chart->legend()->hide();
 
     return QPair<QtCharts::QChart*, Histogram*>(chart, histogram);
@@ -271,7 +271,7 @@ QPair<QtCharts::QChart*, LineGraph*> AnalyticsModel::createChartWithLineGraph(QS
     chart->addSeries(graph->lineSeries);
     graph->lineSeries->attachAxis(axisX);
     graph->lineSeries->attachAxis(axisY);
-    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
+    chart->setAnimationOptions(QtCharts::QChart::NoAnimation);
     chart->legend()->hide();
 
     return QPair<QtCharts::QChart*, LineGraph*>(chart, graph);
@@ -318,8 +318,8 @@ void AnalyticsModel::updateLineGraphs(const HomeConfig& homeCfg)
     }
 
     m_analyticsData->lineGraphs->temperatureSensor->update(homeCfg.sensors.temperature);
-    m_analyticsData->lineGraphs->temperatureSensor->update(homeCfg.sensors.humidity);
-    m_analyticsData->lineGraphs->temperatureSensor->update(homeCfg.sensors.brightness);
+    m_analyticsData->lineGraphs->humiditySensor->update(homeCfg.sensors.humidity);
+    m_analyticsData->lineGraphs->brightnessSensor->update(homeCfg.sensors.brightness);
 }
 
 void AnalyticsModel::updateAnalyticsData(const HomeConfig& homeCfg)
