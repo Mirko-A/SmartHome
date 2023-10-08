@@ -38,7 +38,7 @@ This page offers the user the overview over various analytics which have been ga
 during the SmartHome application runtime. These analytics are displayed in the form of
 either a bar graph or a line graph.
 
-![alt text](resource/readme_imgs/analytics_page.png)
+![alt text](resource/readme_imgs/graphs_page.png)
 
 The information that can be viewed on this page is:
 1) Lights 
