@@ -136,7 +136,7 @@ private:
 
 private:
     QPair<QtCharts::QChart*, Histogram*> createChartWithHistogram(QString title,
-                                                                  QPair<size_t, size_t> rangeX,
+                                                                  const QStringList& rangeX,
                                                                   QPair<size_t, size_t> rangeY);
     QPair<QtCharts::QChart*, LineGraph*> createChartWithLineGraph(QString title,
                                                                   QPair<int, int> rangeX,

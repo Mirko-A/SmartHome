@@ -12,6 +12,11 @@
 static constexpr size_t MAX_HISTOGRAM_VALUE = ONE_HOUR_IN_SEC;
 static constexpr size_t MAX_BARSET_COUNT = 24;
 
+static const QStringList HISTOGRAM_X_AXIS = QStringList{"1" , "2" , "3" , "4" , "5" , "6" ,
+                                                        "7" , "8" , "9" , "10", "11", "12",
+                                                        "13", "14", "15", "16", "17", "18",
+                                                        "19", "20", "21", "22", "23", "24"};
+
 // TODO: Check if this is too few/many points after ONE_SEC_IN_TICKS
 // is set back to real value (found in mainwindow.cpp)
 static constexpr unsigned int MAX_LINE_GRAPH_POINTS_INITIAL = 100;
@@ -19,9 +24,8 @@ static constexpr unsigned int MAX_LINE_GRAPH_POINTS_INITIAL = 100;
 Histogram::Histogram(QString name)
     : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)), m_valueCounter(0)
 {
-    *m_barSet << 0;
-
     barSeries->append(m_barSet);
+    barSeries->setBarWidth(1);
 }
 
 Histogram::~Histogram()
@@ -33,11 +37,18 @@ void Histogram::update()
 {
     // Histograms are updated periodically and represent
     // number of units of time spent in a particular state
-    // e.g. Number of seconds a light was turned on
+    // e.g. Number of seconds a light was turned on.
     // That's why we update the value counter, to signal
     // that another unit of time has passed, and replace
-    // the current bar set with this new value
-    m_barSet->replace(m_barSet->count() - 1, ++m_valueCounter);
+    // the current bar set with this new value.
+    if(m_barSet->count() == 0)
+    {
+        *m_barSet << ++m_valueCounter;
+    }
+    else
+    {
+        m_barSet->replace(m_barSet->count() - 1, ++m_valueCounter);
+    }
 }
 
 void Histogram::shift()
@@ -51,7 +62,7 @@ void Histogram::shift()
 
     // Once the maximum desired number of bar sets is reached
     // we should remove the least recent one to keep the number
-    // of bar sets constant
+    // of bar sets constant.
     if(m_barSet->count() > static_cast<int>(MAX_BARSET_COUNT))
     {
         m_barSet->remove(0);
@@ -95,7 +106,7 @@ void LineGraph::expandLineSeriesIfNeeded()
          *                                                 maxLineGraphPoints by 10 */
         m_maxPointsAllowed = ((UINT_MAX/10) < m_maxPointsAllowed) ? UINT_MAX : m_maxPointsAllowed * 10;
 
-        lineSeries->attachedAxes().at(X_AXIS_POS)->setRange(0, m_maxPointsAllowed);
+        lineSeries->attachedAxes().at(X_AXIS_POS)->setMax(m_maxPointsAllowed);
     }
 }
 
@@ -131,8 +142,8 @@ void AnalyticsModel::initChartsWithHistogram()
 {
     {
         auto livingRoomChartWithHistogram = createChartWithHistogram("Living room light on per hour",
-                                                        QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
-                                                        QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+                                                                     HISTOGRAM_X_AXIS,
+                                                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_livingRoomLightChart = livingRoomChartWithHistogram.first;
         m_analyticsData->histograms->livingRoomLight = livingRoomChartWithHistogram.second;
@@ -140,7 +151,7 @@ void AnalyticsModel::initChartsWithHistogram()
 
     {
         auto bedroomChartWithHistogram = createChartWithHistogram("Bedroom light on per hour",
-                                                                  QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
+                                                                  HISTOGRAM_X_AXIS,
                                                                   QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_bedroomLightChart = bedroomChartWithHistogram.first;
@@ -149,7 +160,7 @@ void AnalyticsModel::initChartsWithHistogram()
 
     {
         auto kitchenChartWithHistogram = createChartWithHistogram("Kitchen light on per hour",
-                                                                  QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
+                                                                  HISTOGRAM_X_AXIS,
                                                                   QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_kitchenLightChart = kitchenChartWithHistogram.first;
@@ -158,7 +169,7 @@ void AnalyticsModel::initChartsWithHistogram()
 
     {
         auto ACOnChartWithHistogram = createChartWithHistogram("AC on per hour",
-                                                               QPair<size_t, size_t>(0, MAX_BARSET_COUNT),
+                                                               HISTOGRAM_X_AXIS,
                                                                QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_ACOnChart = ACOnChartWithHistogram.first;
@@ -203,23 +214,23 @@ void AnalyticsModel::initChartsWithLineGraph()
 }
 
 QPair<QtCharts::QChart*, Histogram*> AnalyticsModel::createChartWithHistogram(QString title,
-                                                                              QPair<size_t, size_t> rangeX,
+                                                                              const QStringList& rangeX,
                                                                               QPair<size_t, size_t> rangeY)
 {
     QtCharts::QChart* chart = new QtCharts::QChart;
     Histogram* histogram = new Histogram(title);
 
     chart->setTitle(title);
-    auto axisX = new QtCharts::QValueAxis;
+    auto axisX = new QtCharts::QBarCategoryAxis;
     auto axisY = new QtCharts::QValueAxis;
-    axisX->setRange(rangeX.first, rangeX.second);
+    axisX->append(rangeX);
     axisY->setRange(rangeY.first, rangeY.second);
-    chart->addSeries(histogram->barSeries);
-    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
+    chart->addSeries(histogram->barSeries);
     histogram->barSeries->attachAxis(axisX);
     histogram->barSeries->attachAxis(axisY);
+    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
     chart->legend()->hide();
 
     return QPair<QtCharts::QChart*, Histogram*>(chart, histogram);
@@ -237,12 +248,12 @@ QPair<QtCharts::QChart*, LineGraph*> AnalyticsModel::createChartWithLineGraph(QS
     auto axisY = new QtCharts::QValueAxis;
     axisX->setRange(rangeX.first, rangeX.second);
     axisY->setRange(rangeY.first, rangeY.second);
-    chart->addSeries(graph->lineSeries);
-    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
+    chart->addSeries(graph->lineSeries);
     graph->lineSeries->attachAxis(axisX);
     graph->lineSeries->attachAxis(axisY);
+    chart->setAnimationOptions(QtCharts::QChart::SeriesAnimations);
     chart->legend()->hide();
 
     return QPair<QtCharts::QChart*, LineGraph*>(chart, graph);
