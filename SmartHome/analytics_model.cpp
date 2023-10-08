@@ -9,6 +9,8 @@
 #define ONE_HOUR_IN_SEC 60
 #define X_AXIS_POS 0
 
+static const QColor CHART_BACKGROUND_COLOR = QColor(52, 59, 71);
+
 static constexpr size_t MAX_HISTOGRAM_VALUE = ONE_HOUR_IN_SEC;
 static constexpr size_t MAX_BARSET_COUNT = 24;
 
@@ -17,13 +19,18 @@ static const QStringList HISTOGRAM_X_AXIS = QStringList{"1" , "2" , "3" , "4" , 
                                                         "13", "14", "15", "16", "17", "18",
                                                         "19", "20", "21", "22", "23", "24"};
 
+static const QColor HISTOGRAM_BAR_COLOR = QColor(160, 110, 181);
+
 // TODO: Check if this is too few/many points after ONE_SEC_IN_TICKS
 // is set back to real value (found in mainwindow.cpp)
 static constexpr unsigned int MAX_LINE_GRAPH_POINTS_INITIAL = 100;
+static const QColor LINE_GRAPH_COLOR = QColor(160, 110, 181);
+
 
 Histogram::Histogram(QString name)
     : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)), m_valueCounter(0)
 {
+    m_barSet->setColor(HISTOGRAM_BAR_COLOR);
     barSeries->append(m_barSet);
     barSeries->setBarWidth(1);
 }
@@ -72,7 +79,10 @@ void Histogram::shift()
 LineGraph::LineGraph(QString title, unsigned int initialMaxPointsAllowed)
     : lineSeries(new QtCharts::QLineSeries()), m_title(title), m_pointCount(0), m_maxPointsAllowed(initialMaxPointsAllowed)
 {
-
+    QPen lineGraphPen = lineSeries->pen();
+    lineGraphPen.setBrush(QBrush(LINE_GRAPH_COLOR));
+    lineGraphPen.setWidth(3);
+    lineSeries->setPen(lineGraphPen);
 }
 
 void LineGraph::update(int16_t newValue)
@@ -218,13 +228,17 @@ QPair<QtCharts::QChart*, Histogram*> AnalyticsModel::createChartWithHistogram(QS
                                                                               QPair<size_t, size_t> rangeY)
 {
     QtCharts::QChart* chart = new QtCharts::QChart;
+    chart->setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
+    chart->setTitleBrush(QBrush(QColor("white")));
     Histogram* histogram = new Histogram(title);
 
     chart->setTitle(title);
     auto axisX = new QtCharts::QBarCategoryAxis;
     auto axisY = new QtCharts::QValueAxis;
     axisX->append(rangeX);
+    axisX->setLabelsColor(QColor("white"));
     axisY->setRange(rangeY.first, rangeY.second);
+    axisY->setLabelsColor(QColor("white"));
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
     chart->addSeries(histogram->barSeries);
@@ -241,13 +255,17 @@ QPair<QtCharts::QChart*, LineGraph*> AnalyticsModel::createChartWithLineGraph(QS
                                                                               QPair<int, int> rangeY)
 {
     QtCharts::QChart *chart = new QtCharts::QChart();
+    chart->setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
+    chart->setTitleBrush(QBrush(QColor("white")));
     LineGraph* graph = new LineGraph(title, rangeX.second);
 
     chart->setTitle(title);
     auto axisX = new QtCharts::QValueAxis;
     auto axisY = new QtCharts::QValueAxis;
     axisX->setRange(rangeX.first, rangeX.second);
+    axisX->setLabelsColor(QColor("white"));
     axisY->setRange(rangeY.first, rangeY.second);
+    axisY->setLabelsColor(QColor("white"));
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
     chart->addSeries(graph->lineSeries);

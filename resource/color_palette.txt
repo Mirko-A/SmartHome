@@ -4,5 +4,6 @@ accent1: #2c313c;
 accent2: #343b47;
 accent3: #22252e;
 purple-accent: #434158;
+purple-graph: #a06eb5;
 dark-purple-accent: #221f2e;
 mint-graph: #82b59d; 
