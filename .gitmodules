@@ -1,3 +1,6 @@
 [submodule "Dependencies/json"]
 	path = Dependencies/json
 	url = https://github.com/nlohmann/json
+[submodule "Dependencies/DHT22"]
+	path = Dependencies/DHT22
+	url = https://github.com/Qengineering/DHT22-Raspberry-Pi

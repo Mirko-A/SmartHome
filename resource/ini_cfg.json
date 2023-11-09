@@ -10,7 +10,7 @@
         "Kitchen": false,
         "LivingRoom": false
     },
-    "Sensors": {
+    "SensorReadings": {
         "Brightness": 0,
         "Humidity": 0,
         "Temperature": 0
