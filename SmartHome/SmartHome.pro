@@ -6,6 +6,8 @@ QT += core gui          \
       network           \
       xml               \
 
+LIBS += -L/usr/local/lib -lwiringPi
+
 CONFIG += c++11
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -13,23 +15,30 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ac.cpp \
     analytics_model.cpp \
     hal.cpp \
     home_config.cpp \
+    light.cpp \
     main.cpp \
     mainwindow.cpp \
     media_player.cpp \
     player_controls.cpp \
-    playlist_model.cpp
+    playlist_model.cpp \
+    sensor.cpp
 
 HEADERS += \
+    ac.h \
     analytics_model.h \
     hal.h \
     home_config.h \
+    light.h \
     mainwindow.h \
     media_player.h \
     player_controls.h \
-    playlist_model.h
+    playlist_model.h \
+    sensor.h \
+    smart_home_types.h
 
 FORMS += \
     mainwindow.ui
@@ -41,4 +50,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES +=
 
-INCLUDEPATH += $$PWD/../Dependencies/json/include/
+INCLUDEPATH += $$PWD/../Dependencies/json/include/   \
+               $$PWD/../Dependencies/DHT22/include/

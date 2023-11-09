@@ -1,11 +1,15 @@
 #ifndef HOME_CONFIG_H
 #define HOME_CONFIG_H
 
-#include <stdint.h>
+#include "smart_home_types.h"
+#include "light.h"
+#include "sensor.h"
+#include "ac.h"
 
 #include "nlohmann/json.hpp"
 
 #include <QString>
+#include <stdint.h>
 
 constexpr int MAX_AC_TEMP  = 30;
 constexpr int MIN_AC_TEMP  = 15;
@@ -44,13 +48,13 @@ struct LightSettings
     }
 };
 
-struct Sensors
+struct SensorReadings
 {
     int16_t temperature;
     int16_t humidity;
     int16_t brightness;
 
-    Sensors()
+    SensorReadings()
     {
         temperature = 0;
         humidity = 0;
@@ -60,7 +64,7 @@ struct Sensors
     nlohmann::json toJSON()
     {
         nlohmann::json thisAsJSON =
-        { "Sensors", {
+        { "SensorReadings", {
                 { "Temperature", temperature },
                 { "Humidity", humidity },
                 { "Brightness", brightness },
@@ -75,14 +79,6 @@ struct Sensors
         humidity = thisAsJson["Humidity"];
         brightness = thisAsJson["Brightness"];
     }
-};
-
-enum class ACMode
-{
-    NORMAL = 0x00,
-    FAST   = 0x01,
-    TURBO  = 0x02,
-    AC_MODE_CNT,
 };
 
 struct ACSettings
@@ -151,20 +147,10 @@ struct SpeakerSettings
     }
 };
 
-struct HomeConfig
+class HomeConfig
 {
-    LightSettings   lights;
-    Sensors         sensors;
-    ACSettings      AC;
-    SpeakerSettings speakers;
-
-    bool isDirty;
-
-    HomeConfig()
-        : lights(LightSettings()), sensors(Sensors()), AC(ACSettings()), speakers(SpeakerSettings()), isDirty(false)
-    {
-
-    }
+public:
+    HomeConfig();
 
     void onUpdate();
 
@@ -175,6 +161,21 @@ struct HomeConfig
 private:
     void readHardwareInputs();
     void sendHardwareOutputs();
+
+public:
+    LightSettings   m_LightSettings;
+    ACSettings      m_ACSettings;
+    SensorReadings  m_SensorReadings;
+    SpeakerSettings m_SpeakerSettings;
+
+private:
+    Light  m_Light;
+    AC     m_AC;
+    Sensor m_Sensor;
+
+public:
+    bool m_Dirty;
+
 };
 
 QString ACModeToString(ACMode mode);
