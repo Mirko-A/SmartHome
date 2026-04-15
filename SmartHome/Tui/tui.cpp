@@ -38,7 +38,6 @@ int tui_main(int argc, char *argv[]) {
 
     // --- AC ---
     bool acOn = cfg.m_ACSettings.on;
-    int acTemp = cfg.m_ACSettings.temperature;
     int acModeIndex = static_cast<int>(cfg.m_ACSettings.mode);
 
     // --- Speakers ---
@@ -54,7 +53,6 @@ int tui_main(int argc, char *argv[]) {
     // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
     std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
     ftxui::Component acModeMenu = ftxui::Toggle(&acModes, &acModeIndex);
-    ftxui::Component acTempSlider = ftxui::Slider("", &acTemp, MIN_AC_TEMP, MAX_AC_TEMP, AC_TEMP_STEP);
     ftxui::Component acToggle = ftxui::Checkbox("On", &acOn);
 
     // Speaker sliders (0..100)
@@ -69,7 +67,6 @@ int tui_main(int argc, char *argv[]) {
 
     ftxui::Component container = ftxui::Container::Vertical({
         acToggle,
-        acTempSlider,
         acModeMenu,
         volumeSlider,
         bassSlider,
@@ -89,16 +86,13 @@ int tui_main(int argc, char *argv[]) {
                                         }));
 
         // AC panel
-        ftxui::Element ac = window(
-            ftxui::text(" AC "),
-            ftxui::vbox({
-                acToggle->Render(),
-                ftxui::separator(),
-                ftxui::hbox({ftxui::text("Temp  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
-                             acTempSlider->Render() | ftxui::flex,
-                             ftxui::text(" " + std::to_string(acTemp) + " C") | size(ftxui::WIDTH, ftxui::EQUAL, 6)}),
-                ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
-            }));
+        ftxui::Element ac =
+            window(ftxui::text(" AC "),
+                   ftxui::vbox({
+                       acToggle->Render(),
+                       ftxui::separator(),
+                       ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
+                   }));
 
         // Speakers panel
         ftxui::Element speakers =
@@ -134,7 +128,6 @@ int tui_main(int argc, char *argv[]) {
         if (event == ftxui::Event::Character('q')) {
             // Write back to cfg before quitting
             cfg.m_ACSettings.on = acOn;
-            cfg.m_ACSettings.temperature = static_cast<int16_t>(acTemp);
             cfg.m_ACSettings.mode = static_cast<ACMode>(acModeIndex);
             cfg.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
             cfg.m_SpeakerSettings.bass = static_cast<int16_t>(bass);

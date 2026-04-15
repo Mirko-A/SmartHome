@@ -1,7 +1,5 @@
 #include "home_config.h"
 
-#include <cmath>
-
 HomeConfig::HomeConfig()
     : m_LightSettings(LightSettings()), m_ACSettings(ACSettings()), m_SensorReadings(SensorReadings()),
       m_SpeakerSettings(SpeakerSettings()), m_Light(Light::Pins()), m_AC(AC::Pins()), m_Sensor(Sensor::Pins()),
@@ -23,9 +21,6 @@ void HomeConfig::sendHardwareOutputs() {
     // AC
     m_AC.setOn(m_ACSettings.on);
     m_AC.setMode(m_ACSettings.mode);
-    // TODO: Mess with speed until right
-    uint8_t ACSpeed = 10 * abs(m_ACSettings.temperature - m_SensorReadings.temperature);
-    m_AC.setSpeed(ACSpeed);
     m_AC.Run();
 }
 
