@@ -1,10 +1,10 @@
 #include "tui.h"
 
-#include "home_config.h"
-
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
+
+#include "home_config.h"
 
 using namespace ftxui;
 
@@ -25,8 +25,8 @@ int tui_main(int argc, char *argv[]) {
     HomeConfig cfg;
 
     // --- AC ---
-    int acTemp = cfg.m_ACSettings.temperature;
     bool acOn = cfg.m_ACSettings.on;
+    int acTemp = cfg.m_ACSettings.temperature;
     int acModeIndex = static_cast<int>(cfg.m_ACSettings.mode);
 
     // --- Speakers ---
@@ -40,22 +40,22 @@ int tui_main(int argc, char *argv[]) {
     bool kitchenOn = cfg.m_LightSettings.kitchenLightOn;
 
     // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
-    auto acTempSlider = Slider("", &acTemp, MIN_AC_TEMP, MAX_AC_TEMP, AC_TEMP_STEP);
-    auto acToggle = Checkbox("On", &acOn);
     std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
-    auto acModeMenu = Toggle(&acModes, &acModeIndex);
+    Component acModeMenu = Toggle(&acModes, &acModeIndex);
+    Component acTempSlider = Slider("", &acTemp, MIN_AC_TEMP, MAX_AC_TEMP, AC_TEMP_STEP);
+    Component acToggle = Checkbox("On", &acOn);
 
     // Speaker sliders (0..100)
-    auto volumeSlider = Slider("", &volume, 0, 100, 1);
-    auto bassSlider = Slider("", &bass, 0, 100, 1);
-    auto pitchSlider = Slider("", &pitch, 0, 100, 1);
+    Component volumeSlider = Slider("", &volume, 0, 100, 1);
+    Component bassSlider = Slider("", &bass, 0, 100, 1);
+    Component pitchSlider = Slider("", &pitch, 0, 100, 1);
 
     // Light checkboxes
-    auto livingRoomCheck = Checkbox("Living Room", &livingRoomOn);
-    auto bedroomCheck = Checkbox("Bedroom", &bedroomOn);
-    auto kitchenCheck = Checkbox("Kitchen", &kitchenOn);
+    Component livingRoomCheck = Checkbox("Living Room", &livingRoomOn);
+    Component bedroomCheck = Checkbox("Bedroom", &bedroomOn);
+    Component kitchenCheck = Checkbox("Kitchen", &kitchenOn);
 
-    auto container = Container::Vertical({
+    Component container = Container::Vertical({
         acToggle,
         acTempSlider,
         acModeMenu,
@@ -67,53 +67,42 @@ int tui_main(int argc, char *argv[]) {
         kitchenCheck,
     });
 
-    auto renderer = Renderer(container, [&]() -> Element {
+    Component renderer = Renderer(container, [&]() -> Element {
         // Sensor panel
-        Element sensors = window(
-            text(" Sensors "),
-            vbox({
-                sensorGauge("Temperature", cfg.m_SensorReadings.temperature, -10, 50, " C"),
-                sensorGauge("Humidity",    cfg.m_SensorReadings.humidity,      0, 100, " %"),
-                sensorGauge("Brightness",  cfg.m_SensorReadings.brightness,    0, 1000, ""),
-            })
-        );
+        Element sensors =
+            window(text(" Sensors "), vbox({
+                                          sensorGauge("Temperature", cfg.m_SensorReadings.temperature, -10, 50, " C"),
+                                          sensorGauge("Humidity", cfg.m_SensorReadings.humidity, 0, 100, " %"),
+                                          sensorGauge("Brightness", cfg.m_SensorReadings.brightness, 0, 1000, ""),
+                                      }));
 
         // AC panel
-        Element ac = window(
-            text(" AC "),
-            vbox({
-                acToggle->Render(),
-                separator(),
-                hbox({text("Temp  ") | size(WIDTH, EQUAL, 7),
-                      acTempSlider->Render() | flex,
-                      text(" " + std::to_string(acTemp) + " C") | size(WIDTH, EQUAL, 6)}),
-                hbox({text("Mode  ") | size(WIDTH, EQUAL, 7),
-                      acModeMenu->Render()}),
-            })
-        );
+        Element ac =
+            window(text(" AC "), vbox({
+                                     acToggle->Render(),
+                                     separator(),
+                                     hbox({text("Temp  ") | size(WIDTH, EQUAL, 7), acTempSlider->Render() | flex,
+                                           text(" " + std::to_string(acTemp) + " C") | size(WIDTH, EQUAL, 6)}),
+                                     hbox({text("Mode  ") | size(WIDTH, EQUAL, 7), acModeMenu->Render()}),
+                                 }));
 
         // Speakers panel
-        Element speakers = window(
-            text(" Speakers "),
-            vbox({
-                hbox({text("Volume") | size(WIDTH, EQUAL, 7), volumeSlider->Render() | flex,
-                      text(" " + std::to_string(volume)) | size(WIDTH, EQUAL, 5)}),
-                hbox({text("Bass  ") | size(WIDTH, EQUAL, 7), bassSlider->Render() | flex,
-                      text(" " + std::to_string(bass))   | size(WIDTH, EQUAL, 5)}),
-                hbox({text("Pitch ") | size(WIDTH, EQUAL, 7), pitchSlider->Render() | flex,
-                      text(" " + std::to_string(pitch))  | size(WIDTH, EQUAL, 5)}),
-            })
-        );
+        Element speakers =
+            window(text(" Speakers "), vbox({
+                                           hbox({text("Volume") | size(WIDTH, EQUAL, 7), volumeSlider->Render() | flex,
+                                                 text(" " + std::to_string(volume)) | size(WIDTH, EQUAL, 5)}),
+                                           hbox({text("Bass  ") | size(WIDTH, EQUAL, 7), bassSlider->Render() | flex,
+                                                 text(" " + std::to_string(bass)) | size(WIDTH, EQUAL, 5)}),
+                                           hbox({text("Pitch ") | size(WIDTH, EQUAL, 7), pitchSlider->Render() | flex,
+                                                 text(" " + std::to_string(pitch)) | size(WIDTH, EQUAL, 5)}),
+                                       }));
 
         // Lights panel
-        Element lights = window(
-            text(" Lights "),
-            vbox({
-                livingRoomCheck->Render(),
-                bedroomCheck->Render(),
-                kitchenCheck->Render(),
-            })
-        );
+        Element lights = window(text(" Lights "), vbox({
+                                                      livingRoomCheck->Render(),
+                                                      bedroomCheck->Render(),
+                                                      kitchenCheck->Render(),
+                                                  }));
 
         return vbox({
             hbox({sensors | flex, ac | flex}),
@@ -122,9 +111,9 @@ int tui_main(int argc, char *argv[]) {
         });
     });
 
-    auto screen = ScreenInteractive::Fullscreen();
+    ScreenInteractive screen = ScreenInteractive::Fullscreen();
 
-    auto with_quit = CatchEvent(renderer, [&](Event event) {
+    Component with_quit = CatchEvent(renderer, [&](Event event) {
         if (event == Event::Character('q')) {
             // Write back to cfg before quitting
             cfg.m_ACSettings.on = acOn;
