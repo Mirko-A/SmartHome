@@ -55,8 +55,8 @@ nlohmann::json HomeConfig::toJSON() {
     return thisAsJSON;
 }
 
-QString ACModeToString(ACMode mode) {
-    QString modeStr;
+std::string ACModeToString(ACMode mode) {
+    std::string modeStr;
 
     switch (mode) {
     case ACMode::NORMAL:

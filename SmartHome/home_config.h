@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include <QString>
+#include <string>
 
 #include "ac.h"
 #include "light.h"
@@ -160,6 +160,6 @@ class HomeConfig {
     bool m_Dirty;
 };
 
-QString ACModeToString(ACMode mode);
+std::string ACModeToString(ACMode mode);
 
 #endif // HOME_CONFIG_H
