@@ -6,6 +6,7 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/screen.hpp>
+#include <mutex>
 
 #include "home_config.h"
 
@@ -28,20 +29,19 @@ int tui_main(int argc, char *argv[]) {
 
     // Load the config from disk.
     std::ifstream cfgFileIn(CFG_JSON_FILE_PATH.c_str());
-    if (!cfgFileIn.good())
+    if (!cfgFileIn.good()) {
         cfgFileIn.open(INI_JSON_FILE_PATH.c_str());
+    }
     if (cfgFileIn.good()) {
         nlohmann::json cfgJson;
         cfgFileIn >> cfgJson;
-        cfgMutex.lock();
         cfg.fromJson(cfgJson);
-        cfgMutex.unlock();
     } else {
-        std::cerr << "Failed to load config JSON file" << std::endl;
+        std::cerr << "Error: Cannot open config file (in): " << CFG_JSON_FILE_PATH << " or " << INI_JSON_FILE_PATH
+                  << std::endl;
         return 1;
     }
 
-    cfgMutex.lock();
     // --- AC ---
     bool acOn = cfg.m_ACSettings.on;
     int acModeIndex = static_cast<int>(cfg.m_ACSettings.mode);
@@ -55,7 +55,6 @@ int tui_main(int argc, char *argv[]) {
     bool livingRoomOn = cfg.m_LightSettings.livingRoomLightOn;
     bool bedroomOn = cfg.m_LightSettings.bedroomLightOn;
     bool kitchenOn = cfg.m_LightSettings.kitchenLightOn;
-    cfgMutex.unlock();
 
     // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
     std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
@@ -85,46 +84,54 @@ int tui_main(int argc, char *argv[]) {
 
     ftxui::Component renderer = Renderer(container, [&]() -> ftxui::Element {
         // Sensor panel
-        cfgMutex.lock();
-        ftxui::Element sensors = window(ftxui::text(" Sensors "),
-                                        ftxui::vbox({
-                                            sensorGauge("Temperature", cfg.m_SensorReadings.temperature, -10, 50, " C"),
-                                            sensorGauge("Humidity", cfg.m_SensorReadings.humidity, 0, 100, " %"),
-                                            sensorGauge("Brightness", cfg.m_SensorReadings.brightness, 0, 1000, ""),
-                                        }));
-        cfgMutex.unlock();
+        int temp, humidity, brightness;
+        {
+            std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(cfgMutex);
+            temp = cfg.m_SensorReadings.temperature;
+            humidity = cfg.m_SensorReadings.humidity;
+            brightness = cfg.m_SensorReadings.brightness;
+        }
+        ftxui::Element sensorsBox = ftxui::vbox({
+            sensorGauge("Temperature", temp, -10, 50, " C"),
+            sensorGauge("Humidity", humidity, 0, 100, " %"),
+            sensorGauge("Brightness", brightness, 0, 1000, ""),
+        });
+        ftxui::Element sensors = window(ftxui::text(" Sensors "), sensorsBox);
 
         // AC panel
-        ftxui::Element ac =
-            window(ftxui::text(" AC "),
-                   ftxui::vbox({
-                       acToggle->Render(),
-                       ftxui::separator(),
-                       ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
-                   }));
+        ftxui::Element acBox = ftxui::vbox({
+            acToggle->Render(),
+            ftxui::separator(),
+            ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
+        });
+        ftxui::Element ac = window(ftxui::text(" AC "), acBox);
 
         // Speakers panel
-        ftxui::Element speakers =
-            window(ftxui::text(" Speakers "),
-                   ftxui::vbox({
-                       ftxui::hbox({ftxui::text("Volume") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
-                                    volumeSlider->Render() | ftxui::flex,
-                                    ftxui::text(" " + std::to_string(volume)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
-                       ftxui::separator(ftxui::Pixel()),
-                       ftxui::hbox({ftxui::text("Bass  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
-                                    bassSlider->Render() | ftxui::flex,
-                                    ftxui::text(" " + std::to_string(bass)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
-                       ftxui::separator(ftxui::Pixel()),
-                       ftxui::hbox({ftxui::text("Pitch ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
-                                    pitchSlider->Render() | ftxui::flex,
-                                    ftxui::text(" " + std::to_string(pitch)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
-                   }));
+        ftxui::Element volumeBox = ftxui::hbox(
+            {ftxui::text("Volume") | size(ftxui::WIDTH, ftxui::EQUAL, 7), volumeSlider->Render() | ftxui::flex,
+             ftxui::text(" " + std::to_string(volume)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)});
+        ftxui::Element bassBox = ftxui::hbox(
+            {ftxui::text("Bass  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), bassSlider->Render() | ftxui::flex,
+             ftxui::text(" " + std::to_string(bass)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)});
+        ftxui::Element pitchBox = ftxui::hbox(
+            {ftxui::text("Pitch ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), pitchSlider->Render() | ftxui::flex,
+             ftxui::text(" " + std::to_string(pitch)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)});
+        ftxui::Element speakersBox = ftxui::vbox({
+            volumeBox,
+            ftxui::separator(ftxui::Pixel()),
+            bassBox,
+            ftxui::separator(ftxui::Pixel()),
+            pitchBox,
+        });
+        ftxui::Element speakers = window(ftxui::text(" Speakers "), speakersBox);
 
-        ftxui::Element lights = window(ftxui::text(" Lights "), ftxui::vbox({
-                                                                    livingRoomCheck->Render(),
-                                                                    bedroomCheck->Render(),
-                                                                    kitchenCheck->Render(),
-                                                                }));
+        // Lights panel
+        ftxui::Element lightsBox = ftxui::vbox({
+            livingRoomCheck->Render(),
+            bedroomCheck->Render(),
+            kitchenCheck->Render(),
+        });
+        ftxui::Element lights = window(ftxui::text(" Lights "), lightsBox);
 
         return ftxui::vbox({
             ftxui::hbox({sensors | ftxui::flex, ac | ftxui::flex}),
@@ -146,18 +153,19 @@ int tui_main(int argc, char *argv[]) {
     ftxui::Component onEvent = CatchEvent(renderer, [&](ftxui::Event event) {
         if (event == ftxui::Event::Character('q')) {
             // Write back to cfg before quitting
-            cfgMutex.lock();
-            cfg.m_ACSettings.on = acOn;
-            cfg.m_ACSettings.mode = static_cast<ACMode>(acModeIndex);
-            cfg.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
-            cfg.m_SpeakerSettings.bass = static_cast<int16_t>(bass);
-            cfg.m_SpeakerSettings.pitch = static_cast<int16_t>(pitch);
-            cfg.m_LightSettings.livingRoomLightOn = livingRoomOn;
-            cfg.m_LightSettings.bedroomLightOn = bedroomOn;
-            cfg.m_LightSettings.kitchenLightOn = kitchenOn;
-
-            nlohmann::json cfgJson = cfg.toJson();
-            cfgMutex.unlock();
+            nlohmann::json cfgJson;
+            {
+                std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(cfgMutex);
+                cfg.m_ACSettings.on = acOn;
+                cfg.m_ACSettings.mode = static_cast<ACMode>(acModeIndex);
+                cfg.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
+                cfg.m_SpeakerSettings.bass = static_cast<int16_t>(bass);
+                cfg.m_SpeakerSettings.pitch = static_cast<int16_t>(pitch);
+                cfg.m_LightSettings.livingRoomLightOn = livingRoomOn;
+                cfg.m_LightSettings.bedroomLightOn = bedroomOn;
+                cfg.m_LightSettings.kitchenLightOn = kitchenOn;
+                cfgJson = cfg.toJson();
+            }
 
             // Save the config to disk.
             std::ofstream cfgFileOut(CFG_JSON_FILE_PATH.c_str());
@@ -166,7 +174,7 @@ int tui_main(int argc, char *argv[]) {
                 cfgFileOut << cfgJson.dump(4);
                 cfgFileOut.close();
             } else {
-                std::cerr << "Error: Unable to open config file for writing: " << CFG_JSON_FILE_PATH << std::endl;
+                std::cerr << "Error: Cannot open config file (out): " << CFG_JSON_FILE_PATH << std::endl;
             }
 
             screen.ExitLoopClosure()();
@@ -177,17 +185,27 @@ int tui_main(int argc, char *argv[]) {
             // Simulate updates for now.
             // cfg.onUpdate();
             int delta = rand() % 5 - 2; // [-2, 2]
-            cfgMutex.lock();
-            cfg.m_SensorReadings.brightness += delta;
-            if (cfg.m_SensorReadings.brightness < 0)
-                cfg.m_SensorReadings.brightness = 0;
-            cfg.m_SensorReadings.humidity += delta;
-            if (cfg.m_SensorReadings.humidity < 0)
-                cfg.m_SensorReadings.humidity = 0;
-            cfg.m_SensorReadings.temperature += delta;
-            if (cfg.m_SensorReadings.temperature < -10)
-                cfg.m_SensorReadings.temperature = -10;
-            cfgMutex.unlock();
+            {
+                std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(cfgMutex);
+
+                cfg.m_SensorReadings.brightness += delta;
+                if (cfg.m_SensorReadings.brightness < 0)
+                    cfg.m_SensorReadings.brightness = 0;
+                else if (cfg.m_SensorReadings.brightness > 1000)
+                    cfg.m_SensorReadings.brightness = 1000;
+
+                cfg.m_SensorReadings.humidity += delta;
+                if (cfg.m_SensorReadings.humidity < 0)
+                    cfg.m_SensorReadings.humidity = 0;
+                else if (cfg.m_SensorReadings.humidity > 100)
+                    cfg.m_SensorReadings.humidity = 100;
+
+                cfg.m_SensorReadings.temperature += delta;
+                if (cfg.m_SensorReadings.temperature < -10)
+                    cfg.m_SensorReadings.temperature = -10;
+                else if (cfg.m_SensorReadings.temperature > 50)
+                    cfg.m_SensorReadings.temperature = 50;
+            }
         }
 
         return false;
