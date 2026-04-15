@@ -71,15 +71,14 @@ int tui_main(int argc, char *argv[]) {
     ftxui::Component bedroomCheck = ftxui::Checkbox("Bedroom", &bedroomOn);
     ftxui::Component kitchenCheck = ftxui::Checkbox("Kitchen", &kitchenOn);
 
+    ftxui::Component acContainer = ftxui::Container::Vertical({acToggle, acModeMenu});
+    ftxui::Component speakersContainer = ftxui::Container::Vertical({volumeSlider, bassSlider, pitchSlider});
+    ftxui::Component lightsContainer = ftxui::Container::Vertical({livingRoomCheck, bedroomCheck, kitchenCheck});
+
     ftxui::Component container = ftxui::Container::Vertical({
-        acToggle,
-        acModeMenu,
-        volumeSlider,
-        bassSlider,
-        pitchSlider,
-        livingRoomCheck,
-        bedroomCheck,
-        kitchenCheck,
+        acContainer,
+        speakersContainer,
+        lightsContainer,
     });
 
     ftxui::Component renderer = Renderer(container, [&]() -> ftxui::Element {
@@ -105,6 +104,9 @@ int tui_main(int argc, char *argv[]) {
             ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
         });
         ftxui::Element ac = window(ftxui::text(" AC "), acBox);
+        if (acContainer->Focused()) {
+            ac = ac | ftxui::color(ftxui::Color::Green) | ftxui::bold;
+        }
 
         // Speakers panel
         ftxui::Element volumeBox = ftxui::hbox(
@@ -124,6 +126,9 @@ int tui_main(int argc, char *argv[]) {
             pitchBox,
         });
         ftxui::Element speakers = window(ftxui::text(" Speakers "), speakersBox);
+        if (speakersContainer->Focused()) {
+            speakers = speakers | ftxui::color(ftxui::Color::Green) | ftxui::bold;
+        }
 
         // Lights panel
         ftxui::Element lightsBox = ftxui::vbox({
@@ -132,6 +137,9 @@ int tui_main(int argc, char *argv[]) {
             kitchenCheck->Render(),
         });
         ftxui::Element lights = window(ftxui::text(" Lights "), lightsBox);
+        if (lightsContainer->Focused()) {
+            lights = lights | ftxui::color(ftxui::Color::Green) | ftxui::bold;
+        }
 
         return ftxui::vbox({
             ftxui::hbox({sensors | ftxui::flex, ac | ftxui::flex}),
