@@ -11,6 +11,9 @@
 #include "sensor.h"
 #include "smart_home_types.h"
 
+const std::string CFG_JSON_FILE_PATH = "../resource/home_cfg.json";
+const std::string INI_JSON_FILE_PATH = "../resource/ini_cfg.json";
+
 constexpr int MAX_AC_TEMP = 30;
 constexpr int MIN_AC_TEMP = 15;
 constexpr int AC_TEMP_STEP = 1;
@@ -26,7 +29,7 @@ struct LightSettings {
         kitchenLightOn = false;
     }
 
-    nlohmann::json toJSON() {
+    nlohmann::json toJson() {
         nlohmann::json thisAsJSON = {"Lights",
                                      {
                                          {"LivingRoom", livingRoomLightOn},
@@ -37,7 +40,7 @@ struct LightSettings {
         return thisAsJSON;
     }
 
-    void fromJSON(const nlohmann::json &thisAsJson) {
+    void fromJson(const nlohmann::json &thisAsJson) {
         livingRoomLightOn = thisAsJson["LivingRoom"];
         bedroomLightOn = thisAsJson["Bedroom"];
         kitchenLightOn = thisAsJson["Kitchen"];
@@ -55,7 +58,7 @@ struct SensorReadings {
         brightness = 0;
     }
 
-    nlohmann::json toJSON() {
+    nlohmann::json toJson() {
         nlohmann::json thisAsJSON = {"SensorReadings",
                                      {
                                          {"Temperature", temperature},
@@ -66,7 +69,7 @@ struct SensorReadings {
         return thisAsJSON;
     }
 
-    void fromJSON(const nlohmann::json &thisAsJson) {
+    void fromJson(const nlohmann::json &thisAsJson) {
         temperature = thisAsJson["Temperature"];
         humidity = thisAsJson["Humidity"];
         brightness = thisAsJson["Brightness"];
@@ -84,7 +87,7 @@ struct ACSettings {
         mode = ACMode::NORMAL;
     }
 
-    nlohmann::json toJSON() {
+    nlohmann::json toJson() {
         nlohmann::json thisAsJSON = {"AC",
                                      {
                                          {"On", on},
@@ -95,7 +98,7 @@ struct ACSettings {
         return thisAsJSON;
     }
 
-    void fromJSON(const nlohmann::json &thisAsJson) {
+    void fromJson(const nlohmann::json &thisAsJson) {
         on = thisAsJson["On"];
         temperature = thisAsJson["Temperature"];
         mode = thisAsJson["Mode"];
@@ -113,7 +116,7 @@ struct SpeakerSettings {
         pitch = 0;
     }
 
-    nlohmann::json toJSON() {
+    nlohmann::json toJson() {
         nlohmann::json thisAsJSON = {"Speakers",
                                      {
                                          {"Volume", volume},
@@ -124,7 +127,7 @@ struct SpeakerSettings {
         return thisAsJSON;
     }
 
-    void fromJSON(nlohmann::json thisAsJson) {
+    void fromJson(nlohmann::json thisAsJson) {
         volume = thisAsJson["Volume"];
         bass = thisAsJson["Bass"];
         pitch = thisAsJson["Pitch"];
@@ -138,8 +141,8 @@ class HomeConfig {
     void onUpdate();
 
     void loadDirtyFlag(const nlohmann::json &thisAsJson);
-    void fromJSON(const nlohmann::json &thisAsJson);
-    nlohmann::json toJSON();
+    void fromJson(const nlohmann::json &thisAsJson);
+    nlohmann::json toJson();
 
   private:
     void readHardwareInputs();

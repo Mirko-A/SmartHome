@@ -1,20 +1,19 @@
 #include "tui.h"
 
+#include <fstream>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 
 #include "home_config.h"
 
-using namespace ftxui;
-
-static Element sensorGauge(const std::string &label, int value, int min, int max, const std::string &unit) {
+static ftxui::Element sensorGauge(const std::string &label, int value, int min, int max, const std::string &unit) {
     float ratio = (max > min) ? float(value - min) / float(max - min) : 0.f;
     ratio = std::max(0.f, std::min(1.f, ratio));
-    return hbox({
-        text(label) | size(WIDTH, EQUAL, 14),
-        text(std::to_string(value) + unit) | size(WIDTH, EQUAL, 7),
-        gauge(ratio) | flex,
+    return ftxui::hbox({
+        ftxui::text(label) | size(ftxui::WIDTH, ftxui::EQUAL, 14),
+        ftxui::text(std::to_string(value) + unit) | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+        ftxui::gauge(ratio) | ftxui::flex,
     });
 }
 
@@ -23,6 +22,19 @@ int tui_main(int argc, char *argv[]) {
     (void)argv;
 
     HomeConfig cfg;
+
+    // Load the config from disk.
+    std::ifstream cfgFileIn(CFG_JSON_FILE_PATH.c_str());
+    if (!cfgFileIn.good())
+        cfgFileIn.open(INI_JSON_FILE_PATH.c_str());
+    if (cfgFileIn.good()) {
+        nlohmann::json cfgJson;
+        cfgFileIn >> cfgJson;
+        cfg.fromJson(cfgJson);
+    } else {
+        std::cerr << "Failed to load config JSON file" << std::endl;
+        return 1;
+    }
 
     // --- AC ---
     bool acOn = cfg.m_ACSettings.on;
@@ -41,21 +53,21 @@ int tui_main(int argc, char *argv[]) {
 
     // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
     std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
-    Component acModeMenu = Toggle(&acModes, &acModeIndex);
-    Component acTempSlider = Slider("", &acTemp, MIN_AC_TEMP, MAX_AC_TEMP, AC_TEMP_STEP);
-    Component acToggle = Checkbox("On", &acOn);
+    ftxui::Component acModeMenu = ftxui::Toggle(&acModes, &acModeIndex);
+    ftxui::Component acTempSlider = ftxui::Slider("", &acTemp, MIN_AC_TEMP, MAX_AC_TEMP, AC_TEMP_STEP);
+    ftxui::Component acToggle = ftxui::Checkbox("On", &acOn);
 
     // Speaker sliders (0..100)
-    Component volumeSlider = Slider("", &volume, 0, 100, 1);
-    Component bassSlider = Slider("", &bass, 0, 100, 1);
-    Component pitchSlider = Slider("", &pitch, 0, 100, 1);
+    ftxui::Component volumeSlider = ftxui::Slider("", &volume, 0, 100, 1);
+    ftxui::Component bassSlider = ftxui::Slider("", &bass, 0, 100, 1);
+    ftxui::Component pitchSlider = ftxui::Slider("", &pitch, 0, 100, 1);
 
     // Light checkboxes
-    Component livingRoomCheck = Checkbox("Living Room", &livingRoomOn);
-    Component bedroomCheck = Checkbox("Bedroom", &bedroomOn);
-    Component kitchenCheck = Checkbox("Kitchen", &kitchenOn);
+    ftxui::Component livingRoomCheck = ftxui::Checkbox("Living Room", &livingRoomOn);
+    ftxui::Component bedroomCheck = ftxui::Checkbox("Bedroom", &bedroomOn);
+    ftxui::Component kitchenCheck = ftxui::Checkbox("Kitchen", &kitchenOn);
 
-    Component container = Container::Vertical({
+    ftxui::Component container = ftxui::Container::Vertical({
         acToggle,
         acTempSlider,
         acModeMenu,
@@ -67,54 +79,59 @@ int tui_main(int argc, char *argv[]) {
         kitchenCheck,
     });
 
-    Component renderer = Renderer(container, [&]() -> Element {
+    ftxui::Component renderer = Renderer(container, [&]() -> ftxui::Element {
         // Sensor panel
-        Element sensors =
-            window(text(" Sensors "), vbox({
-                                          sensorGauge("Temperature", cfg.m_SensorReadings.temperature, -10, 50, " C"),
-                                          sensorGauge("Humidity", cfg.m_SensorReadings.humidity, 0, 100, " %"),
-                                          sensorGauge("Brightness", cfg.m_SensorReadings.brightness, 0, 1000, ""),
-                                      }));
+        ftxui::Element sensors = window(ftxui::text(" Sensors "),
+                                        ftxui::vbox({
+                                            sensorGauge("Temperature", cfg.m_SensorReadings.temperature, -10, 50, " C"),
+                                            sensorGauge("Humidity", cfg.m_SensorReadings.humidity, 0, 100, " %"),
+                                            sensorGauge("Brightness", cfg.m_SensorReadings.brightness, 0, 1000, ""),
+                                        }));
 
         // AC panel
-        Element ac =
-            window(text(" AC "), vbox({
-                                     acToggle->Render(),
-                                     separator(),
-                                     hbox({text("Temp  ") | size(WIDTH, EQUAL, 7), acTempSlider->Render() | flex,
-                                           text(" " + std::to_string(acTemp) + " C") | size(WIDTH, EQUAL, 6)}),
-                                     hbox({text("Mode  ") | size(WIDTH, EQUAL, 7), acModeMenu->Render()}),
-                                 }));
+        ftxui::Element ac = window(
+            ftxui::text(" AC "),
+            ftxui::vbox({
+                acToggle->Render(),
+                ftxui::separator(),
+                ftxui::hbox({ftxui::text("Temp  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+                             acTempSlider->Render() | ftxui::flex,
+                             ftxui::text(" " + std::to_string(acTemp) + " C") | size(ftxui::WIDTH, ftxui::EQUAL, 6)}),
+                ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
+            }));
 
         // Speakers panel
-        Element speakers =
-            window(text(" Speakers "), vbox({
-                                           hbox({text("Volume") | size(WIDTH, EQUAL, 7), volumeSlider->Render() | flex,
-                                                 text(" " + std::to_string(volume)) | size(WIDTH, EQUAL, 5)}),
-                                           hbox({text("Bass  ") | size(WIDTH, EQUAL, 7), bassSlider->Render() | flex,
-                                                 text(" " + std::to_string(bass)) | size(WIDTH, EQUAL, 5)}),
-                                           hbox({text("Pitch ") | size(WIDTH, EQUAL, 7), pitchSlider->Render() | flex,
-                                                 text(" " + std::to_string(pitch)) | size(WIDTH, EQUAL, 5)}),
-                                       }));
+        ftxui::Element speakers =
+            window(ftxui::text(" Speakers "),
+                   ftxui::vbox({
+                       ftxui::hbox({ftxui::text("Volume") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+                                    volumeSlider->Render() | ftxui::flex,
+                                    ftxui::text(" " + std::to_string(volume)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
+                       ftxui::hbox({ftxui::text("Bass  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+                                    bassSlider->Render() | ftxui::flex,
+                                    ftxui::text(" " + std::to_string(bass)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
+                       ftxui::hbox({ftxui::text("Pitch ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+                                    pitchSlider->Render() | ftxui::flex,
+                                    ftxui::text(" " + std::to_string(pitch)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
+                   }));
 
-        // Lights panel
-        Element lights = window(text(" Lights "), vbox({
-                                                      livingRoomCheck->Render(),
-                                                      bedroomCheck->Render(),
-                                                      kitchenCheck->Render(),
-                                                  }));
+        ftxui::Element lights = window(ftxui::text(" Lights "), ftxui::vbox({
+                                                                    livingRoomCheck->Render(),
+                                                                    bedroomCheck->Render(),
+                                                                    kitchenCheck->Render(),
+                                                                }));
 
-        return vbox({
-            hbox({sensors | flex, ac | flex}),
-            hbox({speakers | flex, lights | flex}),
-            text("  Tab/arrows to navigate  Enter to toggle  q to quit") | dim,
+        return ftxui::vbox({
+            ftxui::hbox({sensors | ftxui::flex, ac | ftxui::flex}),
+            ftxui::hbox({speakers | ftxui::flex, lights | ftxui::flex}),
+            ftxui::text("  Tab/arrows to navigate  Enter to toggle  q to quit") | ftxui::dim,
         });
     });
 
-    ScreenInteractive screen = ScreenInteractive::Fullscreen();
+    ftxui::ScreenInteractive screen = ftxui::ScreenInteractive::Fullscreen();
 
-    Component with_quit = CatchEvent(renderer, [&](Event event) {
-        if (event == Event::Character('q')) {
+    ftxui::Component with_quit = CatchEvent(renderer, [&](ftxui::Event event) {
+        if (event == ftxui::Event::Character('q')) {
             // Write back to cfg before quitting
             cfg.m_ACSettings.on = acOn;
             cfg.m_ACSettings.temperature = static_cast<int16_t>(acTemp);
@@ -125,9 +142,24 @@ int tui_main(int argc, char *argv[]) {
             cfg.m_LightSettings.livingRoomLightOn = livingRoomOn;
             cfg.m_LightSettings.bedroomLightOn = bedroomOn;
             cfg.m_LightSettings.kitchenLightOn = kitchenOn;
+
+            // Save the config to disk.
+            nlohmann::json cfgJson = cfg.toJson();
+            std::ofstream cfgFileOut(CFG_JSON_FILE_PATH.c_str());
+            if (cfgFileOut.is_open()) {
+                // Pretty print with 4 spaces indentation.
+                cfgFileOut << cfgJson.dump(4);
+                cfgFileOut.close();
+            } else {
+                std::cerr << "Error: Unable to open config file for writing: " << CFG_JSON_FILE_PATH << std::endl;
+            }
+
             screen.ExitLoopClosure()();
             return true;
         }
+
+        cfg.onUpdate();
+
         return false;
     });
 
