@@ -4,6 +4,8 @@ AC::AC(const Pins &pins) : m_Pins(pins), m_On(false), m_Mode(ACMode::NORMAL), m_
     // TODO: Init pins with HAL
 }
 
+AC::~AC() {}
+
 void AC::setOn(bool on) {
     m_On = on;
 }

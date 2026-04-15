@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+#include "tui.h"
+
 int gui_main(int argc, char *argv[]) {
 #if 0
     QApplication app(argc, argv);
@@ -16,17 +18,11 @@ int gui_main(int argc, char *argv[]) {
     window.show();
     return app.exec();
 #else
+    (void)argc;
+    (void)argv;
     std::cout << "GUI mode stub" << std::endl;
     return 0;
 #endif
-}
-
-int tui_main(int argc, char *argv[]) {
-    std::cout << "TUI mode stub" << std::endl;
-    for (int i = 0; i < argc; ++i) {
-        std::cout << "Argument " << i << ": " << argv[i] << std::endl;
-    }
-    return 0;
 }
 
 int main(int argc, char *argv[]) {
