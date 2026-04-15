@@ -4,9 +4,8 @@
 #include <cstdint>
 
 // TODO: HAL not done yet, still need to implement all functions
-class HAL
-{
-public:
+class HAL {
+  public:
     HAL();
     ~HAL();
 
@@ -16,9 +15,8 @@ public:
     void createPWM(uint8_t pin);
     void sendPWM(uint8_t value, uint8_t pin);
 
-private:
+  private:
     bool m_InitOK;
 };
-
 
 #endif // HAL_H

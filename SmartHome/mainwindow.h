@@ -1,48 +1,45 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "home_config.h"
-#include "media_player.h"
-#include "analytics_model.h"
-
 #include <QMainWindow>
 #include <QMediaPlayer>
-
 #include <QTimer>
 
+#include "analytics_model.h"
+#include "home_config.h"
+#include "media_player.h"
+
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
-enum class PageIndex
-{
+enum class PageIndex {
     HOME,
     MEDIA,
     ANALYTICS,
 };
 
-enum class AnalyticsPageState
-{
+enum class AnalyticsPageState {
     OFF,
     ON,
 };
 
-enum class AnalyticsPageIndex
-{
+enum class AnalyticsPageIndex {
     LIGHT_ANALYTICS,
     AC_ANALYTICS,
     SENSORS_ANALYTICS,
 };
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+  public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+  private slots:
     void onUpdate();
 
     /* Navigation bar button callbacks */
@@ -80,7 +77,7 @@ private slots:
 
     void on_analyticsPageSensorsBtn_clicked();
 
-private:
+  private:
     void updateCurrentPage(PageIndex index);
     void updateDateTimeWidget();
 
@@ -108,13 +105,13 @@ private:
 
     void updateUI();
 
-private:
+  private:
     Ui::MainWindow *ui;
 
-    HomeConfig* homeCfg;
-    MediaPlayer* mediaPlayer;
-    AnalyticsModel* analyticsModel;
+    HomeConfig *homeCfg;
+    MediaPlayer *mediaPlayer;
+    AnalyticsModel *analyticsModel;
 
-    QTimer* updateTimer;
+    QTimer *updateTimer;
 };
 #endif // MAINWINDOW_H

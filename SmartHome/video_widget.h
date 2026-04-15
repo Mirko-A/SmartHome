@@ -3,14 +3,13 @@
 
 #include <QVideoWidget>
 
-class VideoWidget : public QVideoWidget
-{
+class VideoWidget : public QVideoWidget {
     Q_OBJECT
 
-public:
-    VideoWidget(QWidget* parent = nullptr);
+  public:
+    VideoWidget(QWidget *parent = nullptr);
 
-protected:
+  protected:
     void keyPressEvent(QKeyEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
