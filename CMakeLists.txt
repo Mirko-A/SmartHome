@@ -3,6 +3,7 @@ project(SmartHomeCore CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Verify submodules are initialized
 if(NOT EXISTS "${CMAKE_SOURCE_DIR}/Dependencies/json/include/nlohmann/json.hpp")
