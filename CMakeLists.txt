@@ -34,3 +34,6 @@ target_include_directories(SmartHomeCore PUBLIC
 )
 
 #target_link_libraries(SmartHomeCore PUBLIC wiringPi)
+
+add_executable(SmartHome SmartHome/main.cpp)
+target_link_libraries(SmartHome PRIVATE SmartHomeCore)
