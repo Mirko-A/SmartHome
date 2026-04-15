@@ -32,9 +32,6 @@ const QVector<QVector<QString>> ANALYTICS_PAGE_PATHS = {
     },
 };
 
-const QString CFG_JSON_FILE_PATH_QSTR = "../resource/home_cfg.json";
-const QString INI_JSON_FILE_PATH_QSTR = "../resource/ini_cfg.json";
-
 constexpr int INITIAL_PLAYER_VOLUME = 50;
 // TODO: Set to a lower value for easier testing
 // constexpr int ONE_SEC_IN_TICKS = 20;

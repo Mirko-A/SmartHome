@@ -35,21 +35,21 @@ void HomeConfig::onUpdate() {
     sendHardwareOutputs();
 }
 
-void HomeConfig::fromJSON(const nlohmann::json &thisAsJson) {
-    m_LightSettings.fromJSON(thisAsJson["Lights"]);
-    m_SensorReadings.fromJSON(thisAsJson["SensorReadings"]);
-    m_ACSettings.fromJSON(thisAsJson["AC"]);
-    m_SpeakerSettings.fromJSON(thisAsJson["Speakers"]);
+void HomeConfig::fromJson(const nlohmann::json &thisAsJson) {
+    m_LightSettings.fromJson(thisAsJson["Lights"]);
+    m_SensorReadings.fromJson(thisAsJson["SensorReadings"]);
+    m_ACSettings.fromJson(thisAsJson["AC"]);
+    m_SpeakerSettings.fromJson(thisAsJson["Speakers"]);
 }
 
 void HomeConfig::loadDirtyFlag(const nlohmann::json &thisAsJson) {
     m_Dirty = thisAsJson["Dirty"];
 }
 
-nlohmann::json HomeConfig::toJSON() {
+nlohmann::json HomeConfig::toJson() {
     nlohmann::json thisAsJSON = {
-        m_LightSettings.toJSON(),   m_SensorReadings.toJSON(), m_ACSettings.toJSON(),
-        m_SpeakerSettings.toJSON(), {"Dirty", m_Dirty},
+        m_LightSettings.toJson(),   m_SensorReadings.toJson(), m_ACSettings.toJson(),
+        m_SpeakerSettings.toJson(), {"Dirty", m_Dirty},
     };
 
     return thisAsJSON;
