@@ -82,7 +82,7 @@ void MainWindow::updateSensorsUI() {
 void MainWindow::updateACUI() {
     ui->ACOnBtn->setChecked(homeCfg->AC.on);
     ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
-    ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
+    ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeCfg->AC.mode)));
 }
 void MainWindow::updateSpeakersUI() {
     ui->volumeSlider->setValue(homeCfg->speakers.volume);
@@ -292,7 +292,7 @@ void MainWindow::on_ACModeUp_clicked() {
     }
 
     homeCfg->AC.mode = static_cast<ACMode>(currentMode);
-    ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
+    ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeCfg->AC.mode)));
 }
 
 void MainWindow::on_ACModeDown_clicked() {
@@ -303,7 +303,7 @@ void MainWindow::on_ACModeDown_clicked() {
     }
 
     homeCfg->AC.mode = static_cast<ACMode>(currentMode);
-    ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
+    ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeCfg->AC.mode)));
 }
 
 void MainWindow::on_volumeSlider_sliderMoved(int position) {
