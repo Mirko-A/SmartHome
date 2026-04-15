@@ -6,7 +6,8 @@ QT += core gui          \
       network           \
       xml               \
 
-LIBS += -L/usr/local/lib -lwiringPi
+LIBS += -L/usr/local/lib -lwiringPi \
+        -L$$PWD/../build -lSmartHomeCore
 
 CONFIG += c++11
 
@@ -15,33 +16,24 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    ac.cpp \
-    analytics_model.cpp \
-    hal.cpp \
-    home_config.cpp \
-    light.cpp \
     main.cpp \
-    mainwindow.cpp \
-    media_player.cpp \
-    player_controls.cpp \
-    playlist_model.cpp \
-    sensor.cpp
+    Ui/analytics_model.cpp \
+    Ui/mainwindow.cpp \
+    Ui/media_player.cpp \
+    Ui/player_controls.cpp \
+    Ui/playlist_model.cpp \
+    Ui/video_widget.cpp
 
 HEADERS += \
-    ac.h \
-    analytics_model.h \
-    hal.h \
-    home_config.h \
-    light.h \
-    mainwindow.h \
-    media_player.h \
-    player_controls.h \
-    playlist_model.h \
-    sensor.h \
-    smart_home_types.h
+    Ui/analytics_model.h \
+    Ui/mainwindow.h \
+    Ui/media_player.h \
+    Ui/player_controls.h \
+    Ui/playlist_model.h \
+    Ui/video_widget.h
 
 FORMS += \
-    mainwindow.ui
+    Ui/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -50,5 +42,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES +=
 
-INCLUDEPATH += $$PWD/../Dependencies/json/include/   \
+INCLUDEPATH += $$PWD/Core/                           \
+               $$PWD/Ui/                             \
+               $$PWD/../Dependencies/json/include/   \
                $$PWD/../Dependencies/DHT22/include/

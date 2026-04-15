@@ -1,21 +1,21 @@
 #include "sensor.h"
 
-Sensor::Sensor(const Pins &pins) : m_Pins(pins), m_DHT22(new TDHT22(28)) {
+Sensor::Sensor(const Pins &pins) : m_Pins(pins) /*, m_DHT22(new TDHT22(28))*/ {
     // TODO: chnage TDHT22 ctor arg (pin)
-    m_DHT22->Init();
+    // m_DHT22->Init();
 }
 
 float Sensor::read(Type type) {
-    float sensorValue;
+    float sensorValue = 0.0f;
 
-    m_DHT22->Fetch();
+    // m_DHT22->Fetch();
 
     switch (type) {
     case Type::TEMPERATURE: {
-        sensorValue = m_DHT22->Temp;
+        // sensorValue = m_DHT22->Temp;
     } break;
     case Type::HUMIDITY: {
-        sensorValue = m_DHT22->Hum;
+        // sensorValue = m_DHT22->Hum;
     } break;
     case Type::BRIGHTNESS: {
         // TODO: Brightness sensor
