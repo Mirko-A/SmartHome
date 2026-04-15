@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/event.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/screen.hpp>
@@ -22,6 +23,7 @@ int tui_main(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 
+    std::mutex cfgMutex;
     HomeConfig cfg;
 
     // Load the config from disk.
@@ -31,12 +33,15 @@ int tui_main(int argc, char *argv[]) {
     if (cfgFileIn.good()) {
         nlohmann::json cfgJson;
         cfgFileIn >> cfgJson;
+        cfgMutex.lock();
         cfg.fromJson(cfgJson);
+        cfgMutex.unlock();
     } else {
         std::cerr << "Failed to load config JSON file" << std::endl;
         return 1;
     }
 
+    cfgMutex.lock();
     // --- AC ---
     bool acOn = cfg.m_ACSettings.on;
     int acModeIndex = static_cast<int>(cfg.m_ACSettings.mode);
@@ -50,6 +55,7 @@ int tui_main(int argc, char *argv[]) {
     bool livingRoomOn = cfg.m_LightSettings.livingRoomLightOn;
     bool bedroomOn = cfg.m_LightSettings.bedroomLightOn;
     bool kitchenOn = cfg.m_LightSettings.kitchenLightOn;
+    cfgMutex.unlock();
 
     // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
     std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
@@ -79,12 +85,14 @@ int tui_main(int argc, char *argv[]) {
 
     ftxui::Component renderer = Renderer(container, [&]() -> ftxui::Element {
         // Sensor panel
+        cfgMutex.lock();
         ftxui::Element sensors = window(ftxui::text(" Sensors "),
                                         ftxui::vbox({
                                             sensorGauge("Temperature", cfg.m_SensorReadings.temperature, -10, 50, " C"),
                                             sensorGauge("Humidity", cfg.m_SensorReadings.humidity, 0, 100, " %"),
                                             sensorGauge("Brightness", cfg.m_SensorReadings.brightness, 0, 1000, ""),
                                         }));
+        cfgMutex.unlock();
 
         // AC panel
         ftxui::Element ac =
@@ -125,11 +133,20 @@ int tui_main(int argc, char *argv[]) {
         });
     });
 
+    std::atomic<bool> done = false;
     ftxui::ScreenInteractive screen = ftxui::ScreenInteractive::Fullscreen();
 
-    ftxui::Component with_quit = CatchEvent(renderer, [&](ftxui::Event event) {
+    std::thread ticker([&]() {
+        while (!done) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            screen.PostEvent(ftxui::Event::Custom);
+        }
+    });
+
+    ftxui::Component onEvent = CatchEvent(renderer, [&](ftxui::Event event) {
         if (event == ftxui::Event::Character('q')) {
             // Write back to cfg before quitting
+            cfgMutex.lock();
             cfg.m_ACSettings.on = acOn;
             cfg.m_ACSettings.mode = static_cast<ACMode>(acModeIndex);
             cfg.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
@@ -139,8 +156,10 @@ int tui_main(int argc, char *argv[]) {
             cfg.m_LightSettings.bedroomLightOn = bedroomOn;
             cfg.m_LightSettings.kitchenLightOn = kitchenOn;
 
-            // Save the config to disk.
             nlohmann::json cfgJson = cfg.toJson();
+            cfgMutex.unlock();
+
+            // Save the config to disk.
             std::ofstream cfgFileOut(CFG_JSON_FILE_PATH.c_str());
             if (cfgFileOut.is_open()) {
                 // Pretty print with 4 spaces indentation.
@@ -154,11 +173,28 @@ int tui_main(int argc, char *argv[]) {
             return true;
         }
 
-        cfg.onUpdate();
+        if (event == ftxui::Event::Custom) {
+            // Simulate updates for now.
+            // cfg.onUpdate();
+            int delta = rand() % 5 - 2; // [-2, 2]
+            cfgMutex.lock();
+            cfg.m_SensorReadings.brightness += delta;
+            if (cfg.m_SensorReadings.brightness < 0)
+                cfg.m_SensorReadings.brightness = 0;
+            cfg.m_SensorReadings.humidity += delta;
+            if (cfg.m_SensorReadings.humidity < 0)
+                cfg.m_SensorReadings.humidity = 0;
+            cfg.m_SensorReadings.temperature += delta;
+            if (cfg.m_SensorReadings.temperature < -10)
+                cfg.m_SensorReadings.temperature = -10;
+            cfgMutex.unlock();
+        }
 
         return false;
     });
 
-    screen.Loop(with_quit);
+    screen.Loop(onEvent);
+    done = true;
+    ticker.join();
     return 0;
 }

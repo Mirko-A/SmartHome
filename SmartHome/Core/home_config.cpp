@@ -6,11 +6,10 @@ HomeConfig::HomeConfig()
       m_Dirty(false) {}
 
 void HomeConfig::readHardwareInputs() {
-    // Sensors (this should make the cfg dirty)
+    // Sensors
     m_SensorReadings.temperature = static_cast<int16_t>(m_Sensor.read(Sensor::Type::TEMPERATURE));
     m_SensorReadings.humidity = static_cast<int16_t>(m_Sensor.read(Sensor::Type::HUMIDITY));
     m_SensorReadings.brightness = static_cast<int16_t>(m_Sensor.read(Sensor::Type::BRIGHTNESS));
-    m_Dirty = true;
 }
 
 void HomeConfig::sendHardwareOutputs() {
@@ -25,7 +24,6 @@ void HomeConfig::sendHardwareOutputs() {
 }
 
 void HomeConfig::onUpdate() {
-    // TODO: continue this
     readHardwareInputs();
     sendHardwareOutputs();
 }
