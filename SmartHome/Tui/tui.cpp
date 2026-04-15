@@ -105,7 +105,7 @@ int tui_main(int argc, char *argv[]) {
         });
         ftxui::Element ac = window(ftxui::text(" AC "), acBox);
         if (acContainer->Focused()) {
-            ac = ac | ftxui::color(ftxui::Color::Green) | ftxui::bold;
+            ac = ac | ftxui::color(ftxui::Color::Green);
         }
 
         // Speakers panel
@@ -127,7 +127,7 @@ int tui_main(int argc, char *argv[]) {
         });
         ftxui::Element speakers = window(ftxui::text(" Speakers "), speakersBox);
         if (speakersContainer->Focused()) {
-            speakers = speakers | ftxui::color(ftxui::Color::Green) | ftxui::bold;
+            speakers = speakers | ftxui::color(ftxui::Color::Green);
         }
 
         // Lights panel
@@ -138,7 +138,7 @@ int tui_main(int argc, char *argv[]) {
         });
         ftxui::Element lights = window(ftxui::text(" Lights "), lightsBox);
         if (lightsContainer->Focused()) {
-            lights = lights | ftxui::color(ftxui::Color::Green) | ftxui::bold;
+            lights = lights | ftxui::color(ftxui::Color::Green);
         }
 
         return ftxui::vbox({
