@@ -6,6 +6,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(FetchContent)
+FetchContent_Declare(ftxui
+    GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+    GIT_TAG v5.0.0
+)
+FetchContent_MakeAvailable(ftxui)
+
 FetchContent_Declare(json
     GIT_REPOSITORY https://github.com/nlohmann/json
     GIT_TAG v3.11.3
@@ -36,5 +42,11 @@ target_link_libraries(SmartHomeCore PUBLIC nlohmann_json::nlohmann_json)
 
 #target_link_libraries(SmartHomeCore PUBLIC wiringPi)
 
-add_executable(SmartHome SmartHome/main.cpp)
-target_link_libraries(SmartHome PRIVATE SmartHomeCore)
+add_executable(SmartHome SmartHome/main.cpp SmartHome/Tui/tui.cpp)
+target_include_directories(SmartHome PRIVATE SmartHome/Tui/)
+target_link_libraries(SmartHome PRIVATE
+    SmartHomeCore
+    ftxui::screen
+    ftxui::dom
+    ftxui::component
+)
