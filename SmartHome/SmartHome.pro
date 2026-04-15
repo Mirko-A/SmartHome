@@ -17,23 +17,23 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    Ui/analytics_model.cpp \
-    Ui/mainwindow.cpp \
-    Ui/media_player.cpp \
-    Ui/player_controls.cpp \
-    Ui/playlist_model.cpp \
-    Ui/video_widget.cpp
+    Gui/analytics_model.cpp \
+    Gui/mainwindow.cpp \
+    Gui/media_player.cpp \
+    Gui/player_controls.cpp \
+    Gui/playlist_model.cpp \
+    Gui/video_widget.cpp
 
 HEADERS += \
-    Ui/analytics_model.h \
-    Ui/mainwindow.h \
-    Ui/media_player.h \
-    Ui/player_controls.h \
-    Ui/playlist_model.h \
-    Ui/video_widget.h
+    Gui/analytics_model.h \
+    Gui/mainwindow.h \
+    Gui/media_player.h \
+    Gui/player_controls.h \
+    Gui/playlist_model.h \
+    Gui/video_widget.h
 
 FORMS += \
-    Ui/mainwindow.ui
+    Gui/mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -43,6 +43,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES +=
 
 INCLUDEPATH += $$PWD/Core/                           \
-               $$PWD/Ui/                             \
+               $$PWD/Gui/                             \
                $$PWD/../Dependencies/json/include/   \
                $$PWD/../Dependencies/DHT22/include/
