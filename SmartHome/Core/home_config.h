@@ -78,12 +78,10 @@ struct SensorReadings {
 
 struct ACSettings {
     bool on;
-    int16_t temperature;
     ACMode mode;
 
     ACSettings() {
         on = false;
-        temperature = 0;
         mode = ACMode::NORMAL;
     }
 
@@ -91,7 +89,6 @@ struct ACSettings {
         nlohmann::json thisAsJSON = {"AC",
                                      {
                                          {"On", on},
-                                         {"Temperature", temperature},
                                          {"Mode", mode},
                                      }};
 
@@ -100,7 +97,6 @@ struct ACSettings {
 
     void fromJson(const nlohmann::json &thisAsJson) {
         on = thisAsJson["On"];
-        temperature = thisAsJson["Temperature"];
         mode = thisAsJson["Mode"];
     }
 };
