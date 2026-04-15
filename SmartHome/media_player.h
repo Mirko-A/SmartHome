@@ -1,14 +1,14 @@
 #ifndef MEDIAPLAYER_H
 #define MEDIAPLAYER_H
 
-#include "playlist_model.h"
-#include "player_controls.h"
-
-#include <QWidget>
-#include <QtWidgets>
-#include <QVideoWidget>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
+#include <QVideoWidget>
+#include <QWidget>
+#include <QtWidgets>
+
+#include "player_controls.h"
+#include "playlist_model.h"
 
 class QLabel;
 class QMediaPlayer;
@@ -16,11 +16,10 @@ class QModelIndex;
 class QPushButton;
 class QSlider;
 
-class MediaPlayer : public QWidget
-{
+class MediaPlayer : public QWidget {
     Q_OBJECT
 
-public:
+  public:
     MediaPlayer(QWidget *parent = 0);
     ~MediaPlayer();
 
@@ -31,7 +30,7 @@ public:
 
     void addToPlaylist(const QList<QUrl> urls);
 
-private slots:
+  private slots:
     void open();
     void remove();
     void durationChanged(qint64 duration);
@@ -49,26 +48,26 @@ private slots:
 
     void displayErrorMessage();
 
-private:
+  private:
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);
     void handleCursor(QMediaPlayer::MediaStatus status);
     void updateDurationInfo(qint64 currentInfo);
 
-public:
-    QMediaPlayer* m_player;
+  public:
+    QMediaPlayer *m_player;
 
-    QMediaPlaylist* m_playlist;
-    PlaylistModel* m_playlistModel;
-    QListView* m_playlistView;
+    QMediaPlaylist *m_playlist;
+    PlaylistModel *m_playlistModel;
+    QListView *m_playlistView;
 
-    QVideoWidget* m_videoWidget;
+    QVideoWidget *m_videoWidget;
 
-    PlayerControls* m_controls;
+    PlayerControls *m_controls;
 
-    QLabel* m_coverLabel;
-    QLabel* m_labelDuration;
-    QSlider* m_seekSlider;
+    QLabel *m_coverLabel;
+    QLabel *m_labelDuration;
+    QSlider *m_seekSlider;
 
     QString m_trackInfo;
     QString m_statusInfo;

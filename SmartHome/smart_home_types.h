@@ -1,16 +1,14 @@
 #ifndef SMART_HOME_TYPES_H
 #define SMART_HOME_TYPES_H
 
-enum class LightLocation
-{
+enum class LightLocation {
     LIVING_ROOM = 0x00,
     BEDROOM,
     KITCHEN,
     LIGHT_LOCATION_CNT,
 };
 
-enum class ACMode
-{
+enum class ACMode {
     NORMAL = 0x00,
     FAST,
     TURBO,

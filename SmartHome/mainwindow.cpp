@@ -1,25 +1,23 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+
+#include <assert.h>
 
 #include <QDateTime>
 #include <QFileDialog>
-
 #include <fstream>
 
-#include <assert.h>
+#include "ui_mainwindow.h"
 
 #define CFG_JSON_FILE_PATH CFG_JSON_FILE_PATH_QSTR.toStdString().c_str()
 #define INI_JSON_FILE_PATH INI_JSON_FILE_PATH_QSTR.toStdString().c_str()
 
-const QVector<QString> PAGE_ICON_PATHS =
-{
+const QVector<QString> PAGE_ICON_PATHS = {
     "../resource/icons/three-dots-0-purple.svg",
     "../resource/icons/three-dots-1-purple.svg",
     "../resource/icons/three-dots-2-purple.svg",
 };
 
-const QVector<QVector<QString>> ANALYTICS_PAGE_PATHS =
-{
+const QVector<QVector<QString>> ANALYTICS_PAGE_PATHS = {
     // INACTIVE ICONS
     {
         "../resource/icons/analytics-lights-off.svg",
@@ -39,13 +37,10 @@ const QString INI_JSON_FILE_PATH_QSTR = "../resource/ini_cfg.json";
 
 constexpr int INITIAL_PLAYER_VOLUME = 50;
 // TODO: Set to a lower value for easier testing
-//constexpr int ONE_SEC_IN_TICKS = 20;
+// constexpr int ONE_SEC_IN_TICKS = 20;
 constexpr int ONE_SEC_IN_TICKS = 2;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-{
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
     ui->pages->setCurrentIndex(static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
 
@@ -65,8 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
     updateTimer->start(50);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     delete ui;
 
     delete homeCfg;
@@ -75,26 +69,22 @@ MainWindow::~MainWindow()
     delete updateTimer;
 }
 
-void MainWindow::updateLightsUI()
-{
+void MainWindow::updateLightsUI() {
     ui->livingRoomLightBtn->setChecked(homeCfg->lights.livingRoomLightOn);
     ui->bedroomLightBtn->setChecked(homeCfg->lights.bedroomLightOn);
     ui->kitchenLightBtn->setChecked(homeCfg->lights.kitchenLightOn);
 }
-void MainWindow::updateSensorsUI()
-{
+void MainWindow::updateSensorsUI() {
     ui->temperatureSensorValueLabel->setText(QString::number(homeCfg->sensors.temperature));
     ui->humiditySensorValueLabel->setText(QString::number(homeCfg->sensors.humidity));
     ui->brightnessSensorValueLabel->setText(QString::number(homeCfg->sensors.brightness));
 }
-void MainWindow::updateACUI()
-{
+void MainWindow::updateACUI() {
     ui->ACOnBtn->setChecked(homeCfg->AC.on);
     ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
     ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
 }
-void MainWindow::updateSpeakersUI()
-{
+void MainWindow::updateSpeakersUI() {
     ui->volumeSlider->setValue(homeCfg->speakers.volume);
     ui->volumeSliderValueLabel->setText(QString::number(homeCfg->speakers.volume));
 
@@ -105,29 +95,26 @@ void MainWindow::updateSpeakersUI()
     ui->pitchSliderValueLabel->setText(QString::number(homeCfg->speakers.pitch));
 }
 
-void MainWindow::updateHomeCfgWidgets()
-{
+void MainWindow::updateHomeCfgWidgets() {
     updateLightsUI();
     updateSensorsUI();
     updateACUI();
     updateSpeakersUI();
 }
 
-void MainWindow::loadMediaPlayerWidgets()
-{
-     ui->mediaPlayerVideoWidgetContainer->addWidget(mediaPlayer->m_videoWidget);
-     mediaPlayer->m_playlistView = ui->mediaPlaylistListView;
-     mediaPlayer->m_labelDuration = ui->mediaPlayerDurationLabel;
-     mediaPlayer->m_seekSlider = ui->mediaPlayerSeekSlider;
+void MainWindow::loadMediaPlayerWidgets() {
+    ui->mediaPlayerVideoWidgetContainer->addWidget(mediaPlayer->m_videoWidget);
+    mediaPlayer->m_playlistView = ui->mediaPlaylistListView;
+    mediaPlayer->m_labelDuration = ui->mediaPlayerDurationLabel;
+    mediaPlayer->m_seekSlider = ui->mediaPlayerSeekSlider;
 
-     loadMediaPlayerControlWidgets();
+    loadMediaPlayerControlWidgets();
 
-     mediaPlayer->initializeUIElements();
-     mediaPlayer->m_controls->initializeUIElements();
+    mediaPlayer->initializeUIElements();
+    mediaPlayer->m_controls->initializeUIElements();
 }
 
-void MainWindow::loadMediaPlayerControlWidgets()
-{
+void MainWindow::loadMediaPlayerControlWidgets() {
     mediaPlayer->m_controls->m_playButton = ui->mediaPlayerPlayBtn;
     mediaPlayer->m_controls->m_stopButton = ui->mediaPlayerStopBtn;
     mediaPlayer->m_controls->m_nextButton = ui->mediaPlayerNextBtn;
@@ -139,8 +126,7 @@ void MainWindow::loadMediaPlayerControlWidgets()
     mediaPlayer->m_playlistModel->m_removeButton = ui->mediaPlaylistRemoveBtn;
 }
 
-void MainWindow::initAnalyticsModel()
-{
+void MainWindow::initAnalyticsModel() {
     ui->livingRoomLightChartView->setChart(analyticsModel->m_livingRoomLightChart);
     ui->bedroomLightChartView->setChart(analyticsModel->m_bedroomLightChart);
     ui->kitchenLightChartView->setChart(analyticsModel->m_kitchenLightChart);
@@ -153,19 +139,17 @@ void MainWindow::initAnalyticsModel()
     ui->brightnessSensorChartView->setChart(analyticsModel->m_brightnessSensorChart);
 }
 
-void MainWindow::updateUI()
-{
+void MainWindow::updateUI() {
     updateDateTimeWidget();
 
     // Config has been updated by 3rd party (python script)
     reloadHomeCfgWidgetsIfDirty();
 }
 
-void MainWindow::onUpdate()
-{
+void MainWindow::onUpdate() {
     static size_t tickCounter = 0;
 
-    if((tickCounter % ONE_SEC_IN_TICKS) == 0)
+    if ((tickCounter % ONE_SEC_IN_TICKS) == 0)
         analyticsModel->updateAnalyticsData(*homeCfg);
 
     homeCfg->onUpdate();
@@ -177,135 +161,108 @@ void MainWindow::onUpdate()
     tickCounter++;
 }
 
-void MainWindow::saveHomeCfgAsJSON()
-{
+void MainWindow::saveHomeCfgAsJSON() {
     std::ofstream o(CFG_JSON_FILE_PATH);
     o << std::setw(4) << homeCfg->toJSON() << std::endl;
 }
 
-nlohmann::json MainWindow::loadHomeCfgAsJson()
-{
-     std::ifstream i;
-     i.open(CFG_JSON_FILE_PATH);
+nlohmann::json MainWindow::loadHomeCfgAsJson() {
+    std::ifstream i;
+    i.open(CFG_JSON_FILE_PATH);
 
-     if (!i.good())
-         i.open(INI_JSON_FILE_PATH);
+    if (!i.good())
+        i.open(INI_JSON_FILE_PATH);
 
-     nlohmann::json j;
-     i >> j;
+    nlohmann::json j;
+    i >> j;
 
-     return j;
+    return j;
 }
 
-void MainWindow::loadHomeCfgWidgets()
-{
+void MainWindow::loadHomeCfgWidgets() {
     nlohmann::json j = loadHomeCfgAsJson();
     homeCfg->fromJSON(j);
     updateHomeCfgWidgets();
 }
 
-void MainWindow::reloadHomeCfgWidgetsIfDirty()
-{
+void MainWindow::reloadHomeCfgWidgetsIfDirty() {
     nlohmann::json j = loadHomeCfgAsJson();
 
     homeCfg->loadDirtyFlag(j);
-    if (homeCfg->isDirty)
-    {
+    if (homeCfg->isDirty) {
         homeCfg->fromJSON(j);
         updateHomeCfgWidgets();
         homeCfg->isDirty = false;
     }
 }
 
-void MainWindow::updateCurrentPage(PageIndex index)
-{
-    ui->pages->setCurrentIndex(static_cast<int>(index)); // reveal the home page
+void MainWindow::updateCurrentPage(PageIndex index) {
+    ui->pages->setCurrentIndex(static_cast<int>(index));                                   // reveal the home page
     ui->buttonsCurrentButton->setIcon(QIcon(PAGE_ICON_PATHS.at(static_cast<int>(index)))); // update current page icon
 }
 
-void MainWindow::updateDateTimeWidget()
-{
+void MainWindow::updateDateTimeWidget() {
     QDateTime currentDateTime = QDateTime::currentDateTimeUtc();
     ui->dateTimeLabel->setText(currentDateTime.toString());
 }
 
-void MainWindow::on_devicesBtn_clicked()
-{
+void MainWindow::on_devicesBtn_clicked() {
     updateCurrentPage(PageIndex::HOME);
 }
 
-void MainWindow::on_mediaBtn_clicked()
-{
+void MainWindow::on_mediaBtn_clicked() {
     updateCurrentPage(PageIndex::MEDIA);
 }
 
-void MainWindow::on_analyticsBtn_clicked()
-{
+void MainWindow::on_analyticsBtn_clicked() {
     updateCurrentPage(PageIndex::ANALYTICS);
 }
 
-void MainWindow::on_livingRoomLightBtn_toggled(bool checked)
-{
+void MainWindow::on_livingRoomLightBtn_toggled(bool checked) {
     // TODO: handle actual light
     homeCfg->lights.livingRoomLightOn = checked;
 
-    if (checked)
-    {
+    if (checked) {
         ui->livingRoomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
-    }
-    else
-    {
+    } else {
         ui->livingRoomLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
-void MainWindow::on_bedroomLightBtn_toggled(bool checked)
-{
+void MainWindow::on_bedroomLightBtn_toggled(bool checked) {
     // TODO: handle actual light
     homeCfg->lights.bedroomLightOn = checked;
 
-    if (checked)
-    {
+    if (checked) {
         ui->bedroomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
-    }
-    else
-    {
+    } else {
         ui->bedroomLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
-void MainWindow::on_kitchenLightBtn_toggled(bool checked)
-{
+void MainWindow::on_kitchenLightBtn_toggled(bool checked) {
     // TODO: handle actual light
     homeCfg->lights.kitchenLightOn = checked;
 
-    if (checked)
-    {
+    if (checked) {
         ui->kitchenLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
-    }
-    else
-    {
+    } else {
         ui->kitchenLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
-void MainWindow::on_ACOnBtn_toggled(bool checked)
-{
+void MainWindow::on_ACOnBtn_toggled(bool checked) {
     // TODO: handle actual light
     homeCfg->AC.on = checked;
 
-    if (checked)
-    {
+    if (checked) {
         ui->ACOnBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
-    }
-    else
-    {
+    } else {
         ui->ACOnBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
     }
 }
 
-void MainWindow::on_ACTemperatureUp_clicked()
-{
+void MainWindow::on_ACTemperatureUp_clicked() {
     // TODO: handle actual light
     homeCfg->AC.temperature += AC_TEMP_STEP;
 
@@ -315,8 +272,7 @@ void MainWindow::on_ACTemperatureUp_clicked()
     ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
 }
 
-void MainWindow::on_ACTemperatureDown_clicked()
-{
+void MainWindow::on_ACTemperatureDown_clicked() {
     // TODO: handle actual light
     homeCfg->AC.temperature -= AC_TEMP_STEP;
 
@@ -326,14 +282,12 @@ void MainWindow::on_ACTemperatureDown_clicked()
     ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
 }
 
-void MainWindow::on_ACModeUp_clicked()
-{
+void MainWindow::on_ACModeUp_clicked() {
     uint8_t currentMode = static_cast<uint8_t>(homeCfg->AC.mode);
 
     uint8_t modeCnt = static_cast<uint8_t>(ACMode::AC_MODE_CNT);
 
-    if (currentMode < (modeCnt - 1))
-    {
+    if (currentMode < (modeCnt - 1)) {
         currentMode++;
     }
 
@@ -341,12 +295,10 @@ void MainWindow::on_ACModeUp_clicked()
     ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
 }
 
-void MainWindow::on_ACModeDown_clicked()
-{
+void MainWindow::on_ACModeDown_clicked() {
     uint8_t currentMode = static_cast<uint8_t>(homeCfg->AC.mode);
 
-    if (currentMode > 0)
-    {
+    if (currentMode > 0) {
         currentMode--;
     }
 
@@ -354,109 +306,81 @@ void MainWindow::on_ACModeDown_clicked()
     ui->ACModeValueLabel->setText(ACModeToString(homeCfg->AC.mode));
 }
 
-void MainWindow::on_volumeSlider_sliderMoved(int position)
-{
+void MainWindow::on_volumeSlider_sliderMoved(int position) {
     homeCfg->speakers.volume = position;
     ui->volumeSliderValueLabel->setText(QString::number(position));
 }
 
-void MainWindow::on_volumeSlider_valueChanged(int value)
-{
+void MainWindow::on_volumeSlider_valueChanged(int value) {
     homeCfg->speakers.volume = value;
     ui->volumeSliderValueLabel->setText(QString::number(value));
 }
 
-void MainWindow::on_bassSlider_sliderMoved(int position)
-{
+void MainWindow::on_bassSlider_sliderMoved(int position) {
     homeCfg->speakers.bass = position;
     ui->bassSliderValueLabel->setText(QString::number(position));
 }
 
-void MainWindow::on_bassSlider_valueChanged(int value)
-{
+void MainWindow::on_bassSlider_valueChanged(int value) {
     homeCfg->speakers.bass = value;
     ui->bassSliderValueLabel->setText(QString::number(value));
 }
 
-void MainWindow::on_pitchSlider_sliderMoved(int position)
-{
+void MainWindow::on_pitchSlider_sliderMoved(int position) {
     homeCfg->speakers.pitch = position;
     ui->pitchSliderValueLabel->setText(QString::number(position));
 }
 
-void MainWindow::on_pitchSlider_valueChanged(int value)
-{
+void MainWindow::on_pitchSlider_valueChanged(int value) {
     homeCfg->speakers.pitch = value;
     ui->pitchSliderValueLabel->setText(QString::number(value));
 }
 
-void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex, AnalyticsPageState newState)
-{
-    switch(pageIndex)
-    {
-        case AnalyticsPageIndex::LIGHT_ANALYTICS:
-        {
-            ui->analyticsPageLightsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS
-                                                        .at(static_cast<int>(newState))
-                                                            .at(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS))));
-        }
-        break;
-        case AnalyticsPageIndex::AC_ANALYTICS:
-        {
-            ui->analyticsPageACBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS
-                                                        .at(static_cast<int>(newState))
-                                                            .at(static_cast<int>(AnalyticsPageIndex::AC_ANALYTICS))));
-        }
-        break;
-        case AnalyticsPageIndex::SENSORS_ANALYTICS:
-        {
-            ui->analyticsPageSensorsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS
-                                                        .at(static_cast<int>(newState))
-                                                            .at(static_cast<int>(AnalyticsPageIndex::SENSORS_ANALYTICS))));
-        }
-        break;
-        default:
-            assert(false && "Invalid analytics page index provided!");
+void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex, AnalyticsPageState newState) {
+    switch (pageIndex) {
+    case AnalyticsPageIndex::LIGHT_ANALYTICS: {
+        ui->analyticsPageLightsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
+                                                      .at(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS))));
+    } break;
+    case AnalyticsPageIndex::AC_ANALYTICS: {
+        ui->analyticsPageACBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
+                                                  .at(static_cast<int>(AnalyticsPageIndex::AC_ANALYTICS))));
+    } break;
+    case AnalyticsPageIndex::SENSORS_ANALYTICS: {
+        ui->analyticsPageSensorsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
+                                                       .at(static_cast<int>(AnalyticsPageIndex::SENSORS_ANALYTICS))));
+    } break;
+    default:
+        assert(false && "Invalid analytics page index provided!");
         break;
     }
 }
 
-void MainWindow::deselectCurrentAnalyticsPage()
-{
+void MainWindow::deselectCurrentAnalyticsPage() {
     updateAnalyticsPageIcon(static_cast<AnalyticsPageIndex>(ui->analyticsPages->currentIndex()),
                             AnalyticsPageState::OFF);
 }
-void MainWindow::selectNewAnalyticsPage(AnalyticsPageIndex newPageIndex)
-{
-    updateAnalyticsPageIcon(newPageIndex,
-                            AnalyticsPageState::ON);
+void MainWindow::selectNewAnalyticsPage(AnalyticsPageIndex newPageIndex) {
+    updateAnalyticsPageIcon(newPageIndex, AnalyticsPageState::ON);
 
     ui->analyticsPages->setCurrentIndex(static_cast<int>(newPageIndex));
 }
 
-void MainWindow::swapSelectedAnalyticsPage(AnalyticsPageIndex newPageIndex)
-{
-    if (static_cast<int>(newPageIndex) != ui->analyticsPages->currentIndex())
-    {
+void MainWindow::swapSelectedAnalyticsPage(AnalyticsPageIndex newPageIndex) {
+    if (static_cast<int>(newPageIndex) != ui->analyticsPages->currentIndex()) {
         deselectCurrentAnalyticsPage();
         selectNewAnalyticsPage(newPageIndex);
     }
 }
 
-void MainWindow::on_analyticsPageLightsBtn_clicked()
-{
+void MainWindow::on_analyticsPageLightsBtn_clicked() {
     swapSelectedAnalyticsPage(AnalyticsPageIndex::LIGHT_ANALYTICS);
 }
 
-
-void MainWindow::on_analyticsPageACBtn_clicked()
-{
+void MainWindow::on_analyticsPageACBtn_clicked() {
     swapSelectedAnalyticsPage(AnalyticsPageIndex::AC_ANALYTICS);
 }
 
-
-void MainWindow::on_analyticsPageSensorsBtn_clicked()
-{
+void MainWindow::on_analyticsPageSensorsBtn_clicked() {
     swapSelectedAnalyticsPage(AnalyticsPageIndex::SENSORS_ANALYTICS);
 }
-

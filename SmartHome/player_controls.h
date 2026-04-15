@@ -7,12 +7,11 @@
 class QAbstractButton;
 class QAbstractSlider;
 
-class PlayerControls : public QWidget
-{
+class PlayerControls : public QWidget {
     Q_OBJECT
 
-public:
-    PlayerControls(QWidget* parent = nullptr);
+  public:
+    PlayerControls(QWidget *parent = nullptr);
 
     /* Must be called after pointers to UI elements have been assigned */
     void initializeUIElements();
@@ -21,12 +20,12 @@ public:
     int volume() const;
     bool isMuted() const;
 
-public slots:
+  public slots:
     void setState(QMediaPlayer::State state);
     void setVolume(int volume);
     void setMuted(bool muted);
 
-signals:
+  signals:
     void play();
     void pause();
     void stop();
@@ -35,21 +34,21 @@ signals:
     void changeVolume(int volume);
     void changeMuting(bool muting);
 
-private slots:
+  private slots:
     void playClicked();
     void muteClicked();
 
-public:
+  public:
     QMediaPlayer::State m_playerState;
     bool m_playerMuted;
 
     /* Part of player */
-    QAbstractButton* m_playButton;
-    QAbstractButton* m_stopButton;
-    QAbstractButton* m_nextButton;
-    QAbstractButton* m_previousButton;
-    QAbstractButton* m_muteButton;
-    QAbstractSlider* m_volumeSlider;
+    QAbstractButton *m_playButton;
+    QAbstractButton *m_stopButton;
+    QAbstractButton *m_nextButton;
+    QAbstractButton *m_previousButton;
+    QAbstractButton *m_muteButton;
+    QAbstractSlider *m_volumeSlider;
 };
 
 #endif // PLAYER_CONTROLS_H
