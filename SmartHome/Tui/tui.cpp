@@ -4,6 +4,7 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/screen.hpp>
 
 #include "home_config.h"
 
@@ -101,9 +102,11 @@ int tui_main(int argc, char *argv[]) {
                        ftxui::hbox({ftxui::text("Volume") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
                                     volumeSlider->Render() | ftxui::flex,
                                     ftxui::text(" " + std::to_string(volume)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
+                       ftxui::separator(ftxui::Pixel()),
                        ftxui::hbox({ftxui::text("Bass  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
                                     bassSlider->Render() | ftxui::flex,
                                     ftxui::text(" " + std::to_string(bass)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
+                       ftxui::separator(ftxui::Pixel()),
                        ftxui::hbox({ftxui::text("Pitch ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
                                     pitchSlider->Render() | ftxui::flex,
                                     ftxui::text(" " + std::to_string(pitch)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)}),
