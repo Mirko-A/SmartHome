@@ -1,9 +1,9 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
-#include <cstdint>
+// #include "DHT22.h"
 
-#include "DHT22.h"
+#include <cstdint>
 
 class Sensor {
   public:
@@ -40,7 +40,7 @@ class Sensor {
 
   private:
     Pins m_Pins;
-    TDHT22 *m_DHT22;
+    // TDHT22 *m_DHT22;
 };
 
 #endif // SENSOR_H
