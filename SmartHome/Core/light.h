@@ -1,28 +1,24 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include "smart_home_types.h"
-
 #include <cstdint>
 
-class Light
-{
-public:
-    struct Pins
-    {
+#include "smart_home_types.h"
+
+class Light {
+  public:
+    struct Pins {
         // TODO: add pins
-        Pins(uint8_t livingRoom = 0U, uint8_t bedRoom = 0U, uint8_t kitchen = 0U)
-        {
+        Pins(uint8_t livingRoom = 0U, uint8_t bedRoom = 0U, uint8_t kitchen = 0U) {
             this->livingRoom = livingRoom;
-            this->bedRoom    = bedRoom;
-            this->kitchen    = kitchen;
+            this->bedRoom = bedRoom;
+            this->kitchen = kitchen;
         };
 
-        Pins(const Pins& other)
-        {
+        Pins(const Pins &other) {
             livingRoom = other.livingRoom;
-            bedRoom    = other.bedRoom;
-            kitchen    = other.kitchen;
+            bedRoom = other.bedRoom;
+            kitchen = other.kitchen;
         };
 
         uint8_t livingRoom;
@@ -30,12 +26,12 @@ public:
         uint8_t kitchen;
     };
 
-public:
-    Light(const Pins& pins);
+  public:
+    Light(const Pins &pins);
 
     void setOn(bool on, LightLocation location);
 
-private:
+  private:
     Pins m_Pins;
 };
 
