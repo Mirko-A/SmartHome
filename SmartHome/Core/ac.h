@@ -5,7 +5,7 @@
 
 #include "smart_home_types.h"
 
-class AC {
+class Ac {
   public:
     struct Pins {
         // TODO: add pins
@@ -14,21 +14,16 @@ class AC {
             this->pin2 = pin2;
         };
 
-        Pins(const Pins &other) {
-            pin1 = other.pin1;
-            pin2 = other.pin2;
-        };
-
         uint8_t pin1;
         uint8_t pin2;
     };
 
   public:
-    AC(const Pins &pins);
-    ~AC();
+    Ac(uint8_t pin1, uint8_t pin2);
+    ~Ac();
 
     void setOn(bool on);
-    void setMode(ACMode mode);
+    void setMode(AcMode mode);
     void setSpeed(uint8_t speed);
 
     void Run();
@@ -36,7 +31,7 @@ class AC {
   private:
     Pins m_Pins;
     bool m_On;
-    ACMode m_Mode;
+    AcMode m_Mode;
     uint8_t m_Speed;
 };
 

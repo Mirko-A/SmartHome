@@ -1,64 +1,55 @@
 #include "home_ctrl.h"
 
 HomeControl::HomeControl()
-    : m_LightSettings(LightSettings()), m_ACSettings(ACSettings()), m_SensorReadings(SensorReadings()),
-      m_SpeakerSettings(SpeakerSettings()), m_Light(Light::Pins()), m_AC(AC::Pins()), m_Sensor(Sensor::Pins()),
-      m_Dirty(false) {}
+    : m_LightSettings(), m_AcSettings(), m_SensorReadings(), m_SpeakerSettings(), m_Light(0, 0, 0), m_Ac(0, 0),
+      m_Sensor(0, 0, 0), m_Dirty(false) {}
 
-void HomeControl::readHardwareInputs() {
-    // Sensors
+void HomeControl::onUpdate() {
+    // Inputs
     m_SensorReadings.temperature = static_cast<int16_t>(m_Sensor.read(Sensor::Type::TEMPERATURE));
     m_SensorReadings.humidity = static_cast<int16_t>(m_Sensor.read(Sensor::Type::HUMIDITY));
     m_SensorReadings.brightness = static_cast<int16_t>(m_Sensor.read(Sensor::Type::BRIGHTNESS));
-}
 
-void HomeControl::sendHardwareOutputs() {
-    // Lights
+    // Outputs
     m_Light.setOn(m_LightSettings.livingRoomLightOn, LightLocation::LIVING_ROOM);
     m_Light.setOn(m_LightSettings.bedroomLightOn, LightLocation::BEDROOM);
     m_Light.setOn(m_LightSettings.kitchenLightOn, LightLocation::KITCHEN);
-    // AC
-    m_AC.setOn(m_ACSettings.on);
-    m_AC.setMode(m_ACSettings.mode);
-    m_AC.Run();
-}
-
-void HomeControl::onUpdate() {
-    readHardwareInputs();
-    sendHardwareOutputs();
+    m_Ac.setOn(m_AcSettings.on);
+    m_Ac.setMode(m_AcSettings.mode);
+    m_Ac.Run();
 }
 
 void HomeControl::fromJson(const nlohmann::json &thisAsJson) {
-    m_LightSettings.fromJson(thisAsJson["Lights"]);
-    m_SensorReadings.fromJson(thisAsJson["SensorReadings"]);
-    m_ACSettings.fromJson(thisAsJson["AC"]);
-    m_SpeakerSettings.fromJson(thisAsJson["Speakers"]);
+    m_LightSettings.fromJson(thisAsJson["lights"]);
+    m_SensorReadings.fromJson(thisAsJson["sensor_readings"]);
+    m_AcSettings.fromJson(thisAsJson["ac"]);
+    m_SpeakerSettings.fromJson(thisAsJson["speakers"]);
 }
 
 void HomeControl::loadDirtyFlag(const nlohmann::json &thisAsJson) {
-    m_Dirty = thisAsJson["Dirty"];
+    m_Dirty = thisAsJson["dirty"];
 }
 
 nlohmann::json HomeControl::toJson() {
     nlohmann::json thisAsJSON = {
-        m_LightSettings.toJson(),   m_SensorReadings.toJson(), m_ACSettings.toJson(),
-        m_SpeakerSettings.toJson(), {"Dirty", m_Dirty},
+        m_LightSettings.toJson(),   m_SensorReadings.toJson(), m_AcSettings.toJson(),
+        m_SpeakerSettings.toJson(), {"dirty", m_Dirty},
     };
 
     return thisAsJSON;
 }
 
-std::string ACModeToString(ACMode mode) {
+std::string AcModeToString(AcMode mode) {
     std::string modeStr;
 
     switch (mode) {
-    case ACMode::NORMAL:
+    case AcMode::NORMAL:
         modeStr = "Normal";
         break;
-    case ACMode::FAST:
+    case AcMode::FAST:
         modeStr = "Fast";
         break;
-    case ACMode::TURBO:
+    case AcMode::TURBO:
         modeStr = "Turbo";
         break;
     default:

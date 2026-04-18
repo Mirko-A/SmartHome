@@ -43,8 +43,8 @@ int tui_main(int argc, char *argv[]) {
     }
 
     // --- AC ---
-    bool acOn = home.m_ACSettings.on;
-    int acModeIndex = static_cast<int>(home.m_ACSettings.mode);
+    bool acOn = home.m_AcSettings.on;
+    int acModeIndex = static_cast<int>(home.m_AcSettings.mode);
 
     // --- Speakers ---
     int volume = home.m_SpeakerSettings.volume;
@@ -164,8 +164,8 @@ int tui_main(int argc, char *argv[]) {
             nlohmann::json cfgJson;
             {
                 std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
-                home.m_ACSettings.on = acOn;
-                home.m_ACSettings.mode = static_cast<ACMode>(acModeIndex);
+                home.m_AcSettings.on = acOn;
+                home.m_AcSettings.mode = static_cast<AcMode>(acModeIndex);
                 home.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
                 home.m_SpeakerSettings.bass = static_cast<int16_t>(bass);
                 home.m_SpeakerSettings.pitch = static_cast<int16_t>(pitch);

@@ -1,9 +1,7 @@
 #include "sensor.h"
 
-Sensor::Sensor(const Pins &pins) : m_Pins(pins) /*, m_DHT22(new TDHT22(28))*/ {
-    // TODO: chnage TDHT22 ctor arg (pin)
-    // m_DHT22->Init();
-}
+Sensor::Sensor(uint8_t temperaturePin, uint8_t humidityPin, uint8_t brightnessPin)
+    : m_Pins(temperaturePin, humidityPin, brightnessPin) {}
 
 float Sensor::read(Type type) {
     float sensorValue = 0.0f;

@@ -8,7 +8,7 @@ enum class LightLocation {
     LIGHT_LOCATION_CNT,
 };
 
-enum class ACMode {
+enum class AcMode {
     NORMAL = 0x00,
     FAST,
     TURBO,

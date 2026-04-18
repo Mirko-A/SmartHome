@@ -1,35 +1,35 @@
 #include "ac.h"
 
-AC::AC(const Pins &pins) : m_Pins(pins), m_On(false), m_Mode(ACMode::NORMAL), m_Speed(0) {
+Ac::Ac(uint8_t pin1, uint8_t pin2) : m_Pins(pin1, pin2), m_On(false), m_Mode(AcMode::NORMAL), m_Speed(0) {
     // TODO: Init pins with HAL
 }
 
-AC::~AC() {}
+Ac::~Ac() {}
 
-void AC::setOn(bool on) {
+void Ac::setOn(bool on) {
     m_On = on;
 }
 
-void AC::setMode(ACMode mode) {
+void Ac::setMode(AcMode mode) {
     m_Mode = mode;
 }
 
-void AC::setSpeed(uint8_t speed) {
+void Ac::setSpeed(uint8_t speed) {
     m_Speed = speed;
 }
 
-void AC::Run() {
+void Ac::Run() {
     // TODO: run the AC based on speed
     if (m_On) {
         // Start AC
         switch (m_Mode) {
-        case ACMode::NORMAL: {
+        case AcMode::NORMAL: {
             // Run at m_Speed
         } break;
-        case ACMode::FAST: {
+        case AcMode::FAST: {
             // Run at 1.5 * m_Speed
         } break;
-        case ACMode::TURBO: {
+        case AcMode::TURBO: {
             // Run at 2 * m_Speed
         } break;
         default: {

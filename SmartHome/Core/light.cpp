@@ -1,6 +1,7 @@
 #include "light.h"
 
-Light::Light(const Pins &pins) : m_Pins(pins) {
+Light::Light(uint8_t livingRoomPin, uint8_t bedRoomPin, uint8_t kitchenPin)
+    : m_Pins(livingRoomPin, bedRoomPin, kitchenPin) {
     // TODO: init pins with HAL
 }
 
