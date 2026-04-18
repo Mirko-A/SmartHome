@@ -8,7 +8,7 @@
 #include <ftxui/screen/screen.hpp>
 #include <mutex>
 
-#include "home_config.h"
+#include "home_ctrl.h"
 
 static ftxui::Element sensorGauge(const std::string &label, int value, int min, int max, const std::string &unit) {
     float ratio = (max > min) ? float(value - min) / float(max - min) : 0.f;
@@ -24,8 +24,8 @@ int tui_main(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 
-    std::mutex cfgMutex;
-    HomeConfig cfg;
+    std::mutex homeMutex;
+    HomeControl home;
 
     // Load the config from disk.
     std::ifstream cfgFileIn(CFG_JSON_FILE_PATH.c_str());
@@ -35,7 +35,7 @@ int tui_main(int argc, char *argv[]) {
     if (cfgFileIn.good()) {
         nlohmann::json cfgJson;
         cfgFileIn >> cfgJson;
-        cfg.fromJson(cfgJson);
+        home.fromJson(cfgJson);
     } else {
         std::cerr << "Error: Cannot open config file (in): " << CFG_JSON_FILE_PATH << " or " << INI_JSON_FILE_PATH
                   << std::endl;
@@ -43,18 +43,18 @@ int tui_main(int argc, char *argv[]) {
     }
 
     // --- AC ---
-    bool acOn = cfg.m_ACSettings.on;
-    int acModeIndex = static_cast<int>(cfg.m_ACSettings.mode);
+    bool acOn = home.m_ACSettings.on;
+    int acModeIndex = static_cast<int>(home.m_ACSettings.mode);
 
     // --- Speakers ---
-    int volume = cfg.m_SpeakerSettings.volume;
-    int bass = cfg.m_SpeakerSettings.bass;
-    int pitch = cfg.m_SpeakerSettings.pitch;
+    int volume = home.m_SpeakerSettings.volume;
+    int bass = home.m_SpeakerSettings.bass;
+    int pitch = home.m_SpeakerSettings.pitch;
 
     // --- Lights ---
-    bool livingRoomOn = cfg.m_LightSettings.livingRoomLightOn;
-    bool bedroomOn = cfg.m_LightSettings.bedroomLightOn;
-    bool kitchenOn = cfg.m_LightSettings.kitchenLightOn;
+    bool livingRoomOn = home.m_LightSettings.livingRoomLightOn;
+    bool bedroomOn = home.m_LightSettings.bedroomLightOn;
+    bool kitchenOn = home.m_LightSettings.kitchenLightOn;
 
     // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
     std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
@@ -85,10 +85,10 @@ int tui_main(int argc, char *argv[]) {
         // Sensor panel
         int temp, humidity, brightness;
         {
-            std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(cfgMutex);
-            temp = cfg.m_SensorReadings.temperature;
-            humidity = cfg.m_SensorReadings.humidity;
-            brightness = cfg.m_SensorReadings.brightness;
+            std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
+            temp = home.m_SensorReadings.temperature;
+            humidity = home.m_SensorReadings.humidity;
+            brightness = home.m_SensorReadings.brightness;
         }
         ftxui::Element sensorsBox = ftxui::vbox({
             sensorGauge("Temperature", temp, -10, 50, " C"),
@@ -163,16 +163,16 @@ int tui_main(int argc, char *argv[]) {
             // Write back to cfg before quitting
             nlohmann::json cfgJson;
             {
-                std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(cfgMutex);
-                cfg.m_ACSettings.on = acOn;
-                cfg.m_ACSettings.mode = static_cast<ACMode>(acModeIndex);
-                cfg.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
-                cfg.m_SpeakerSettings.bass = static_cast<int16_t>(bass);
-                cfg.m_SpeakerSettings.pitch = static_cast<int16_t>(pitch);
-                cfg.m_LightSettings.livingRoomLightOn = livingRoomOn;
-                cfg.m_LightSettings.bedroomLightOn = bedroomOn;
-                cfg.m_LightSettings.kitchenLightOn = kitchenOn;
-                cfgJson = cfg.toJson();
+                std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
+                home.m_ACSettings.on = acOn;
+                home.m_ACSettings.mode = static_cast<ACMode>(acModeIndex);
+                home.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
+                home.m_SpeakerSettings.bass = static_cast<int16_t>(bass);
+                home.m_SpeakerSettings.pitch = static_cast<int16_t>(pitch);
+                home.m_LightSettings.livingRoomLightOn = livingRoomOn;
+                home.m_LightSettings.bedroomLightOn = bedroomOn;
+                home.m_LightSettings.kitchenLightOn = kitchenOn;
+                cfgJson = home.toJson();
             }
 
             // Save the config to disk.
@@ -194,25 +194,25 @@ int tui_main(int argc, char *argv[]) {
             // cfg.onUpdate();
             int delta = rand() % 5 - 2; // [-2, 2]
             {
-                std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(cfgMutex);
+                std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
 
-                cfg.m_SensorReadings.brightness += delta;
-                if (cfg.m_SensorReadings.brightness < 0)
-                    cfg.m_SensorReadings.brightness = 0;
-                else if (cfg.m_SensorReadings.brightness > 1000)
-                    cfg.m_SensorReadings.brightness = 1000;
+                home.m_SensorReadings.brightness += delta;
+                if (home.m_SensorReadings.brightness < 0)
+                    home.m_SensorReadings.brightness = 0;
+                else if (home.m_SensorReadings.brightness > 1000)
+                    home.m_SensorReadings.brightness = 1000;
 
-                cfg.m_SensorReadings.humidity += delta;
-                if (cfg.m_SensorReadings.humidity < 0)
-                    cfg.m_SensorReadings.humidity = 0;
-                else if (cfg.m_SensorReadings.humidity > 100)
-                    cfg.m_SensorReadings.humidity = 100;
+                home.m_SensorReadings.humidity += delta;
+                if (home.m_SensorReadings.humidity < 0)
+                    home.m_SensorReadings.humidity = 0;
+                else if (home.m_SensorReadings.humidity > 100)
+                    home.m_SensorReadings.humidity = 100;
 
-                cfg.m_SensorReadings.temperature += delta;
-                if (cfg.m_SensorReadings.temperature < -10)
-                    cfg.m_SensorReadings.temperature = -10;
-                else if (cfg.m_SensorReadings.temperature > 50)
-                    cfg.m_SensorReadings.temperature = 50;
+                home.m_SensorReadings.temperature += delta;
+                if (home.m_SensorReadings.temperature < -10)
+                    home.m_SensorReadings.temperature = -10;
+                else if (home.m_SensorReadings.temperature > 50)
+                    home.m_SensorReadings.temperature = 50;
             }
         }
 

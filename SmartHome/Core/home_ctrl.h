@@ -1,5 +1,5 @@
-#ifndef HOME_CONFIG_H
-#define HOME_CONFIG_H
+#ifndef HOME_CTRL_H
+#define HOME_CTRL_H
 
 #include <stdint.h>
 
@@ -130,9 +130,9 @@ struct SpeakerSettings {
     }
 };
 
-class HomeConfig {
+class HomeControl {
   public:
-    HomeConfig();
+    HomeControl();
 
     void onUpdate();
 
@@ -161,4 +161,4 @@ class HomeConfig {
 
 std::string ACModeToString(ACMode mode);
 
-#endif // HOME_CONFIG_H
+#endif // HOME_CTRL_H

@@ -1,18 +1,18 @@
-#include "home_config.h"
+#include "home_ctrl.h"
 
-HomeConfig::HomeConfig()
+HomeControl::HomeControl()
     : m_LightSettings(LightSettings()), m_ACSettings(ACSettings()), m_SensorReadings(SensorReadings()),
       m_SpeakerSettings(SpeakerSettings()), m_Light(Light::Pins()), m_AC(AC::Pins()), m_Sensor(Sensor::Pins()),
       m_Dirty(false) {}
 
-void HomeConfig::readHardwareInputs() {
+void HomeControl::readHardwareInputs() {
     // Sensors
     m_SensorReadings.temperature = static_cast<int16_t>(m_Sensor.read(Sensor::Type::TEMPERATURE));
     m_SensorReadings.humidity = static_cast<int16_t>(m_Sensor.read(Sensor::Type::HUMIDITY));
     m_SensorReadings.brightness = static_cast<int16_t>(m_Sensor.read(Sensor::Type::BRIGHTNESS));
 }
 
-void HomeConfig::sendHardwareOutputs() {
+void HomeControl::sendHardwareOutputs() {
     // Lights
     m_Light.setOn(m_LightSettings.livingRoomLightOn, LightLocation::LIVING_ROOM);
     m_Light.setOn(m_LightSettings.bedroomLightOn, LightLocation::BEDROOM);
@@ -23,23 +23,23 @@ void HomeConfig::sendHardwareOutputs() {
     m_AC.Run();
 }
 
-void HomeConfig::onUpdate() {
+void HomeControl::onUpdate() {
     readHardwareInputs();
     sendHardwareOutputs();
 }
 
-void HomeConfig::fromJson(const nlohmann::json &thisAsJson) {
+void HomeControl::fromJson(const nlohmann::json &thisAsJson) {
     m_LightSettings.fromJson(thisAsJson["Lights"]);
     m_SensorReadings.fromJson(thisAsJson["SensorReadings"]);
     m_ACSettings.fromJson(thisAsJson["AC"]);
     m_SpeakerSettings.fromJson(thisAsJson["Speakers"]);
 }
 
-void HomeConfig::loadDirtyFlag(const nlohmann::json &thisAsJson) {
+void HomeControl::loadDirtyFlag(const nlohmann::json &thisAsJson) {
     m_Dirty = thisAsJson["Dirty"];
 }
 
-nlohmann::json HomeConfig::toJson() {
+nlohmann::json HomeControl::toJson() {
     nlohmann::json thisAsJSON = {
         m_LightSettings.toJson(),   m_SensorReadings.toJson(), m_ACSettings.toJson(),
         m_SpeakerSettings.toJson(), {"Dirty", m_Dirty},
