@@ -8,17 +8,10 @@
 class Light {
   public:
     struct Pins {
-        // TODO: add pins
         Pins(uint8_t livingRoom = 0U, uint8_t bedRoom = 0U, uint8_t kitchen = 0U) {
             this->livingRoom = livingRoom;
             this->bedRoom = bedRoom;
             this->kitchen = kitchen;
-        };
-
-        Pins(const Pins &other) {
-            livingRoom = other.livingRoom;
-            bedRoom = other.bedRoom;
-            kitchen = other.kitchen;
         };
 
         uint8_t livingRoom;
@@ -27,7 +20,11 @@ class Light {
     };
 
   public:
-    Light(const Pins &pins);
+    Light(uint8_t livingRoomPin, uint8_t bedRoomPin, uint8_t kitchenPin);
+
+    Light() = delete;
+    Light(const Light &) = delete;
+    Light(Light &&) = delete;
 
     void setOn(bool on, LightLocation location);
 

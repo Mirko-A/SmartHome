@@ -1,22 +1,22 @@
 {
-    "AC": {
-        "Mode": 0,
-        "On": false,
+    "ac": {
+        "mode": 0,
+        "on": false
     },
-    "Dirty": false,
-    "Lights": {
-        "Bedroom": false,
-        "Kitchen": false,
-        "LivingRoom": false
+    "dirty": false,
+    "lights": {
+        "living_room": false,
+        "bedroom": false,
+        "kitchen": false
     },
-    "SensorReadings": {
-        "Brightness": 0,
-        "Humidity": 0,
-        "Temperature": 0
+    "sensors": {
+        "brightness": 0,
+        "humidity": 0,
+        "temperature": 0
     },
-    "Speakers": {
-        "Bass": 50,
-        "Pitch": 50,
-        "Volume": 50
+    "speakers": {
+        "bass": 50,
+        "pitch": 50,
+        "volume": 50
     }
 }
