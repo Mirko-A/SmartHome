@@ -19,8 +19,12 @@ class Ac {
     };
 
   public:
-    Ac(uint8_t pin1, uint8_t pin2);
-    ~Ac();
+    Ac();
+
+    Ac(const Ac &) = delete;
+    Ac(Ac &&) = delete;
+
+    void initPins(uint8_t pin1, uint8_t pin2);
 
     void setOn(bool on);
     void setMode(AcMode mode);

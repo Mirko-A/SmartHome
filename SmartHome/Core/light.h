@@ -20,11 +20,12 @@ class Light {
     };
 
   public:
-    Light(uint8_t livingRoomPin, uint8_t bedRoomPin, uint8_t kitchenPin);
+    Light();
 
-    Light() = delete;
     Light(const Light &) = delete;
     Light(Light &&) = delete;
+
+    void initPins(uint8_t livingRoomPin, uint8_t bedRoomPin, uint8_t kitchenPin);
 
     void setOn(bool on, LightLocation location);
 
