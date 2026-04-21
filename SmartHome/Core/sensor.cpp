@@ -1,7 +1,14 @@
 #include "sensor.h"
 
-Sensor::Sensor(uint8_t temperaturePin, uint8_t humidityPin, uint8_t brightnessPin)
-    : m_Pins(temperaturePin, humidityPin, brightnessPin) {}
+Sensor::Sensor() {}
+
+void Sensor::initPins(uint8_t temperaturePin, uint8_t humidityPin, uint8_t brightnessPin) {
+    m_Pins.temperature = temperaturePin;
+    m_Pins.humidity = humidityPin;
+    m_Pins.brightness = brightnessPin;
+
+    // TODO: init pins with HAL
+}
 
 float Sensor::read(Type type) {
     float sensorValue = 0.0f;

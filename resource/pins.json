@@ -1,0 +1,15 @@
+{
+    "ac": {
+        "pin1": 1,
+        "pin2": 2
+    },
+    "lights": {
+        "living_room": 3,
+        "kitchen": 4,
+        "bedroom": 5
+    },
+    "sensors": {
+        "temperature": 6,
+        "humidity": 7
+    }
+}

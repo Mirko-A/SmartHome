@@ -11,8 +11,9 @@
 #include "sensor.h"
 #include "smart_home_types.h"
 
-const std::string CFG_JSON_FILE_PATH = "../resource/home_cfg.json";
-const std::string INI_JSON_FILE_PATH = "../resource/ini_cfg.json";
+const std::string HOME_INI_FILE_PATH = "../resource/ini_cfg.json";
+const std::string HOME_CFG_FILE_PATH = "../resource/home_cfg.json";
+const std::string PIN_CFG_FILE_PATH = "../resource/pin_cfg.json";
 
 constexpr int MAX_AC_TEMP = 30;
 constexpr int MIN_AC_TEMP = 15;
@@ -30,20 +31,19 @@ struct LightSettings {
     }
 
     nlohmann::json toJson() {
-        nlohmann::json thisAsJSON = {"lights",
-                                     {
-                                         {"living_room", livingRoomLightOn},
-                                         {"bedroom", bedroomLightOn},
-                                         {"kitchen", kitchenLightOn},
-                                     }};
-
-        return thisAsJSON;
+        nlohmann::json json = {"lights",
+                               {
+                                   {"living_room", livingRoomLightOn},
+                                   {"bedroom", bedroomLightOn},
+                                   {"kitchen", kitchenLightOn},
+                               }};
+        return json;
     }
 
-    void fromJson(const nlohmann::json &thisAsJson) {
-        livingRoomLightOn = thisAsJson["living_room"];
-        bedroomLightOn = thisAsJson["bedroom"];
-        kitchenLightOn = thisAsJson["kitchen"];
+    void fromJson(const nlohmann::json &json) {
+        livingRoomLightOn = json["living_room"];
+        bedroomLightOn = json["bedroom"];
+        kitchenLightOn = json["kitchen"];
     }
 };
 
@@ -59,45 +59,43 @@ struct SensorReadings {
     }
 
     nlohmann::json toJson() {
-        nlohmann::json thisAsJSON = {"sensors",
-                                     {
-                                         {"temperature", temperature},
-                                         {"humidity", humidity},
-                                         {"brightness", brightness},
-                                     }};
-
-        return thisAsJSON;
+        nlohmann::json json = {"sensors",
+                               {
+                                   {"temperature", temperature},
+                                   {"humidity", humidity},
+                                   {"brightness", brightness},
+                               }};
+        return json;
     }
 
-    void fromJson(const nlohmann::json &thisAsJson) {
-        temperature = thisAsJson["temperature"];
-        humidity = thisAsJson["humidity"];
-        brightness = thisAsJson["brightness"];
+    void fromJson(const nlohmann::json &json) {
+        temperature = json["temperature"];
+        humidity = json["humidity"];
+        brightness = json["brightness"];
     }
 };
 
-struct ASettings {
+struct AcSettings {
     bool on;
     AcMode mode;
 
-    ASettings() {
+    AcSettings() {
         on = false;
         mode = AcMode::NORMAL;
     }
 
     nlohmann::json toJson() {
-        nlohmann::json thisAsJSON = {"ac",
-                                     {
-                                         {"on", on},
-                                         {"mode", mode},
-                                     }};
-
-        return thisAsJSON;
+        nlohmann::json json = {"ac",
+                               {
+                                   {"on", on},
+                                   {"mode", mode},
+                               }};
+        return json;
     }
 
-    void fromJson(const nlohmann::json &thisAsJson) {
-        on = thisAsJson["on"];
-        mode = thisAsJson["mode"];
+    void fromJson(const nlohmann::json &json) {
+        on = json["on"];
+        mode = json["mode"];
     }
 };
 
@@ -113,36 +111,36 @@ struct SpeakerSettings {
     }
 
     nlohmann::json toJson() {
-        nlohmann::json thisAsJSON = {"speakers",
-                                     {
-                                         {"volume", volume},
-                                         {"bass", bass},
-                                         {"pitch", pitch},
-                                     }};
-
-        return thisAsJSON;
+        nlohmann::json json = {"speakers",
+                               {
+                                   {"volume", volume},
+                                   {"bass", bass},
+                                   {"pitch", pitch},
+                               }};
+        return json;
     }
 
-    void fromJson(nlohmann::json thisAsJson) {
-        volume = thisAsJson["volume"];
-        bass = thisAsJson["bass"];
-        pitch = thisAsJson["pitch"];
+    void fromJson(nlohmann::json json) {
+        volume = json["volume"];
+        bass = json["bass"];
+        pitch = json["pitch"];
     }
 };
 
 class HomeControl {
   public:
     HomeControl();
+    void initPins(const nlohmann::json &pinsJson);
 
     void onUpdate();
 
     void loadDirtyFlag(const nlohmann::json &thisAsJson);
-    void fromJson(const nlohmann::json &thisAsJson);
+    void fromJson(const nlohmann::json &json);
     nlohmann::json toJson();
 
   public:
     LightSettings m_LightSettings;
-    ASettings m_AcSettings;
+    AcSettings m_AcSettings;
     SensorReadings m_SensorReadings;
     SpeakerSettings m_SpeakerSettings;
 

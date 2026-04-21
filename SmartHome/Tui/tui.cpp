@@ -24,23 +24,31 @@ int tui_main(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
 
-    std::mutex homeMutex;
-    HomeControl home;
+    // Load the home and pin configs from disk.
+    std::ifstream pinCfgFile(PIN_CFG_FILE_PATH.c_str());
+    if (!pinCfgFile.good()) {
+        std::cerr << "Error: Cannot open pin config file (in): " << PIN_CFG_FILE_PATH << std::endl;
+        return -1;
+    }
+    std::ifstream homeCfgFileIn(HOME_CFG_FILE_PATH.c_str());
+    if (!homeCfgFileIn.good()) {
+        homeCfgFileIn.open(HOME_INI_FILE_PATH.c_str());
+        if (!homeCfgFileIn.good()) {
+            std::cerr << "Error: Cannot open home config file (in): " << HOME_CFG_FILE_PATH << " or "
+                      << HOME_INI_FILE_PATH << std::endl;
+            return -1;
+        }
+    }
 
-    // Load the config from disk.
-    std::ifstream cfgFileIn(CFG_JSON_FILE_PATH.c_str());
-    if (!cfgFileIn.good()) {
-        cfgFileIn.open(INI_JSON_FILE_PATH.c_str());
-    }
-    if (cfgFileIn.good()) {
-        nlohmann::json cfgJson;
-        cfgFileIn >> cfgJson;
-        home.fromJson(cfgJson);
-    } else {
-        std::cerr << "Error: Cannot open config file (in): " << CFG_JSON_FILE_PATH << " or " << INI_JSON_FILE_PATH
-                  << std::endl;
-        return 1;
-    }
+    HomeControl home;
+    nlohmann::json homeCfgJson;
+    nlohmann::json pinCfgJson;
+    homeCfgFileIn >> homeCfgJson;
+    pinCfgFile >> pinCfgJson;
+    home.fromJson(homeCfgJson);
+    home.initPins(pinCfgJson);
+
+    std::mutex homeMutex;
 
     // --- AC ---
     bool acOn = home.m_AcSettings.on;
@@ -161,7 +169,7 @@ int tui_main(int argc, char *argv[]) {
     ftxui::Component onEvent = CatchEvent(renderer, [&](ftxui::Event event) {
         if (event == ftxui::Event::Character('q')) {
             // Write back to cfg before quitting
-            nlohmann::json cfgJson;
+            nlohmann::json homeCfgJson;
             {
                 std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
                 home.m_AcSettings.on = acOn;
@@ -172,17 +180,17 @@ int tui_main(int argc, char *argv[]) {
                 home.m_LightSettings.livingRoomLightOn = livingRoomOn;
                 home.m_LightSettings.bedroomLightOn = bedroomOn;
                 home.m_LightSettings.kitchenLightOn = kitchenOn;
-                cfgJson = home.toJson();
+                homeCfgJson = home.toJson();
             }
 
-            // Save the config to disk.
-            std::ofstream cfgFileOut(CFG_JSON_FILE_PATH.c_str());
-            if (cfgFileOut.is_open()) {
+            // Save the home config to disk.
+            std::ofstream homeCfgFileOut(HOME_CFG_FILE_PATH.c_str());
+            if (homeCfgFileOut.is_open()) {
                 // Pretty print with 4 spaces indentation.
-                cfgFileOut << cfgJson.dump(4);
-                cfgFileOut.close();
+                homeCfgFileOut << homeCfgJson.dump(4);
+                homeCfgFileOut.close();
             } else {
-                std::cerr << "Error: Cannot open config file (out): " << CFG_JSON_FILE_PATH << std::endl;
+                std::cerr << "Error: Cannot open config file (out): " << HOME_CFG_FILE_PATH << std::endl;
             }
 
             screen.ExitLoopClosure()();

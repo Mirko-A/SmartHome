@@ -26,11 +26,12 @@ class Sensor {
     };
 
   public:
-    Sensor(uint8_t temperaturePin, uint8_t humidityPin, uint8_t brightnessPin);
+    Sensor();
 
-    Sensor() = delete;
     Sensor(const Sensor &) = delete;
     Sensor(Sensor &&) = delete;
+
+    void initPins(uint8_t temperaturePin, uint8_t humidityPin, uint8_t brightnessPin);
 
     float read(Type type);
 

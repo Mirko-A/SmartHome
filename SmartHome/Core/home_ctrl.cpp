@@ -1,8 +1,23 @@
 #include "home_ctrl.h"
 
 HomeControl::HomeControl()
-    : m_LightSettings(), m_AcSettings(), m_SensorReadings(), m_SpeakerSettings(), m_Light(0, 0, 0), m_Ac(0, 0),
-      m_Sensor(0, 0, 0), m_Dirty(false) {}
+    : m_LightSettings(), m_AcSettings(), m_SensorReadings(), m_SpeakerSettings(), m_Dirty(false) {}
+
+void HomeControl::fromJson(const nlohmann::json &json) {
+    m_LightSettings.fromJson(json["lights"]);
+    m_SensorReadings.fromJson(json["sensor_readings"]);
+    m_AcSettings.fromJson(json["ac"]);
+    m_SpeakerSettings.fromJson(json["speakers"]);
+}
+
+void HomeControl::initPins(const nlohmann::json &pinsJson) {
+    nlohmann::json lightPinsJson = pinsJson["lights"];
+    nlohmann::json sensorPinsJson = pinsJson["sensors"];
+    nlohmann::json acPinsJson = pinsJson["ac"];
+    m_Light.initPins(lightPinsJson["living_room"], lightPinsJson["bedroom"], lightPinsJson["kitchen"]);
+    m_Sensor.initPins(sensorPinsJson["temperature"], sensorPinsJson["humidity"], sensorPinsJson["brightness"]);
+    m_Ac.initPins(acPinsJson["pin1"], acPinsJson["pin2"]);
+}
 
 void HomeControl::onUpdate() {
     // Inputs
@@ -19,24 +34,16 @@ void HomeControl::onUpdate() {
     m_Ac.Run();
 }
 
-void HomeControl::fromJson(const nlohmann::json &thisAsJson) {
-    m_LightSettings.fromJson(thisAsJson["lights"]);
-    m_SensorReadings.fromJson(thisAsJson["sensor_readings"]);
-    m_AcSettings.fromJson(thisAsJson["ac"]);
-    m_SpeakerSettings.fromJson(thisAsJson["speakers"]);
-}
-
 void HomeControl::loadDirtyFlag(const nlohmann::json &thisAsJson) {
     m_Dirty = thisAsJson["dirty"];
 }
 
 nlohmann::json HomeControl::toJson() {
-    nlohmann::json thisAsJSON = {
+    nlohmann::json serialized = {
         m_LightSettings.toJson(),   m_SensorReadings.toJson(), m_AcSettings.toJson(),
         m_SpeakerSettings.toJson(), {"dirty", m_Dirty},
     };
-
-    return thisAsJSON;
+    return serialized;
 }
 
 std::string AcModeToString(AcMode mode) {
