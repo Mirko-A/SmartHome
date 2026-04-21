@@ -46,50 +46,54 @@ int tui_main(int argc, char *argv[]) {
     homeCfgFileIn >> homeCfgJson;
     pinCfgFile >> pinCfgJson;
     home.fromJson(homeCfgJson);
-    home.initPins(pinCfgJson);
+    if (auto result = home.initPins(pinCfgJson); !result) {
+        std::cerr << "Error initializing pins: " << result.error() << std::endl;
+        return -1;
+    }
 
+    // Protect access to the home object since it will be updated from the ticker
+    // thread and read from the UI thread.
     std::mutex homeMutex;
-
-    // --- AC ---
-    bool acOn = home.m_AcSettings.on;
-    int acModeIndex = static_cast<int>(home.m_AcSettings.mode);
-
-    // --- Speakers ---
-    int volume = home.m_SpeakerSettings.volume;
-    int bass = home.m_SpeakerSettings.bass;
-    int pitch = home.m_SpeakerSettings.pitch;
 
     // --- Lights ---
     bool livingRoomOn = home.m_LightSettings.livingRoomLightOn;
     bool bedroomOn = home.m_LightSettings.bedroomLightOn;
     bool kitchenOn = home.m_LightSettings.kitchenLightOn;
 
-    // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
-    std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
-    ftxui::Component acModeMenu = ftxui::Toggle(&acModes, &acModeIndex);
-    ftxui::Component acToggle = ftxui::Checkbox("On", &acOn);
+    // --- Speakers ---
+    int volume = home.m_SpeakerSettings.volume;
+    int bass = home.m_SpeakerSettings.bass;
+    int pitch = home.m_SpeakerSettings.pitch;
 
-    // Speaker sliders (0..100)
-    ftxui::Component volumeSlider = ftxui::Slider("", &volume, 0, 100, 1);
-    ftxui::Component bassSlider = ftxui::Slider("", &bass, 0, 100, 1);
-    ftxui::Component pitchSlider = ftxui::Slider("", &pitch, 0, 100, 1);
+    // --- AC ---
+    bool acOn = home.m_AcSettings.on;
+    int acModeIndex = static_cast<int>(home.m_AcSettings.mode);
 
     // Light checkboxes
     ftxui::Component livingRoomCheck = ftxui::Checkbox("Living Room", &livingRoomOn);
     ftxui::Component bedroomCheck = ftxui::Checkbox("Bedroom", &bedroomOn);
     ftxui::Component kitchenCheck = ftxui::Checkbox("Kitchen", &kitchenOn);
-
-    ftxui::Component acContainer = ftxui::Container::Vertical({acToggle, acModeMenu});
-    ftxui::Component speakersContainer = ftxui::Container::Vertical({volumeSlider, bassSlider, pitchSlider});
     ftxui::Component lightsContainer = ftxui::Container::Vertical({livingRoomCheck, bedroomCheck, kitchenCheck});
 
-    ftxui::Component container = ftxui::Container::Vertical({
-        acContainer,
-        speakersContainer,
+    // Speaker sliders (0..100)
+    ftxui::Component volumeSlider = ftxui::Slider("", &volume, 0, 100, 1);
+    ftxui::Component bassSlider = ftxui::Slider("", &bass, 0, 100, 1);
+    ftxui::Component pitchSlider = ftxui::Slider("", &pitch, 0, 100, 1);
+    ftxui::Component speakersContainer = ftxui::Container::Vertical({volumeSlider, bassSlider, pitchSlider});
+
+    // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
+    std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
+    ftxui::Component acModeMenu = ftxui::Toggle(&acModes, &acModeIndex);
+    ftxui::Component acToggle = ftxui::Checkbox("On", &acOn);
+    ftxui::Component acContainer = ftxui::Container::Vertical({acToggle, acModeMenu});
+
+    ftxui::Component interactiveContainer = ftxui::Container::Vertical({
         lightsContainer,
+        speakersContainer,
+        acContainer,
     });
 
-    ftxui::Component renderer = Renderer(container, [&]() -> ftxui::Element {
+    ftxui::Component renderer = Renderer(interactiveContainer, [&]() -> ftxui::Element {
         // Sensor panel
         int temp, humidity, brightness;
         {
@@ -105,15 +109,15 @@ int tui_main(int argc, char *argv[]) {
         });
         ftxui::Element sensors = window(ftxui::text(" Sensors "), sensorsBox);
 
-        // AC panel
-        ftxui::Element acBox = ftxui::vbox({
-            acToggle->Render(),
-            ftxui::separator(),
-            ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
+        // Lights panel
+        ftxui::Element lightsBox = ftxui::vbox({
+            livingRoomCheck->Render(),
+            bedroomCheck->Render(),
+            kitchenCheck->Render(),
         });
-        ftxui::Element ac = window(ftxui::text(" AC "), acBox);
-        if (acContainer->Focused()) {
-            ac = ac | ftxui::color(ftxui::Color::Green);
+        ftxui::Element lights = window(ftxui::text("[1]-Lights "), lightsBox);
+        if (lightsContainer->Focused()) {
+            lights = lights | ftxui::color(ftxui::Color::Green);
         }
 
         // Speakers panel
@@ -133,28 +137,30 @@ int tui_main(int argc, char *argv[]) {
             ftxui::separator(ftxui::Pixel()),
             pitchBox,
         });
-        ftxui::Element speakers = window(ftxui::text(" Speakers "), speakersBox);
+        ftxui::Element speakers = window(ftxui::text("[2]-Speakers "), speakersBox);
         if (speakersContainer->Focused()) {
             speakers = speakers | ftxui::color(ftxui::Color::Green);
         }
 
-        // Lights panel
-        ftxui::Element lightsBox = ftxui::vbox({
-            livingRoomCheck->Render(),
-            bedroomCheck->Render(),
-            kitchenCheck->Render(),
+        // AC panel
+        ftxui::Element acBox = ftxui::vbox({
+            acToggle->Render(),
+            ftxui::separator(),
+            ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
         });
-        ftxui::Element lights = window(ftxui::text(" Lights "), lightsBox);
-        if (lightsContainer->Focused()) {
-            lights = lights | ftxui::color(ftxui::Color::Green);
+        ftxui::Element ac = window(ftxui::text("[3]-AC "), acBox);
+        if (acContainer->Focused()) {
+            ac = ac | ftxui::color(ftxui::Color::Green);
         }
 
         return ftxui::vbox({
-            ftxui::hbox({sensors | ftxui::flex, ac | ftxui::flex}),
-            ftxui::hbox({speakers | ftxui::flex, lights | ftxui::flex}),
+            ftxui::hbox({sensors}),
+            ftxui::hbox({lights | ftxui::flex, speakers | ftxui::flex, ac | ftxui::flex}),
             ftxui::text("  Tab/arrows to navigate  Enter to toggle  q to quit") | ftxui::dim,
         });
     });
+
+    lightsContainer->TakeFocus();
 
     std::atomic<bool> done = false;
     ftxui::ScreenInteractive screen = ftxui::ScreenInteractive::Fullscreen();
@@ -167,7 +173,18 @@ int tui_main(int argc, char *argv[]) {
     });
 
     ftxui::Component onEvent = CatchEvent(renderer, [&](ftxui::Event event) {
-        if (event == ftxui::Event::Character('q')) {
+        bool handled = false;
+
+        if (event == ftxui::Event::Character('1')) {
+            lightsContainer->TakeFocus();
+            handled = true;
+        } else if (event == ftxui::Event::Character('2')) {
+            speakersContainer->TakeFocus();
+            handled = true;
+        } else if (event == ftxui::Event::Character('3')) {
+            acContainer->TakeFocus();
+            handled = true;
+        } else if (event == ftxui::Event::Character('q')) {
             // Write back to cfg before quitting
             nlohmann::json homeCfgJson;
             {
@@ -194,10 +211,8 @@ int tui_main(int argc, char *argv[]) {
             }
 
             screen.ExitLoopClosure()();
-            return true;
-        }
-
-        if (event == ftxui::Event::Custom) {
+            handled = true;
+        } else if (event == ftxui::Event::Custom) {
             // Simulate updates for now.
             // cfg.onUpdate();
             int delta = rand() % 5 - 2; // [-2, 2]
@@ -222,9 +237,10 @@ int tui_main(int argc, char *argv[]) {
                 else if (home.m_SensorReadings.temperature > 50)
                     home.m_SensorReadings.temperature = 50;
             }
+            handled = true;
         }
 
-        return false;
+        return handled;
     });
 
     screen.Loop(onEvent);
