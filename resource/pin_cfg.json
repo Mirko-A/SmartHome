@@ -10,7 +10,7 @@
         "brightness": 6
     },
     "ac": {
-        "pin1": 7,
-        "pin2": 8
+        "pin1": 12,
+        "pin2": 18
     }
 }
