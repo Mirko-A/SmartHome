@@ -2,9 +2,9 @@
 
 Light::Light() {}
 
-void Light::initPins(uint8_t livingRoomPin, uint8_t bedRoomPin, uint8_t kitchenPin) {
+void Light::initPins(uint8_t livingRoomPin, uint8_t bedroomPin, uint8_t kitchenPin) {
     m_Pins.livingRoom = livingRoomPin;
-    m_Pins.bedRoom = bedRoomPin;
+    m_Pins.bedroom = bedroomPin;
     m_Pins.kitchen = kitchenPin;
 
     // TODO: init pins with HAL

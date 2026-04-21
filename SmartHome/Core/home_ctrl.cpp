@@ -5,18 +5,28 @@ HomeControl::HomeControl()
 
 void HomeControl::fromJson(const nlohmann::json &json) {
     m_LightSettings.fromJson(json["lights"]);
-    m_SensorReadings.fromJson(json["sensor_readings"]);
+    m_SensorReadings.fromJson(json["sensors"]);
     m_AcSettings.fromJson(json["ac"]);
     m_SpeakerSettings.fromJson(json["speakers"]);
 }
 
-void HomeControl::initPins(const nlohmann::json &pinsJson) {
-    nlohmann::json lightPinsJson = pinsJson["lights"];
-    nlohmann::json sensorPinsJson = pinsJson["sensors"];
-    nlohmann::json acPinsJson = pinsJson["ac"];
-    m_Light.initPins(lightPinsJson["living_room"], lightPinsJson["bedroom"], lightPinsJson["kitchen"]);
-    m_Sensor.initPins(sensorPinsJson["temperature"], sensorPinsJson["humidity"], sensorPinsJson["brightness"]);
-    m_Ac.initPins(acPinsJson["pin1"], acPinsJson["pin2"]);
+void HomeControl::initPins(const nlohmann::json &pinCfgJson) {
+    nlohmann::json lightPinsJson = pinCfgJson["lights"];
+    uint8_t livingRoomPin = lightPinsJson["living_room"];
+    uint8_t bedroomPin = lightPinsJson["bedroom"];
+    uint8_t kitchenPin = lightPinsJson["kitchen"];
+    m_Light.initPins(livingRoomPin, bedroomPin, kitchenPin);
+
+    nlohmann::json sensorPinsJson = pinCfgJson["sensors"];
+    uint8_t temperaturePin = sensorPinsJson["temperature"];
+    uint8_t humidityPin = sensorPinsJson["humidity"];
+    uint8_t brightnessPin = sensorPinsJson["brightness"];
+    m_Sensor.initPins(temperaturePin, humidityPin, brightnessPin);
+
+    nlohmann::json acPinsJson = pinCfgJson["ac"];
+    uint8_t acPin1 = acPinsJson["pin1"];
+    uint8_t acPin2 = acPinsJson["pin2"];
+    m_Ac.initPins(acPin1, acPin2);
 }
 
 void HomeControl::onUpdate() {
