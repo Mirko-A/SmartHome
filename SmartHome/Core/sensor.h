@@ -1,6 +1,8 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
+#include <expected>
+#include <string>
 // #include "DHT22.h"
 
 #include "hal.h"
@@ -32,7 +34,7 @@ class Sensor {
     Sensor(const Sensor &) = delete;
     Sensor(Sensor &&) = delete;
 
-    void initPins(GpioPin temperaturePin, GpioPin humidityPin, GpioPin brightnessPin);
+    std::expected<void, std::string> initPins(GpioPin temperaturePin, GpioPin humidityPin, GpioPin brightnessPin);
 
     float read(Type type);
 

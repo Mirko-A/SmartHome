@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include <expected>
 #include <string>
 
 #include "ac.h"
@@ -130,9 +131,9 @@ struct SpeakerSettings {
 class HomeControl {
   public:
     HomeControl();
-    void initPins(const nlohmann::json &pinsJson);
+    std::expected<void, std::string> initPins(const nlohmann::json &pinsJson);
 
-    void onUpdate();
+    std::expected<void, std::string> onUpdate();
 
     void loadDirtyFlag(const nlohmann::json &thisAsJson);
     void fromJson(const nlohmann::json &json);

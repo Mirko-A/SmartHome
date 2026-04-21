@@ -50,15 +50,19 @@ enum class PinState : uint8_t {
     HIGH = 1u,
 };
 
-class HAL {
+class Hal {
   public:
-    static HAL &instance() {
-        static HAL hal;
+    static Hal &instance() {
+        static Hal hal;
         return hal;
     }
 
-    HAL(const HAL &) = delete;
-    HAL &operator=(const HAL &) = delete;
+    Hal(const Hal &) = delete;
+    Hal &operator=(const Hal &) = delete;
+
+    bool isInitialized() const {
+        return m_Initialized;
+    }
 
     void pinMode(GpioPin pin, PinMode mode);
 
@@ -72,8 +76,8 @@ class HAL {
     bool readDHT22(GpioPin pin, float &temp, float &humidity);
 
   private:
-    HAL();
-    ~HAL();
+    Hal();
+    ~Hal();
 
     bool m_Initialized;
 };

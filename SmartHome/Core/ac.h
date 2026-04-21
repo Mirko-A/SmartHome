@@ -2,6 +2,8 @@
 #define AC_H
 
 #include <cstdint>
+#include <expected>
+#include <string>
 
 #include "hal.h"
 #include "smart_home_types.h"
@@ -9,7 +11,7 @@
 class Ac {
   public:
     struct Pins {
-        // TODO: add pins
+        // FIXME: Change to actual pins.
         Pins(GpioPin pin1 = GpioPin::NONE, GpioPin pin2 = GpioPin::NONE) {
             this->pin1 = pin1;
             this->pin2 = pin2;
@@ -25,7 +27,7 @@ class Ac {
     Ac(const Ac &) = delete;
     Ac(Ac &&) = delete;
 
-    void initPins(GpioPin pin1, GpioPin pin2);
+    std::expected<void, std::string> initPins(GpioPin pin1, GpioPin pin2);
 
     void setOn(bool on);
     void setMode(AcMode mode);
