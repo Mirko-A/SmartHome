@@ -8,14 +8,14 @@
 class Light {
   public:
     struct Pins {
-        Pins(uint8_t livingRoom = 0U, uint8_t bedRoom = 0U, uint8_t kitchen = 0U) {
+        Pins(uint8_t livingRoom = 0U, uint8_t bedroom = 0U, uint8_t kitchen = 0U) {
             this->livingRoom = livingRoom;
-            this->bedRoom = bedRoom;
+            this->bedroom = bedroom;
             this->kitchen = kitchen;
         };
 
         uint8_t livingRoom;
-        uint8_t bedRoom;
+        uint8_t bedroom;
         uint8_t kitchen;
     };
 

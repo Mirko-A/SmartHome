@@ -1,15 +1,16 @@
 {
-    "ac": {
-        "pin1": 1,
-        "pin2": 2
-    },
     "lights": {
-        "living_room": 3,
-        "kitchen": 4,
-        "bedroom": 5
+        "living_room": 1,
+        "kitchen": 2,
+        "bedroom": 3
     },
     "sensors": {
-        "temperature": 6,
-        "humidity": 7
+        "temperature": 4,
+        "humidity": 5,
+        "brightness": 6
+    },
+    "ac": {
+        "pin1": 7,
+        "pin2": 8
     }
 }
