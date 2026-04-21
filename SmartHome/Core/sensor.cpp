@@ -2,7 +2,7 @@
 
 Sensor::Sensor() {}
 
-void Sensor::initPins(uint8_t temperaturePin, uint8_t humidityPin, uint8_t brightnessPin) {
+void Sensor::initPins(GpioPin temperaturePin, GpioPin humidityPin, GpioPin brightnessPin) {
     m_Pins.temperature = temperaturePin;
     m_Pins.humidity = humidityPin;
     m_Pins.brightness = brightnessPin;

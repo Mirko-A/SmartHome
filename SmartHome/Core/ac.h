@@ -3,19 +3,20 @@
 
 #include <cstdint>
 
+#include "hal.h"
 #include "smart_home_types.h"
 
 class Ac {
   public:
     struct Pins {
         // TODO: add pins
-        Pins(uint8_t pin1 = 0, uint8_t pin2 = 0) {
+        Pins(GpioPin pin1 = GpioPin::NONE, GpioPin pin2 = GpioPin::NONE) {
             this->pin1 = pin1;
             this->pin2 = pin2;
         };
 
-        uint8_t pin1;
-        uint8_t pin2;
+        GpioPin pin1;
+        GpioPin pin2;
     };
 
   public:
@@ -24,7 +25,7 @@ class Ac {
     Ac(const Ac &) = delete;
     Ac(Ac &&) = delete;
 
-    void initPins(uint8_t pin1, uint8_t pin2);
+    void initPins(GpioPin pin1, GpioPin pin2);
 
     void setOn(bool on);
     void setMode(AcMode mode);

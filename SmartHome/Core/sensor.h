@@ -3,7 +3,7 @@
 
 // #include "DHT22.h"
 
-#include <cstdint>
+#include "hal.h"
 
 class Sensor {
   public:
@@ -14,15 +14,16 @@ class Sensor {
     };
 
     struct Pins {
-        Pins(uint8_t temperature = 0U, uint8_t humidity = 0U, uint8_t brightness = 0U) {
+        Pins(GpioPin temperature = GpioPin::NONE, GpioPin humidity = GpioPin::NONE,
+             GpioPin brightness = GpioPin::NONE) {
             this->temperature = temperature;
             this->humidity = humidity;
             this->brightness = brightness;
         };
 
-        uint8_t temperature;
-        uint8_t humidity;
-        uint8_t brightness;
+        GpioPin temperature;
+        GpioPin humidity;
+        GpioPin brightness;
     };
 
   public:
@@ -31,7 +32,7 @@ class Sensor {
     Sensor(const Sensor &) = delete;
     Sensor(Sensor &&) = delete;
 
-    void initPins(uint8_t temperaturePin, uint8_t humidityPin, uint8_t brightnessPin);
+    void initPins(GpioPin temperaturePin, GpioPin humidityPin, GpioPin brightnessPin);
 
     float read(Type type);
 

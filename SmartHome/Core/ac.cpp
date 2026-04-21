@@ -2,7 +2,7 @@
 
 Ac::Ac() : m_On(false), m_Mode(AcMode::NORMAL), m_Speed(0) {}
 
-void Ac::initPins(uint8_t pin1, uint8_t pin2) {
+void Ac::initPins(GpioPin pin1, GpioPin pin2) {
     m_Pins.pin1 = pin1;
     m_Pins.pin2 = pin2;
 

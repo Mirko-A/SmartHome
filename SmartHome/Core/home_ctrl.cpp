@@ -12,20 +12,20 @@ void HomeControl::fromJson(const nlohmann::json &json) {
 
 void HomeControl::initPins(const nlohmann::json &pinCfgJson) {
     nlohmann::json lightPinsJson = pinCfgJson["lights"];
-    uint8_t livingRoomPin = lightPinsJson["living_room"];
-    uint8_t bedroomPin = lightPinsJson["bedroom"];
-    uint8_t kitchenPin = lightPinsJson["kitchen"];
+    GpioPin livingRoomPin = static_cast<GpioPin>(lightPinsJson["living_room"].get<uint8_t>());
+    GpioPin bedroomPin = static_cast<GpioPin>(lightPinsJson["bedroom"].get<uint8_t>());
+    GpioPin kitchenPin = static_cast<GpioPin>(lightPinsJson["kitchen"].get<uint8_t>());
     m_Light.initPins(livingRoomPin, bedroomPin, kitchenPin);
 
     nlohmann::json sensorPinsJson = pinCfgJson["sensors"];
-    uint8_t temperaturePin = sensorPinsJson["temperature"];
-    uint8_t humidityPin = sensorPinsJson["humidity"];
-    uint8_t brightnessPin = sensorPinsJson["brightness"];
+    GpioPin temperaturePin = static_cast<GpioPin>(sensorPinsJson["temperature"].get<uint8_t>());
+    GpioPin humidityPin = static_cast<GpioPin>(sensorPinsJson["humidity"].get<uint8_t>());
+    GpioPin brightnessPin = static_cast<GpioPin>(sensorPinsJson["brightness"].get<uint8_t>());
     m_Sensor.initPins(temperaturePin, humidityPin, brightnessPin);
 
     nlohmann::json acPinsJson = pinCfgJson["ac"];
-    uint8_t acPin1 = acPinsJson["pin1"];
-    uint8_t acPin2 = acPinsJson["pin2"];
+    GpioPin acPin1 = static_cast<GpioPin>(acPinsJson["pin1"].get<uint8_t>());
+    GpioPin acPin2 = static_cast<GpioPin>(acPinsJson["pin2"].get<uint8_t>());
     m_Ac.initPins(acPin1, acPin2);
 }
 
