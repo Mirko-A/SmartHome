@@ -5,10 +5,15 @@
 #include <string>
 
 #include "gpio.h"
-#include "smart_home_types.h"
 
 class Light {
   public:
+    enum class Location {
+        LIVING_ROOM = 0x00,
+        BEDROOM,
+        KITCHEN,
+    };
+
     struct Pins {
         Pins(hal::GpioPin livingRoom, hal::GpioPin bedroom, hal::GpioPin kitchen) {
             this->livingRoom = livingRoom;
@@ -30,7 +35,7 @@ class Light {
     Light(Light &&) = default;
     Light &operator=(Light &&) = default;
 
-    std::expected<void, std::string> setOn(bool on, LightLocation location);
+    std::expected<void, std::string> setOn(bool on, Light::Location location);
 
   private:
     Light(hal::GpioPin livingRoom, hal::GpioPin bedroom, hal::GpioPin kitchen);

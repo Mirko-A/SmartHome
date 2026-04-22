@@ -192,7 +192,7 @@ int tui_main(int argc, char *argv[]) {
             {
                 std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
                 home.m_AcSettings.on = acOn;
-                home.m_AcSettings.mode = static_cast<AcMode>(acModeIndex);
+                home.m_AcSettings.mode = static_cast<Ac::Mode>(acModeIndex);
                 home.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
                 home.m_SpeakerSettings.bass = static_cast<int16_t>(bass);
                 home.m_SpeakerSettings.pitch = static_cast<int16_t>(pitch);

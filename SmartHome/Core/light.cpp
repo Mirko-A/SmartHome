@@ -24,20 +24,18 @@ std::expected<Light, std::string> Light::create(hal::GpioPin livingRoomPin, hal:
     return Light(livingRoomPin, bedroomPin, kitchenPin);
 }
 
-std::expected<void, std::string> Light::setOn(bool on, LightLocation location) {
+std::expected<void, std::string> Light::setOn(bool on, Light::Location location) {
     hal::GpioPin pin;
     switch (location) {
-    case LightLocation::LIVING_ROOM:
+    case Light::Location::LIVING_ROOM:
         pin = m_Pins.livingRoom;
         break;
-    case LightLocation::BEDROOM:
+    case Light::Location::BEDROOM:
         pin = m_Pins.bedroom;
         break;
-    case LightLocation::KITCHEN:
+    case Light::Location::KITCHEN:
         pin = m_Pins.kitchen;
         break;
-    default:
-        return std::unexpected("Invalid light location");
     }
 
     auto gpioResult = hal::Gpio::instance();

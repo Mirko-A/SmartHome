@@ -1,7 +1,6 @@
 #include "ac.h"
 
-Ac::Ac(hal::GpioPin pin1, hal::GpioPin pin2)
-    : m_Pins(pin1, pin2), m_On(false), m_Mode(AcMode::NORMAL), m_Speed(0) {}
+Ac::Ac(hal::GpioPin pin1, hal::GpioPin pin2) : m_Pins(pin1, pin2), m_On(false), m_Mode(Ac::Mode::NORMAL), m_Speed(0) {}
 
 std::expected<Ac, std::string> Ac::create(hal::GpioPin pin1, hal::GpioPin pin2) {
     auto gpioResult = hal::Gpio::instance();
@@ -24,7 +23,7 @@ void Ac::setOn(bool on) {
     m_On = on;
 }
 
-void Ac::setMode(AcMode mode) {
+void Ac::setMode(Ac::Mode mode) {
     m_Mode = mode;
 }
 
@@ -37,13 +36,13 @@ void Ac::Run() {
     if (m_On) {
         // Start AC
         switch (m_Mode) {
-        case AcMode::NORMAL: {
+        case Ac::Mode::NORMAL: {
             // Run at m_Speed
         } break;
-        case AcMode::FAST: {
+        case Ac::Mode::FAST: {
             // Run at 1.5 * m_Speed
         } break;
-        case AcMode::TURBO: {
+        case Ac::Mode::TURBO: {
             // Run at 2 * m_Speed
         } break;
         default: {

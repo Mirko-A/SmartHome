@@ -6,10 +6,15 @@
 #include <string>
 
 #include "gpio.h"
-#include "smart_home_types.h"
 
 class Ac {
   public:
+    enum class Mode {
+        NORMAL,
+        FAST,
+        TURBO,
+    };
+
     struct Pins {
         Pins(hal::GpioPin pin1, hal::GpioPin pin2) {
             this->pin1 = pin1;
@@ -29,8 +34,19 @@ class Ac {
     Ac &operator=(Ac &&) = default;
 
     void setOn(bool on);
-    void setMode(AcMode mode);
+    void setMode(Ac::Mode mode);
     void setSpeed(uint8_t speed);
+
+    std::string modeAsString() const {
+        switch (m_Mode) {
+        case Ac::Mode::NORMAL:
+            return "Normal";
+        case Ac::Mode::FAST:
+            return "Fast";
+        case Ac::Mode::TURBO:
+            return "Turbo";
+        }
+    }
 
     void Run();
 
@@ -39,7 +55,7 @@ class Ac {
 
     Pins m_Pins;
     bool m_On;
-    AcMode m_Mode;
+    Ac::Mode m_Mode;
     uint8_t m_Speed;
 };
 

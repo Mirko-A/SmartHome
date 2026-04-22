@@ -48,24 +48,3 @@ nlohmann::json HomeControl::toJson() {
     };
     return serialized;
 }
-
-std::string AcModeToString(AcMode mode) {
-    std::string modeStr;
-
-    switch (mode) {
-    case AcMode::NORMAL:
-        modeStr = "Normal";
-        break;
-    case AcMode::FAST:
-        modeStr = "Fast";
-        break;
-    case AcMode::TURBO:
-        modeStr = "Turbo";
-        break;
-    default:
-        modeStr = "Error";
-        break;
-    }
-
-    return modeStr;
-}

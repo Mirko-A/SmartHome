@@ -10,7 +10,6 @@
 #include "light.h"
 #include "nlohmann/json.hpp"
 #include "sensor.h"
-#include "smart_home_types.h"
 
 const std::string HOME_INI_FILE_PATH = "../resource/ini_cfg.json";
 const std::string HOME_CFG_FILE_PATH = "../resource/home_cfg.json";
@@ -78,11 +77,11 @@ struct SensorReadings {
 
 struct AcSettings {
     bool on;
-    AcMode mode;
+    Ac::Mode mode;
 
     AcSettings() {
         on = false;
-        mode = AcMode::NORMAL;
+        mode = Ac::Mode::NORMAL;
     }
 
     nlohmann::json toJson() {
@@ -162,7 +161,5 @@ class HomeControl {
   public:
     bool m_Dirty;
 };
-
-std::string AcModeToString(AcMode mode);
 
 #endif // HOME_CTRL_H
