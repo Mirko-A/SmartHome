@@ -1,27 +1,27 @@
 #include "sensor.h"
 
-Sensor::Sensor() {}
+Sensor::Sensor(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness)
+    : m_Pins(temperature, humidity, brightness) {}
 
-std::expected<void, std::string> Sensor::initPins(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
+std::expected<Sensor, std::string> Sensor::create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
                                                   hal::GpioPin brightnessPin) {
-    m_Pins.temperature = temperaturePin;
-    m_Pins.humidity = humidityPin;
-    m_Pins.brightness = brightnessPin;
+    auto gpioResult = hal::Gpio::instance();
+    if (!gpioResult) {
+        return std::unexpected(gpioResult.error());
+    }
+    hal::Gpio &gpio = gpioResult->get();
 
-    if (m_Pins.temperature == hal::GpioPin::NONE || m_Pins.humidity == hal::GpioPin::NONE ||
-        m_Pins.brightness == hal::GpioPin::NONE) {
-        return std::unexpected("Invalid GPIO pin(s) for sensors");
+    if (auto r = gpio.setPinMode(temperaturePin, hal::PinMode::INPUT); !r) {
+        return std::unexpected(r.error());
+    }
+    if (auto r = gpio.setPinMode(humidityPin, hal::PinMode::INPUT); !r) {
+        return std::unexpected(r.error());
+    }
+    if (auto r = gpio.setPinMode(brightnessPin, hal::PinMode::INPUT); !r) {
+        return std::unexpected(r.error());
     }
 
-    hal::Gpio &gpio = hal::Gpio::instance();
-    if (!gpio.isInitialized()) {
-        return std::unexpected("gpio initialization failed");
-    }
-
-    gpio.pinMode(m_Pins.temperature, hal::PinMode::INPUT);
-    gpio.pinMode(m_Pins.humidity, hal::PinMode::INPUT);
-    gpio.pinMode(m_Pins.brightness, hal::PinMode::INPUT);
-    return std::expected<void, std::string>();
+    return Sensor(temperaturePin, humidityPin, brightnessPin);
 }
 
 float Sensor::read(Type type) {

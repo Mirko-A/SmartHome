@@ -41,7 +41,7 @@ struct LightSettings {
         return json;
     }
 
-    void fromJson(const nlohmann::json &json) {
+    void loadFromJson(const nlohmann::json &json) {
         livingRoomLightOn = json["living_room"];
         bedroomLightOn = json["bedroom"];
         kitchenLightOn = json["kitchen"];
@@ -69,7 +69,7 @@ struct SensorReadings {
         return json;
     }
 
-    void fromJson(const nlohmann::json &json) {
+    void loadFromJson(const nlohmann::json &json) {
         temperature = json["temperature"];
         humidity = json["humidity"];
         brightness = json["brightness"];
@@ -94,7 +94,7 @@ struct AcSettings {
         return json;
     }
 
-    void fromJson(const nlohmann::json &json) {
+    void loadFromJson(const nlohmann::json &json) {
         on = json["on"];
         mode = json["mode"];
     }
@@ -121,7 +121,7 @@ struct SpeakerSettings {
         return json;
     }
 
-    void fromJson(nlohmann::json json) {
+    void loadFromJson(nlohmann::json json) {
         volume = json["volume"];
         bass = json["bass"];
         pitch = json["pitch"];
@@ -132,12 +132,21 @@ class HomeControl {
   public:
     HomeControl();
     std::expected<void, std::string> initPins(const nlohmann::json &pinsJson);
+    static std::expected<HomeControl, std::string> create(const nlohmann::json &pinCfgJson);
+
+    HomeControl(const HomeControl &) = delete;
+    HomeControl &operator=(const HomeControl &) = delete;
+    HomeControl(HomeControl &&) = default;
+    HomeControl &operator=(HomeControl &&) = default;
 
     std::expected<void, std::string> onUpdate();
 
     void loadDirtyFlag(const nlohmann::json &thisAsJson);
-    void fromJson(const nlohmann::json &json);
+    void loadFromJson(const nlohmann::json &json);
     nlohmann::json toJson();
+
+  private:
+    HomeControl(Light light, Ac ac, Sensor sensor);
 
   public:
     LightSettings m_LightSettings;

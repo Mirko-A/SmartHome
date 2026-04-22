@@ -1,27 +1,27 @@
 #include "light.h"
 
-Light::Light() {}
+Light::Light(hal::GpioPin livingRoom, hal::GpioPin bedroom, hal::GpioPin kitchen)
+    : m_Pins(livingRoom, bedroom, kitchen) {}
 
-std::expected<void, std::string> Light::initPins(hal::GpioPin livingRoomPin, hal::GpioPin bedroomPin,
-                                                 hal::GpioPin kitchenPin) {
-    m_Pins.livingRoom = livingRoomPin;
-    m_Pins.bedroom = bedroomPin;
-    m_Pins.kitchen = kitchenPin;
+std::expected<Light, std::string> Light::create(hal::GpioPin livingRoomPin, hal::GpioPin bedroomPin,
+                                                hal::GpioPin kitchenPin) {
+    auto gpioResult = hal::Gpio::instance();
+    if (!gpioResult) {
+        return std::unexpected(gpioResult.error());
+    }
+    hal::Gpio &gpio = gpioResult->get();
 
-    if (m_Pins.livingRoom == hal::GpioPin::NONE || m_Pins.bedroom == hal::GpioPin::NONE ||
-        m_Pins.kitchen == hal::GpioPin::NONE) {
-        return std::unexpected("Invalid GPIO pin(s) for lights");
+    if (auto r = gpio.setPinMode(livingRoomPin, hal::PinMode::OUTPUT); !r) {
+        return std::unexpected(r.error());
+    }
+    if (auto r = gpio.setPinMode(bedroomPin, hal::PinMode::OUTPUT); !r) {
+        return std::unexpected(r.error());
+    }
+    if (auto r = gpio.setPinMode(kitchenPin, hal::PinMode::OUTPUT); !r) {
+        return std::unexpected(r.error());
     }
 
-    hal::Gpio &gpio = hal::Gpio::instance();
-    if (!gpio.isInitialized()) {
-        return std::unexpected("gpio initialization failed");
-    }
-
-    gpio.pinMode(m_Pins.livingRoom, hal::PinMode::OUTPUT);
-    gpio.pinMode(m_Pins.bedroom, hal::PinMode::OUTPUT);
-    gpio.pinMode(m_Pins.kitchen, hal::PinMode::OUTPUT);
-    return std::expected<void, std::string>();
+    return Light(livingRoomPin, bedroomPin, kitchenPin);
 }
 
 std::expected<void, std::string> Light::setOn(bool on, LightLocation location) {
@@ -40,11 +40,11 @@ std::expected<void, std::string> Light::setOn(bool on, LightLocation location) {
         return std::unexpected("Invalid light location");
     }
 
-    hal::Gpio &gpio = hal::Gpio::instance();
-    if (!gpio.isInitialized()) {
-        return std::unexpected("gpio initialization failed");
+    auto gpioResult = hal::Gpio::instance();
+    if (!gpioResult) {
+        return std::unexpected(gpioResult.error());
     }
+    hal::Gpio &gpio = gpioResult->get();
 
-    gpio.digitalWrite(pin, on ? hal::PinState::HIGH : hal::PinState::LOW);
-    return std::expected<void, std::string>();
+    return gpio.digitalWrite(pin, on ? hal::PinState::HIGH : hal::PinState::LOW);
 }

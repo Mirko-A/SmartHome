@@ -40,16 +40,18 @@ int tui_main(int argc, char *argv[]) {
         }
     }
 
-    HomeControl home;
     nlohmann::json homeCfgJson;
     nlohmann::json pinCfgJson;
     homeCfgFileIn >> homeCfgJson;
     pinCfgFile >> pinCfgJson;
-    home.fromJson(homeCfgJson);
-    if (auto result = home.initPins(pinCfgJson); !result) {
-        std::cerr << "Error initializing pins: " << result.error() << std::endl;
+
+    auto homeResult = HomeControl::create(pinCfgJson);
+    if (!homeResult) {
+        std::cerr << "Error initializing pins: " << homeResult.error() << std::endl;
         return -1;
     }
+    HomeControl home = std::move(*homeResult);
+    home.loadFromJson(homeCfgJson);
 
     // Protect access to the home object since it will be updated from the ticker
     // thread and read from the UI thread.

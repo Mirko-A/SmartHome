@@ -16,8 +16,7 @@ class Sensor {
     };
 
     struct Pins {
-        Pins(hal::GpioPin temperature = hal::GpioPin::NONE, hal::GpioPin humidity = hal::GpioPin::NONE,
-             hal::GpioPin brightness = hal::GpioPin::NONE);
+        Pins(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness);
 
         hal::GpioPin temperature;
         hal::GpioPin humidity;
@@ -25,17 +24,19 @@ class Sensor {
     };
 
   public:
-    Sensor();
+    static std::expected<Sensor, std::string> create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
+                                                     hal::GpioPin brightnessPin);
 
     Sensor(const Sensor &) = delete;
-    Sensor(Sensor &&) = delete;
-
-    std::expected<void, std::string> initPins(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
-                                              hal::GpioPin brightnessPin);
+    Sensor &operator=(const Sensor &) = delete;
+    Sensor(Sensor &&) = default;
+    Sensor &operator=(Sensor &&) = default;
 
     float read(Type type);
 
   private:
+    Sensor(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness);
+
     Pins m_Pins;
 };
 

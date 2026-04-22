@@ -11,8 +11,7 @@
 class Ac {
   public:
     struct Pins {
-        // FIXME: Change to actual pins.
-        Pins(hal::GpioPin pin1 = hal::GpioPin::NONE, hal::GpioPin pin2 = hal::GpioPin::NONE) {
+        Pins(hal::GpioPin pin1, hal::GpioPin pin2) {
             this->pin1 = pin1;
             this->pin2 = pin2;
         };
@@ -22,12 +21,12 @@ class Ac {
     };
 
   public:
-    Ac();
+    static std::expected<Ac, std::string> create(hal::GpioPin pin1, hal::GpioPin pin2);
 
     Ac(const Ac &) = delete;
-    Ac(Ac &&) = delete;
-
-    std::expected<void, std::string> initPins(hal::GpioPin pin1, hal::GpioPin pin2);
+    Ac &operator=(const Ac &) = delete;
+    Ac(Ac &&) = default;
+    Ac &operator=(Ac &&) = default;
 
     void setOn(bool on);
     void setMode(AcMode mode);
@@ -36,6 +35,8 @@ class Ac {
     void Run();
 
   private:
+    Ac(hal::GpioPin pin1, hal::GpioPin pin2);
+
     Pins m_Pins;
     bool m_On;
     AcMode m_Mode;

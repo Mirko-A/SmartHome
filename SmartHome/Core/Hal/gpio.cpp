@@ -14,24 +14,37 @@ namespace hal {
 
 Gpio::Gpio() {
     m_Initialized = (wiringPiSetup() >= 0);
+    m_PinModes = {};
 }
 
 Gpio::~Gpio() = default;
 
-void Gpio::pinMode(GpioPin pin, PinMode mode) {
-    if (pin == GpioPin::NONE) {
-        return;
+std::expected<void, std::string> Gpio::setPinMode(GpioPin pin, PinMode mode) {
+    std::size_t idx = static_cast<std::size_t>(pin);
+    if (m_PinModes[idx].has_value()) {
+        return std::unexpected("Pin mode already set");
+    }
+    bool isPwmPin = (pin == GpioPin::GPIO_12 || pin == GpioPin::GPIO_18);
+    if (mode == PinMode::PWM_OUTPUT && !isPwmPin) {
+        return std::unexpected("Pin does not support PWM output");
     }
 #if HAL_HAS_WIRINGPI
     ::pinMode(static_cast<int>(pin), static_cast<int>(mode));
+    m_PinModes[idx] = mode;
 #else
     (void)mode;
 #endif
+    return std::expected<void, std::string>();
 }
 
-PinState Gpio::digitalRead(GpioPin pin) {
-    if (pin == GpioPin::NONE) {
-        return PinState::LOW;
+std::expected<PinState, std::string> Gpio::digitalRead(GpioPin pin) {
+    std::size_t idx = static_cast<std::size_t>(pin);
+    std::optional<PinMode> mode = m_PinModes[idx];
+    if (!mode.has_value()) {
+        return std::unexpected("Pin mode not set");
+    }
+    if (mode.value() != PinMode::INPUT) {
+        return std::unexpected("Pin mode is not INPUT");
     }
 #if HAL_HAS_WIRINGPI
     return (::digitalRead(static_cast<int>(pin)) != 0) ? PinState::HIGH : PinState::LOW;
@@ -40,20 +53,31 @@ PinState Gpio::digitalRead(GpioPin pin) {
 #endif
 }
 
-void Gpio::digitalWrite(GpioPin pin, PinState state) {
-    if (pin == GpioPin::NONE) {
-        return;
+std::expected<void, std::string> Gpio::digitalWrite(GpioPin pin, PinState state) {
+    std::size_t idx = static_cast<std::size_t>(pin);
+    std::optional<PinMode> mode = m_PinModes[idx];
+    if (!mode.has_value()) {
+        return std::unexpected("Pin mode not set");
+    }
+    if (mode.value() != PinMode::OUTPUT) {
+        return std::unexpected("Pin mode is not OUTPUT");
     }
 #if HAL_HAS_WIRINGPI
     ::digitalWrite(static_cast<int>(pin), static_cast<int>(state));
 #else
     (void)state;
 #endif
+    return std::expected<void, std::string>();
 }
 
-int Gpio::analogRead(GpioPin pin) {
-    if (pin == GpioPin::NONE) {
-        return 0;
+std::expected<int, std::string> Gpio::analogRead(GpioPin pin) {
+    std::size_t idx = static_cast<std::size_t>(pin);
+    std::optional<PinMode> mode = m_PinModes[idx];
+    if (!mode.has_value()) {
+        return std::unexpected("Pin mode not set");
+    }
+    if (mode.value() != PinMode::INPUT) {
+        return std::unexpected("Pin mode is not INPUT");
     }
 #if HAL_HAS_WIRINGPI
     return ::analogRead(static_cast<int>(pin));
@@ -62,14 +86,20 @@ int Gpio::analogRead(GpioPin pin) {
 #endif
 }
 
-void Gpio::pwmWrite(GpioPin pin, uint16_t value) {
-    if (pin == GpioPin::NONE) {
-        return;
+std::expected<void, std::string> Gpio::pwmWrite(GpioPin pin, uint16_t value) {
+    std::size_t idx = static_cast<std::size_t>(pin);
+    std::optional<PinMode> mode = m_PinModes[idx];
+    if (!mode.has_value()) {
+        return std::unexpected("Pin mode not set");
+    }
+    if (mode.value() != PinMode::PWM_OUTPUT) {
+        return std::unexpected("Pin mode is not PWM_OUTPUT");
     }
 #if HAL_HAS_WIRINGPI
     ::pwmWrite(static_cast<int>(pin), static_cast<int>(value));
 #else
     (void)value;
 #endif
+    return std::expected<void, std::string>();
 }
 } // namespace hal

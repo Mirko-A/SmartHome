@@ -1,12 +1,16 @@
 #ifndef GPIO_H
 #define GPIO_H
 
+#include <array>
 #include <cstdint>
+#include <expected>
+#include <functional>
+#include <optional>
+#include <string>
 
 namespace hal {
 
 enum class GpioPin : uint8_t {
-    NONE = 0xFFu,
     GPIO_0 = 0u,
     GPIO_1,
     GPIO_2,
@@ -38,6 +42,7 @@ enum class GpioPin : uint8_t {
     GPIO_28,
     GPIO_29,
     GPIO_30,
+    COUNT,
 };
 
 enum class PinMode : uint8_t {
@@ -54,26 +59,26 @@ enum class PinState : uint8_t {
 
 class Gpio {
   public:
-    static Gpio &instance() {
+    static std::expected<std::reference_wrapper<Gpio>, std::string> instance() {
         static Gpio gpio;
-        return gpio;
+        if (gpio.m_Initialized) {
+            return std::ref(gpio);
+        } else {
+            return std::unexpected("gpio initialization failed");
+        }
     }
 
     Gpio(const Gpio &) = delete;
     Gpio &operator=(const Gpio &) = delete;
 
-    bool isInitialized() const {
-        return m_Initialized;
-    }
+    std::expected<void, std::string> setPinMode(GpioPin pin, PinMode mode);
 
-    void pinMode(GpioPin pin, PinMode mode);
+    std::expected<PinState, std::string> digitalRead(GpioPin pin);
+    std::expected<void, std::string> digitalWrite(GpioPin pin, PinState state);
 
-    PinState digitalRead(GpioPin pin);
-    void digitalWrite(GpioPin pin, PinState state);
+    std::expected<int, std::string> analogRead(GpioPin pin);
 
-    int analogRead(GpioPin pin);
-
-    void pwmWrite(GpioPin pin, uint16_t value);
+    std::expected<void, std::string> pwmWrite(GpioPin pin, uint16_t value);
 
     bool readDHT22(GpioPin pin, float &temp, float &humidity);
 
@@ -81,6 +86,7 @@ class Gpio {
     Gpio();
     ~Gpio();
 
+    std::array<std::optional<PinMode>, static_cast<std::size_t>(GpioPin::COUNT)> m_PinModes;
     bool m_Initialized;
 };
 
