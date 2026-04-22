@@ -5,20 +5,20 @@
 #include <expected>
 #include <string>
 
-#include "hal.h"
+#include "gpio.h"
 #include "smart_home_types.h"
 
 class Ac {
   public:
     struct Pins {
         // FIXME: Change to actual pins.
-        Pins(GpioPin pin1 = GpioPin::NONE, GpioPin pin2 = GpioPin::NONE) {
+        Pins(hal::GpioPin pin1 = hal::GpioPin::NONE, hal::GpioPin pin2 = hal::GpioPin::NONE) {
             this->pin1 = pin1;
             this->pin2 = pin2;
         };
 
-        GpioPin pin1;
-        GpioPin pin2;
+        hal::GpioPin pin1;
+        hal::GpioPin pin2;
     };
 
   public:
@@ -27,7 +27,7 @@ class Ac {
     Ac(const Ac &) = delete;
     Ac(Ac &&) = delete;
 
-    std::expected<void, std::string> initPins(GpioPin pin1, GpioPin pin2);
+    std::expected<void, std::string> initPins(hal::GpioPin pin1, hal::GpioPin pin2);
 
     void setOn(bool on);
     void setMode(AcMode mode);

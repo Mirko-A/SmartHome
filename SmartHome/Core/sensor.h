@@ -5,7 +5,7 @@
 #include <string>
 // #include "DHT22.h"
 
-#include "hal.h"
+#include "gpio.h"
 
 class Sensor {
   public:
@@ -16,16 +16,12 @@ class Sensor {
     };
 
     struct Pins {
-        Pins(GpioPin temperature = GpioPin::NONE, GpioPin humidity = GpioPin::NONE,
-             GpioPin brightness = GpioPin::NONE) {
-            this->temperature = temperature;
-            this->humidity = humidity;
-            this->brightness = brightness;
-        };
+        Pins(hal::GpioPin temperature = hal::GpioPin::NONE, hal::GpioPin humidity = hal::GpioPin::NONE,
+             hal::GpioPin brightness = hal::GpioPin::NONE);
 
-        GpioPin temperature;
-        GpioPin humidity;
-        GpioPin brightness;
+        hal::GpioPin temperature;
+        hal::GpioPin humidity;
+        hal::GpioPin brightness;
     };
 
   public:
@@ -34,7 +30,8 @@ class Sensor {
     Sensor(const Sensor &) = delete;
     Sensor(Sensor &&) = delete;
 
-    std::expected<void, std::string> initPins(GpioPin temperaturePin, GpioPin humidityPin, GpioPin brightnessPin);
+    std::expected<void, std::string> initPins(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
+                                              hal::GpioPin brightnessPin);
 
     float read(Type type);
 

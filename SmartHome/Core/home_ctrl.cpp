@@ -12,24 +12,24 @@ void HomeControl::fromJson(const nlohmann::json &json) {
 
 std::expected<void, std::string> HomeControl::initPins(const nlohmann::json &pinCfgJson) {
     nlohmann::json lightPinsJson = pinCfgJson["lights"];
-    GpioPin livingRoomPin = static_cast<GpioPin>(lightPinsJson["living_room"].get<uint8_t>());
-    GpioPin bedroomPin = static_cast<GpioPin>(lightPinsJson["bedroom"].get<uint8_t>());
-    GpioPin kitchenPin = static_cast<GpioPin>(lightPinsJson["kitchen"].get<uint8_t>());
+    hal::GpioPin livingRoomPin = static_cast<hal::GpioPin>(lightPinsJson["living_room"].get<uint8_t>());
+    hal::GpioPin bedroomPin = static_cast<hal::GpioPin>(lightPinsJson["bedroom"].get<uint8_t>());
+    hal::GpioPin kitchenPin = static_cast<hal::GpioPin>(lightPinsJson["kitchen"].get<uint8_t>());
     if (auto result = m_Light.initPins(livingRoomPin, bedroomPin, kitchenPin); !result) {
         return std::unexpected(result.error());
     }
 
     nlohmann::json sensorPinsJson = pinCfgJson["sensors"];
-    GpioPin temperaturePin = static_cast<GpioPin>(sensorPinsJson["temperature"].get<uint8_t>());
-    GpioPin humidityPin = static_cast<GpioPin>(sensorPinsJson["humidity"].get<uint8_t>());
-    GpioPin brightnessPin = static_cast<GpioPin>(sensorPinsJson["brightness"].get<uint8_t>());
+    hal::GpioPin temperaturePin = static_cast<hal::GpioPin>(sensorPinsJson["temperature"].get<uint8_t>());
+    hal::GpioPin humidityPin = static_cast<hal::GpioPin>(sensorPinsJson["humidity"].get<uint8_t>());
+    hal::GpioPin brightnessPin = static_cast<hal::GpioPin>(sensorPinsJson["brightness"].get<uint8_t>());
     if (auto result = m_Sensor.initPins(temperaturePin, humidityPin, brightnessPin); !result) {
         return std::unexpected(result.error());
     }
 
     nlohmann::json acPinsJson = pinCfgJson["ac"];
-    GpioPin acPin1 = static_cast<GpioPin>(acPinsJson["pin1"].get<uint8_t>());
-    GpioPin acPin2 = static_cast<GpioPin>(acPinsJson["pin2"].get<uint8_t>());
+    hal::GpioPin acPin1 = static_cast<hal::GpioPin>(acPinsJson["pin1"].get<uint8_t>());
+    hal::GpioPin acPin2 = static_cast<hal::GpioPin>(acPinsJson["pin2"].get<uint8_t>());
     if (auto result = m_Ac.initPins(acPin1, acPin2); !result) {
         return std::unexpected(result.error());
     }

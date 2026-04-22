@@ -2,36 +2,36 @@
 
 Ac::Ac() : m_On(false), m_Mode(AcMode::NORMAL), m_Speed(0) {}
 
-std::expected<void, std::string> Ac::initPins(GpioPin pin1, GpioPin pin2) {
+std::expected<void, std::string> Ac::initPins(hal::GpioPin pin1, hal::GpioPin pin2) {
     m_Pins.pin1 = pin1;
     m_Pins.pin2 = pin2;
 
-    if (m_Pins.pin1 == GpioPin::NONE || m_Pins.pin2 == GpioPin::NONE) {
+    if (m_Pins.pin1 == hal::GpioPin::NONE || m_Pins.pin2 == hal::GpioPin::NONE) {
         return std::unexpected("Invalid GPIO pin(s) for AC");
     }
     // Only GPIO pins that support PWM output (12 and 18) can be used for AC control.
     switch (m_Pins.pin1) {
-    case GpioPin::GPIO_12:
-    case GpioPin::GPIO_18:
+    case hal::GpioPin::GPIO_12:
+    case hal::GpioPin::GPIO_18:
         break;
     default:
         return std::unexpected("Invalid GPIO pin 1 for AC");
     }
     switch (m_Pins.pin2) {
-    case GpioPin::GPIO_12:
-    case GpioPin::GPIO_18:
+    case hal::GpioPin::GPIO_12:
+    case hal::GpioPin::GPIO_18:
         break;
     default:
         return std::unexpected("Invalid GPIO pin 2 for AC");
     }
 
-    Hal &hal = Hal::instance();
-    if (!hal.isInitialized()) {
-        return std::unexpected("HAL initialization failed");
+    hal::Gpio &gpio = hal::Gpio::instance();
+    if (!gpio.isInitialized()) {
+        return std::unexpected("gpio initialization failed");
     }
 
-    hal.pinMode(m_Pins.pin1, PinMode::PWM_OUTPUT);
-    hal.pinMode(m_Pins.pin2, PinMode::PWM_OUTPUT);
+    gpio.pinMode(m_Pins.pin1, hal::PinMode::PWM_OUTPUT);
+    gpio.pinMode(m_Pins.pin2, hal::PinMode::PWM_OUTPUT);
     return std::expected<void, std::string>();
 }
 

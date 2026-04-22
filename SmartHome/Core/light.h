@@ -4,21 +4,22 @@
 #include <expected>
 #include <string>
 
-#include "hal.h"
+#include "gpio.h"
 #include "smart_home_types.h"
 
 class Light {
   public:
     struct Pins {
-        Pins(GpioPin livingRoom = GpioPin::NONE, GpioPin bedroom = GpioPin::NONE, GpioPin kitchen = GpioPin::NONE) {
+        Pins(hal::GpioPin livingRoom = hal::GpioPin::NONE, hal::GpioPin bedroom = hal::GpioPin::NONE,
+             hal::GpioPin kitchen = hal::GpioPin::NONE) {
             this->livingRoom = livingRoom;
             this->bedroom = bedroom;
             this->kitchen = kitchen;
         };
 
-        GpioPin livingRoom;
-        GpioPin bedroom;
-        GpioPin kitchen;
+        hal::GpioPin livingRoom;
+        hal::GpioPin bedroom;
+        hal::GpioPin kitchen;
     };
 
   public:
@@ -27,7 +28,8 @@ class Light {
     Light(const Light &) = delete;
     Light(Light &&) = delete;
 
-    std::expected<void, std::string> initPins(GpioPin livingRoomPin, GpioPin bedRoomPin, GpioPin kitchenPin);
+    std::expected<void, std::string> initPins(hal::GpioPin livingRoomPin, hal::GpioPin bedRoomPin,
+                                              hal::GpioPin kitchenPin);
 
     std::expected<void, std::string> setOn(bool on, LightLocation location);
 

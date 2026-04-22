@@ -1,7 +1,9 @@
-#ifndef HAL_H
-#define HAL_H
+#ifndef GPIO_H
+#define GPIO_H
 
 #include <cstdint>
+
+namespace hal {
 
 enum class GpioPin : uint8_t {
     NONE = 0xFFu,
@@ -50,15 +52,15 @@ enum class PinState : uint8_t {
     HIGH = 1u,
 };
 
-class Hal {
+class Gpio {
   public:
-    static Hal &instance() {
-        static Hal hal;
-        return hal;
+    static Gpio &instance() {
+        static Gpio gpio;
+        return gpio;
     }
 
-    Hal(const Hal &) = delete;
-    Hal &operator=(const Hal &) = delete;
+    Gpio(const Gpio &) = delete;
+    Gpio &operator=(const Gpio &) = delete;
 
     bool isInitialized() const {
         return m_Initialized;
@@ -76,10 +78,12 @@ class Hal {
     bool readDHT22(GpioPin pin, float &temp, float &humidity);
 
   private:
-    Hal();
-    ~Hal();
+    Gpio();
+    ~Gpio();
 
     bool m_Initialized;
 };
 
-#endif // HAL_H
+} // namespace hal
+
+#endif // GPIO_H

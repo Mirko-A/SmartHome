@@ -25,7 +25,8 @@ FetchContent_MakeAvailable(json)
 #endif()
 
 add_library(SmartHomeCore STATIC
-    SmartHome/Core/hal.cpp
+    SmartHome/Core/Hal/hal.cpp
+    SmartHome/Core/Hal/gpio.cpp
     SmartHome/Core/light.cpp
     SmartHome/Core/ac.cpp
     SmartHome/Core/sensor.cpp
@@ -35,6 +36,7 @@ add_library(SmartHomeCore STATIC
 
 target_include_directories(SmartHomeCore PUBLIC
     SmartHome/Core/
+    SmartHome/Core/Hal/
 #    Dependencies/DHT22/include/
 )
 
