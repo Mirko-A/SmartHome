@@ -122,10 +122,11 @@ class AnalyticsModel {
     void onUpdate();
 
   private:
-    QPair<QtCharts::QChart *, Histogram *> createChartWithHistogram(QString title, const QStringList &rangeX,
+    QPair<QtCharts::QChart *, Histogram *> createChartWithHistogram(QString title,
+                                                                    const QStringList &rangeX,
                                                                     QPair<size_t, size_t> rangeY);
-    QPair<QtCharts::QChart *, LineGraph *> createChartWithLineGraph(QString title, QPair<int, int> rangeX,
-                                                                    QPair<int, int> rangeY);
+    QPair<QtCharts::QChart *, LineGraph *>
+    createChartWithLineGraph(QString title, QPair<int, int> rangeX, QPair<int, int> rangeY);
 
   public:
     QtCharts::QChart *m_livingRoomLightChart;

@@ -8,7 +8,8 @@
 #include "playlist_model.h"
 
 MediaPlayer::MediaPlayer(QWidget *parent)
-    : QWidget(parent), m_videoWidget(nullptr), m_controls(nullptr), m_coverLabel(nullptr), m_seekSlider(nullptr) {
+    : QWidget(parent), m_videoWidget(nullptr), m_controls(nullptr), m_coverLabel(nullptr),
+      m_seekSlider(nullptr) {
     m_player = new QMediaPlayer(this);
     // owned by PlaylistModel
     m_playlist = new QMediaPlaylist(this);
@@ -56,7 +57,8 @@ void MediaPlayer::initializeUIElements() {
     connect(m_controls, SIGNAL(changeVolume(int)), m_player, SLOT(setVolume(int)));
     connect(m_controls, SIGNAL(changeMuting(bool)), m_player, SLOT(setMuted(bool)));
 
-    connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)), m_controls, SLOT(setState(QMediaPlayer::State)));
+    connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)), m_controls,
+            SLOT(setState(QMediaPlayer::State)));
     connect(m_player, SIGNAL(volumeChanged(int)), m_controls, SLOT(setVolume(int)));
     connect(m_player, SIGNAL(mutedChanged(bool)), m_controls, SLOT(setMuted(bool)));
 
@@ -94,8 +96,8 @@ void MediaPlayer::open() {
         fileDialog.setMimeTypeFilters(supportedMimeTypes);
     }
 
-    fileDialog.setDirectory(
-        QStandardPaths::standardLocations(QStandardPaths::MoviesLocation).value(0, QDir::homePath()));
+    fileDialog.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MoviesLocation)
+                                .value(0, QDir::homePath()));
 
     if (fileDialog.exec() == QDialog::Accepted)
         addToPlaylist(fileDialog.selectedUrls());
@@ -114,7 +116,8 @@ static bool isPlaylist(const QUrl &url) // Check for ".m3u" playlists.
     if (!url.isLocalFile())
         return false;
     const QFileInfo fileInfo(url.toLocalFile());
-    return fileInfo.exists() && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
+    return fileInfo.exists() &&
+           !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
 }
 
 void MediaPlayer::addToPlaylist(const QList<QUrl> urls) {
@@ -242,7 +245,8 @@ void MediaPlayer::updateDurationInfo(qint64 currentInfo) {
     if (currentInfo || m_duration) {
         QTime currentTime((currentInfo / 3600) % 60, (currentInfo / 60) % 60, currentInfo % 60,
                           (currentInfo * 1000) % 1000);
-        QTime totalTime((m_duration / 3600) % 60, (m_duration / 60) % 60, m_duration % 60, (m_duration * 1000) % 1000);
+        QTime totalTime((m_duration / 3600) % 60, (m_duration / 60) % 60, m_duration % 60,
+                        (m_duration * 1000) % 1000);
         QString format = "mm:ss";
         if (m_duration > 3600)
             format = "hh:mm:ss";

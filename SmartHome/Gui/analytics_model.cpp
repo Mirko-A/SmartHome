@@ -26,7 +26,8 @@ static constexpr unsigned int MAX_LINE_GRAPH_POINTS_INITIAL = 100;
 static const QColor LINE_GRAPH_COLOR = QColor(160, 110, 181);
 
 Histogram::Histogram(QString name)
-    : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)), m_valueCounter(0) {
+    : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)),
+      m_valueCounter(0) {
     m_barSet->setColor(HISTOGRAM_BAR_COLOR);
     barSeries->append(m_barSet);
     barSeries->setBarWidth(1);
@@ -93,13 +94,15 @@ void LineGraph::expandLineSeriesIfNeeded() {
     /* Whole X-axis of the line graph is filled out and needs to be expanded
      * In case we reached the maximum range, we will freeze it
      * at [UINT_MAX/10; UINT_MAX] (through the condition after &&). */
-    if (static_cast<size_t>(lineSeries->count()) >= m_maxPointsAllowed && m_maxPointsAllowed != UINT_MAX) {
+    if (static_cast<size_t>(lineSeries->count()) >= m_maxPointsAllowed &&
+        m_maxPointsAllowed != UINT_MAX) {
         /* Calculate new maximum for the X-axis:
          *     case 1: maxLineGraphPoints*10 > UINT_MAX -> overflow would occur if
          * we multiply by 10 so we just set maxLineGraphPoints to UINT_MAX case 2:
          * maxLineGraphPoints*10 < UINT_MAX -> no overflow will occur so we can
          * multiply maxLineGraphPoints by 10 */
-        m_maxPointsAllowed = ((UINT_MAX / 10) < m_maxPointsAllowed) ? UINT_MAX : m_maxPointsAllowed * 10;
+        m_maxPointsAllowed =
+            ((UINT_MAX / 10) < m_maxPointsAllowed) ? UINT_MAX : m_maxPointsAllowed * 10;
 
         lineSeries->attachedAxes().at(X_AXIS_POS)->setMax(m_maxPointsAllowed);
     }
@@ -131,32 +134,35 @@ void AnalyticsModel::initCharts() {
 
 void AnalyticsModel::initChartsWithHistogram() {
     {
-        auto livingRoomChartWithHistogram = createChartWithHistogram("Living room light on per hour", HISTOGRAM_X_AXIS,
-                                                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+        auto livingRoomChartWithHistogram =
+            createChartWithHistogram("Living room light on per hour", HISTOGRAM_X_AXIS,
+                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_livingRoomLightChart = livingRoomChartWithHistogram.first;
         m_analyticsData->histograms->livingRoomLight = livingRoomChartWithHistogram.second;
     }
 
     {
-        auto bedroomChartWithHistogram = createChartWithHistogram("Bedroom light on per hour", HISTOGRAM_X_AXIS,
-                                                                  QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+        auto bedroomChartWithHistogram =
+            createChartWithHistogram("Bedroom light on per hour", HISTOGRAM_X_AXIS,
+                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_bedroomLightChart = bedroomChartWithHistogram.first;
         m_analyticsData->histograms->bedroomLight = bedroomChartWithHistogram.second;
     }
 
     {
-        auto kitchenChartWithHistogram = createChartWithHistogram("Kitchen light on per hour", HISTOGRAM_X_AXIS,
-                                                                  QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+        auto kitchenChartWithHistogram =
+            createChartWithHistogram("Kitchen light on per hour", HISTOGRAM_X_AXIS,
+                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_kitchenLightChart = kitchenChartWithHistogram.first;
         m_analyticsData->histograms->kitchenLight = kitchenChartWithHistogram.second;
     }
 
     {
-        auto ACOnChartWithHistogram =
-            createChartWithHistogram("AC on per hour", HISTOGRAM_X_AXIS, QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+        auto ACOnChartWithHistogram = createChartWithHistogram(
+            "AC on per hour", HISTOGRAM_X_AXIS, QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
 
         m_ACOnChart = ACOnChartWithHistogram.first;
         m_analyticsData->histograms->ACOn = ACOnChartWithHistogram.second;
@@ -165,9 +171,9 @@ void AnalyticsModel::initChartsWithHistogram() {
 
 void AnalyticsModel::initChartsWithLineGraph() {
     {
-        auto ACTemperatureChartWithLineGraph =
-            createChartWithLineGraph("AC Temperature", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
-                                     QPair<size_t, size_t>(0, MAX_AC_TEMP));
+        auto ACTemperatureChartWithLineGraph = createChartWithLineGraph(
+            "AC Temperature", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
+            QPair<size_t, size_t>(0, MAX_AC_TEMP));
         m_ACTemperatureChart = ACTemperatureChartWithLineGraph.first;
         m_analyticsData->lineGraphs->ACTemperature = ACTemperatureChartWithLineGraph.second;
     }
@@ -199,7 +205,8 @@ void AnalyticsModel::initChartsWithLineGraph() {
 }
 
 QPair<QtCharts::QChart *, Histogram *>
-AnalyticsModel::createChartWithHistogram(QString title, const QStringList &rangeX, QPair<size_t, size_t> rangeY) {
+AnalyticsModel::createChartWithHistogram(QString title, const QStringList &rangeX,
+                                         QPair<size_t, size_t> rangeY) {
     QtCharts::QChart *chart = new QtCharts::QChart;
     chart->setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
     chart->setTitleBrush(QBrush(QColor("white")));
@@ -223,8 +230,9 @@ AnalyticsModel::createChartWithHistogram(QString title, const QStringList &range
     return QPair<QtCharts::QChart *, Histogram *>(chart, histogram);
 }
 
-QPair<QtCharts::QChart *, LineGraph *> AnalyticsModel::createChartWithLineGraph(QString title, QPair<int, int> rangeX,
-                                                                                QPair<int, int> rangeY) {
+QPair<QtCharts::QChart *, LineGraph *>
+AnalyticsModel::createChartWithLineGraph(QString title, QPair<int, int> rangeX,
+                                         QPair<int, int> rangeY) {
     QtCharts::QChart *chart = new QtCharts::QChart();
     chart->setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
     chart->setTitleBrush(QBrush(QColor("white")));

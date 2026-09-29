@@ -22,8 +22,8 @@ class Light {
     };
 
   public:
-    static std::expected<Light, std::string> create(hal::GpioPin livingRoomPin, hal::GpioPin bedRoomPin,
-                                                    hal::GpioPin kitchenPin);
+    static std::expected<Light, std::string>
+    create(hal::GpioPin livingRoomPin, hal::GpioPin bedRoomPin, hal::GpioPin kitchenPin);
 
     ~Light() = default;
 

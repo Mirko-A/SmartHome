@@ -22,8 +22,8 @@ class Sensor {
     };
 
   public:
-    static std::expected<Sensor, std::string> create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
-                                                     hal::GpioPin brightnessPin);
+    static std::expected<Sensor, std::string>
+    create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin, hal::GpioPin brightnessPin);
 
     Sensor(const Sensor &) = delete;
     Sensor &operator=(const Sensor &) = delete;

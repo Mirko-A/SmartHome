@@ -28,7 +28,8 @@ class Gpio {
 
     // Outputs start and finish at inactiveState; PWM starts and finishes at zero.
     // Released outputs retain their inactive drive level, rather than floating.
-    std::expected<OwnedPin, std::string> take(GpioPin pin, PinMode mode, PinState inactiveState = PinState::LOW);
+    std::expected<OwnedPin, std::string> take(GpioPin pin, PinMode mode,
+                                              PinState inactiveState = PinState::LOW);
 
   private:
     friend class OwnedPin;

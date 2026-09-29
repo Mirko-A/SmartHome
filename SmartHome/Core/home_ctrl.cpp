@@ -1,9 +1,11 @@
 #include "home_ctrl.h"
 
-std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group, const char *key);
+std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group,
+                                                  const char *key);
 
 HomeControl::HomeControl(Light light, Ac ac, Sensor sensor)
-    : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)), m_Dirty(false) {}
+    : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)),
+      m_Dirty(false) {}
 
 std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json &pinCfgJson) {
     // Validate every pin before device factories start configuring hardware.
@@ -68,7 +70,8 @@ nlohmann::json HomeControl::toJson() const {
     return serialized;
 }
 
-std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group, const char *key) {
+std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group,
+                                                  const char *key) {
     const std::string path = std::string(group) + "." + key;
     try {
         const auto &value = config.at(group).at(key);

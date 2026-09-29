@@ -11,15 +11,8 @@
 
 #include "home_ctrl.h"
 
-static ftxui::Element sensorGauge(const std::string &label, int value, int min, int max, const std::string &unit) {
-    float ratio = (max > min) ? float(value - min) / float(max - min) : 0.f;
-    ratio = std::max(0.f, std::min(1.f, ratio));
-    return ftxui::hbox({
-        ftxui::text(label) | size(ftxui::WIDTH, ftxui::EQUAL, 14),
-        ftxui::text(std::to_string(value) + unit) | size(ftxui::WIDTH, ftxui::EQUAL, 7),
-        ftxui::gauge(ratio) | ftxui::flex,
-    });
-}
+static ftxui::Element sensorGauge(const std::string &label, int value, int min, int max,
+                                  const std::string &unit);
 
 int tui_main(int argc, char *argv[]) {
     (void)argc;
@@ -35,8 +28,8 @@ int tui_main(int argc, char *argv[]) {
     if (!homeCfgFileIn.good()) {
         homeCfgFileIn.open(HOME_INI_FILE_PATH.c_str());
         if (!homeCfgFileIn.good()) {
-            std::cerr << "Error: Cannot open home config file (in): " << HOME_CFG_FILE_PATH << " or "
-                      << HOME_INI_FILE_PATH << std::endl;
+            std::cerr << "Error: Cannot open home config file (in): " << HOME_CFG_FILE_PATH
+                      << " or " << HOME_INI_FILE_PATH << std::endl;
             return -1;
         }
     }
@@ -79,13 +72,15 @@ int tui_main(int argc, char *argv[]) {
     ftxui::Component livingRoomCheck = ftxui::Checkbox("Living Room", &livingRoomOn);
     ftxui::Component bedroomCheck = ftxui::Checkbox("Bedroom", &bedroomOn);
     ftxui::Component kitchenCheck = ftxui::Checkbox("Kitchen", &kitchenOn);
-    ftxui::Component lightsContainer = ftxui::Container::Vertical({livingRoomCheck, bedroomCheck, kitchenCheck});
+    ftxui::Component lightsContainer =
+        ftxui::Container::Vertical({livingRoomCheck, bedroomCheck, kitchenCheck});
 
     // Speaker sliders (0..100)
     ftxui::Component volumeSlider = ftxui::Slider("", &volume, 0, 100, 1);
     ftxui::Component bassSlider = ftxui::Slider("", &bass, 0, 100, 1);
     ftxui::Component pitchSlider = ftxui::Slider("", &pitch, 0, 100, 1);
-    ftxui::Component speakersContainer = ftxui::Container::Vertical({volumeSlider, bassSlider, pitchSlider});
+    ftxui::Component speakersContainer =
+        ftxui::Container::Vertical({volumeSlider, bassSlider, pitchSlider});
 
     // AC temperature slider (MIN_AC_TEMP..MAX_AC_TEMP)
     std::vector<std::string> acModes = {"Normal", "Fast", "Turbo"};
@@ -128,13 +123,16 @@ int tui_main(int argc, char *argv[]) {
 
         // Speakers panel
         ftxui::Element volumeBox = ftxui::hbox(
-            {ftxui::text("Volume") | size(ftxui::WIDTH, ftxui::EQUAL, 7), volumeSlider->Render() | ftxui::flex,
+            {ftxui::text("Volume") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+             volumeSlider->Render() | ftxui::flex,
              ftxui::text(" " + std::to_string(volume)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)});
         ftxui::Element bassBox = ftxui::hbox(
-            {ftxui::text("Bass  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), bassSlider->Render() | ftxui::flex,
+            {ftxui::text("Bass  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+             bassSlider->Render() | ftxui::flex,
              ftxui::text(" " + std::to_string(bass)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)});
         ftxui::Element pitchBox = ftxui::hbox(
-            {ftxui::text("Pitch ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), pitchSlider->Render() | ftxui::flex,
+            {ftxui::text("Pitch ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+             pitchSlider->Render() | ftxui::flex,
              ftxui::text(" " + std::to_string(pitch)) | size(ftxui::WIDTH, ftxui::EQUAL, 5)});
         ftxui::Element speakersBox = ftxui::vbox({
             volumeBox,
@@ -152,7 +150,8 @@ int tui_main(int argc, char *argv[]) {
         ftxui::Element acBox = ftxui::vbox({
             acToggle->Render(),
             ftxui::separator(),
-            ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7), acModeMenu->Render()}),
+            ftxui::hbox({ftxui::text("Mode  ") | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+                         acModeMenu->Render()}),
         });
         ftxui::Element ac = window(ftxui::text("[3]-AC "), acBox);
         if (acContainer->Focused()) {
@@ -196,7 +195,8 @@ int tui_main(int argc, char *argv[]) {
             {
                 std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
                 auto settings = home.settings();
-                if (auto result = settings.setAc(acOn, static_cast<Ac::Mode>(acModeIndex)); !result) {
+                if (auto result = settings.setAc(acOn, static_cast<Ac::Mode>(acModeIndex));
+                    !result) {
                     std::cerr << result.error() << std::endl;
                     return true;
                 }
@@ -216,7 +216,8 @@ int tui_main(int argc, char *argv[]) {
                 homeCfgFileOut << homeCfgJson.dump(4);
                 homeCfgFileOut.close();
             } else {
-                std::cerr << "Error: Cannot open config file (out): " << HOME_CFG_FILE_PATH << std::endl;
+                std::cerr << "Error: Cannot open config file (out): " << HOME_CFG_FILE_PATH
+                          << std::endl;
             }
 
             screen.ExitLoopClosure()();
@@ -229,9 +230,12 @@ int tui_main(int argc, char *argv[]) {
                 std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
 
                 auto sensors = home.settings().sensors();
-                sensors.brightness = static_cast<int16_t>(std::clamp(sensors.brightness + delta, 0, 1000));
-                sensors.humidity = static_cast<int16_t>(std::clamp(sensors.humidity + delta, 0, 100));
-                sensors.temperature = static_cast<int16_t>(std::clamp(sensors.temperature + delta, -10, 50));
+                sensors.brightness =
+                    static_cast<int16_t>(std::clamp(sensors.brightness + delta, 0, 1000));
+                sensors.humidity =
+                    static_cast<int16_t>(std::clamp(sensors.humidity + delta, 0, 100));
+                sensors.temperature =
+                    static_cast<int16_t>(std::clamp(sensors.temperature + delta, -10, 50));
                 home.settings().setSensors(sensors);
             }
             handled = true;
@@ -244,4 +248,15 @@ int tui_main(int argc, char *argv[]) {
     done = true;
     ticker.join();
     return 0;
+}
+
+static ftxui::Element sensorGauge(const std::string &label, int value, int min, int max,
+                                  const std::string &unit) {
+    float ratio = (max > min) ? float(value - min) / float(max - min) : 0.f;
+    ratio = std::max(0.f, std::min(1.f, ratio));
+    return ftxui::hbox({
+        ftxui::text(label) | size(ftxui::WIDTH, ftxui::EQUAL, 14),
+        ftxui::text(std::to_string(value) + unit) | size(ftxui::WIDTH, ftxui::EQUAL, 7),
+        ftxui::gauge(ratio) | ftxui::flex,
+    });
 }

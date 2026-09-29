@@ -40,7 +40,8 @@ std::expected<void, std::string> HomeSettings::setSpeakers(int volume, int bass,
     if (volume < 0 || volume > 100 || bass < 0 || bass > 100 || pitch < 0 || pitch > 100) {
         return std::unexpected("speakers: volume, bass and pitch must be from 0 to 100");
     }
-    m_Speakers = {static_cast<int16_t>(volume), static_cast<int16_t>(bass), static_cast<int16_t>(pitch)};
+    m_Speakers = {static_cast<int16_t>(volume), static_cast<int16_t>(bass),
+                  static_cast<int16_t>(pitch)};
     return {};
 }
 
@@ -48,15 +49,17 @@ std::expected<void, std::string> HomeSettings::loadFromJson(const nlohmann::json
     HomeSettings candidate;
     try {
         const auto &lights = json.at("lights");
-        candidate.setLights(
-            {lights.at("living_room").get<bool>(), lights.at("bedroom").get<bool>(), lights.at("kitchen").get<bool>()});
+        candidate.setLights({lights.at("living_room").get<bool>(), lights.at("bedroom").get<bool>(),
+                             lights.at("kitchen").get<bool>()});
 
         constexpr int minReading = std::numeric_limits<int16_t>::min();
         constexpr int maxReading = std::numeric_limits<int16_t>::max();
         candidate.setSensors({
-            static_cast<int16_t>(readInteger(json, "sensors", "temperature", minReading, maxReading)),
+            static_cast<int16_t>(
+                readInteger(json, "sensors", "temperature", minReading, maxReading)),
             static_cast<int16_t>(readInteger(json, "sensors", "humidity", minReading, maxReading)),
-            static_cast<int16_t>(readInteger(json, "sensors", "brightness", minReading, maxReading)),
+            static_cast<int16_t>(
+                readInteger(json, "sensors", "brightness", minReading, maxReading)),
         });
 
         auto ac = candidate.setAc(json.at("ac").at("on").get<bool>(),
@@ -91,6 +94,7 @@ nlohmann::json HomeSettings::toJson() const {
           {"humidity", m_Sensors.humidity},
           {"brightness", m_Sensors.brightness}}},
         {"ac", {{"on", m_Ac.on}, {"mode", m_Ac.mode}}},
-        {"speakers", {{"volume", m_Speakers.volume}, {"bass", m_Speakers.bass}, {"pitch", m_Speakers.pitch}}},
+        {"speakers",
+         {{"volume", m_Speakers.volume}, {"bass", m_Speakers.bass}, {"pitch", m_Speakers.pitch}}},
     };
 }

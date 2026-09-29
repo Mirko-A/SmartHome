@@ -39,7 +39,8 @@ constexpr int ONE_SEC_IN_TICKS = 2;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    ui->pages->setCurrentIndex(static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
+    ui->pages->setCurrentIndex(
+        static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
 
     homeCfg = new HomeConfig;
     loadHomeCfgWidgets();
@@ -194,8 +195,9 @@ void MainWindow::reloadHomeCfgWidgetsIfDirty() {
 }
 
 void MainWindow::updateCurrentPage(PageIndex index) {
-    ui->pages->setCurrentIndex(static_cast<int>(index));                                   // reveal the home page
-    ui->buttonsCurrentButton->setIcon(QIcon(PAGE_ICON_PATHS.at(static_cast<int>(index)))); // update current page icon
+    ui->pages->setCurrentIndex(static_cast<int>(index)); // reveal the home page
+    ui->buttonsCurrentButton->setIcon(
+        QIcon(PAGE_ICON_PATHS.at(static_cast<int>(index)))); // update current page icon
 }
 
 void MainWindow::updateDateTimeWidget() {
@@ -333,19 +335,23 @@ void MainWindow::on_pitchSlider_valueChanged(int value) {
     ui->pitchSliderValueLabel->setText(QString::number(value));
 }
 
-void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex, AnalyticsPageState newState) {
+void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex,
+                                         AnalyticsPageState newState) {
     switch (pageIndex) {
     case AnalyticsPageIndex::LIGHT_ANALYTICS: {
-        ui->analyticsPageLightsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
-                                                      .at(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS))));
+        ui->analyticsPageLightsBtn->setIcon(
+            QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
+                      .at(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS))));
     } break;
     case AnalyticsPageIndex::AC_ANALYTICS: {
-        ui->analyticsPageACBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
-                                                  .at(static_cast<int>(AnalyticsPageIndex::AC_ANALYTICS))));
+        ui->analyticsPageACBtn->setIcon(
+            QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
+                      .at(static_cast<int>(AnalyticsPageIndex::AC_ANALYTICS))));
     } break;
     case AnalyticsPageIndex::SENSORS_ANALYTICS: {
-        ui->analyticsPageSensorsBtn->setIcon(QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
-                                                       .at(static_cast<int>(AnalyticsPageIndex::SENSORS_ANALYTICS))));
+        ui->analyticsPageSensorsBtn->setIcon(
+            QIcon(ANALYTICS_PAGE_PATHS.at(static_cast<int>(newState))
+                      .at(static_cast<int>(AnalyticsPageIndex::SENSORS_ANALYTICS))));
     } break;
     default:
         assert(false && "Invalid analytics page index provided!");

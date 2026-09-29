@@ -7,9 +7,9 @@
 #include <QToolButton>
 
 PlayerControls::PlayerControls(QWidget *parent)
-    : QWidget(parent), m_playerState(QMediaPlayer::StoppedState), m_playerMuted(false), m_playButton(nullptr),
-      m_stopButton(nullptr), m_nextButton(nullptr), m_previousButton(nullptr), m_muteButton(nullptr),
-      m_volumeSlider(nullptr) {}
+    : QWidget(parent), m_playerState(QMediaPlayer::StoppedState), m_playerMuted(false),
+      m_playButton(nullptr), m_stopButton(nullptr), m_nextButton(nullptr),
+      m_previousButton(nullptr), m_muteButton(nullptr), m_volumeSlider(nullptr) {}
 
 void PlayerControls::initializeUIElements() {
     m_stopButton->setEnabled(false);
@@ -64,7 +64,8 @@ void PlayerControls::setMuted(bool muted) {
     if (m_playerMuted != muted) {
         m_playerMuted = muted;
 
-        m_muteButton->setIcon(QIcon(muted ? "../resource/icons/volume-x.svg" : "../resource/icons/volume-2.svg"));
+        m_muteButton->setIcon(
+            QIcon(muted ? "../resource/icons/volume-x.svg" : "../resource/icons/volume-2.svg"));
     }
 }
 

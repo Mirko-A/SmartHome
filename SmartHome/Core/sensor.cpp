@@ -4,8 +4,8 @@
 
 Sensor::Sensor(Pins pins) : m_Pins(std::move(pins)) {}
 
-std::expected<Sensor, std::string> Sensor::create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
-                                                  hal::GpioPin brightnessPin) {
+std::expected<Sensor, std::string>
+Sensor::create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin, hal::GpioPin brightnessPin) {
     auto gpioResult = hal::Gpio::instance();
     if (!gpioResult) {
         return std::unexpected(gpioResult.error());
@@ -25,7 +25,8 @@ std::expected<Sensor, std::string> Sensor::create(hal::GpioPin temperaturePin, h
         return std::unexpected(brightnessResult.error());
     }
 
-    return Sensor(Pins{std::move(*temperatureResult), std::move(*humidityResult), std::move(*brightnessResult)});
+    return Sensor(Pins{std::move(*temperatureResult), std::move(*humidityResult),
+                       std::move(*brightnessResult)});
 }
 
 float Sensor::read(Type type) {

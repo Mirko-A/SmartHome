@@ -25,7 +25,8 @@ std::expected<Light, std::string> Light::create(hal::GpioPin livingRoomPin, hal:
         return std::unexpected(kitchenResult.error());
     }
 
-    return Light(Pins{std::move(*livingRoomResult), std::move(*bedroomResult), std::move(*kitchenResult)});
+    return Light(
+        Pins{std::move(*livingRoomResult), std::move(*bedroomResult), std::move(*kitchenResult)});
 }
 
 std::expected<void, std::string> Light::setOn(bool on, Light::Location location) {
