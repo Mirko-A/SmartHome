@@ -41,11 +41,17 @@ target_include_directories(SmartHomeCore PUBLIC
 )
 
 target_link_libraries(SmartHomeCore PUBLIC nlohmann_json::nlohmann_json)
-
 #target_link_libraries(SmartHomeCore PUBLIC wiringPi)
 
-add_executable(SmartHome SmartHome/main.cpp SmartHome/Tui/tui.cpp)
-target_include_directories(SmartHome PRIVATE SmartHome/Tui/)
+add_executable(SmartHome
+    SmartHome/main.cpp
+    SmartHome/Gui/gui.cpp
+    SmartHome/Tui/tui.cpp
+)
+target_include_directories(SmartHome PRIVATE
+    SmartHome/Gui/
+    SmartHome/Tui/
+)
 target_link_libraries(SmartHome PRIVATE
     SmartHomeCore
     ftxui::screen

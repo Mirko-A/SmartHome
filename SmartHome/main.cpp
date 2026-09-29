@@ -7,23 +7,8 @@
 #include <iostream>
 #include <string>
 
+#include "gui.h"
 #include "tui.h"
-
-int gui_main(int argc, char *argv[]) {
-#if 0
-    QApplication app(argc, argv);
-    MainWindow window;
-    window.setWindowTitle("Smart Home");
-
-    window.show();
-    return app.exec();
-#else
-    (void)argc;
-    (void)argv;
-    std::cout << "GUI mode stub" << std::endl;
-    return 0;
-#endif
-}
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
