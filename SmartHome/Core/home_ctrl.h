@@ -129,8 +129,6 @@ struct SpeakerSettings {
 
 class HomeControl {
   public:
-    HomeControl();
-    std::expected<void, std::string> initPins(const nlohmann::json &pinsJson);
     static std::expected<HomeControl, std::string> create(const nlohmann::json &pinCfgJson);
 
     HomeControl(const HomeControl &) = delete;
@@ -145,6 +143,7 @@ class HomeControl {
     nlohmann::json toJson();
 
   private:
+    HomeControl() = delete;
     HomeControl(Light light, Ac ac, Sensor sensor);
 
   public:
