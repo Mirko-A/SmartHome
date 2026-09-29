@@ -5,7 +5,7 @@
 #include <string>
 // #include "DHT22.h"
 
-#include "gpio.h"
+#include "owned_pin.h"
 
 class Sensor {
   public:
@@ -16,11 +16,9 @@ class Sensor {
     };
 
     struct Pins {
-        Pins(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness);
-
-        hal::GpioPin temperature;
-        hal::GpioPin humidity;
-        hal::GpioPin brightness;
+        hal::OwnedPin temperature;
+        hal::OwnedPin humidity;
+        hal::OwnedPin brightness;
     };
 
   public:
@@ -35,7 +33,7 @@ class Sensor {
     float read(Type type);
 
   private:
-    Sensor(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness);
+    explicit Sensor(Pins pins);
 
     Pins m_Pins;
 };

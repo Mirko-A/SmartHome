@@ -1,6 +1,8 @@
 #include "ac.h"
 
-Ac::Ac(hal::GpioPin pin1, hal::GpioPin pin2) : m_Pins(pin1, pin2), m_On(false), m_Mode(Ac::Mode::NORMAL), m_Speed(0) {}
+#include "gpio.h"
+
+Ac::Ac(Pins pins) : m_Pins(std::move(pins)), m_On(false), m_Mode(Ac::Mode::NORMAL), m_Speed(0) {}
 
 std::expected<Ac, std::string> Ac::create(hal::GpioPin pin1, hal::GpioPin pin2) {
     auto gpioResult = hal::Gpio::instance();
@@ -9,14 +11,16 @@ std::expected<Ac, std::string> Ac::create(hal::GpioPin pin1, hal::GpioPin pin2) 
     }
     hal::Gpio &gpio = gpioResult->get();
 
-    if (auto r = gpio.setPinMode(pin1, hal::PinMode::PWM_OUTPUT); !r) {
-        return std::unexpected(r.error());
+    auto result1 = gpio.take(pin1, hal::PinMode::PWM_OUTPUT);
+    if (!result1) {
+        return std::unexpected(result1.error());
     }
-    if (auto r = gpio.setPinMode(pin2, hal::PinMode::PWM_OUTPUT); !r) {
-        return std::unexpected(r.error());
+    auto result2 = gpio.take(pin2, hal::PinMode::PWM_OUTPUT);
+    if (!result2) {
+        return std::unexpected(result2.error());
     }
 
-    return Ac(pin1, pin2);
+    return Ac(Pins{std::move(*result1), std::move(*result2)});
 }
 
 void Ac::setOn(bool on) {

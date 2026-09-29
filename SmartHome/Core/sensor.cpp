@@ -1,7 +1,8 @@
 #include "sensor.h"
 
-Sensor::Sensor(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness)
-    : m_Pins(temperature, humidity, brightness) {}
+#include "gpio.h"
+
+Sensor::Sensor(Pins pins) : m_Pins(std::move(pins)) {}
 
 std::expected<Sensor, std::string> Sensor::create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin,
                                                   hal::GpioPin brightnessPin) {
@@ -11,17 +12,20 @@ std::expected<Sensor, std::string> Sensor::create(hal::GpioPin temperaturePin, h
     }
     hal::Gpio &gpio = gpioResult->get();
 
-    if (auto r = gpio.setPinMode(temperaturePin, hal::PinMode::INPUT); !r) {
-        return std::unexpected(r.error());
+    auto temperatureResult = gpio.take(temperaturePin, hal::PinMode::INPUT);
+    if (!temperatureResult) {
+        return std::unexpected(temperatureResult.error());
     }
-    if (auto r = gpio.setPinMode(humidityPin, hal::PinMode::INPUT); !r) {
-        return std::unexpected(r.error());
+    auto humidityResult = gpio.take(humidityPin, hal::PinMode::INPUT);
+    if (!humidityResult) {
+        return std::unexpected(humidityResult.error());
     }
-    if (auto r = gpio.setPinMode(brightnessPin, hal::PinMode::INPUT); !r) {
-        return std::unexpected(r.error());
+    auto brightnessResult = gpio.take(brightnessPin, hal::PinMode::INPUT);
+    if (!brightnessResult) {
+        return std::unexpected(brightnessResult.error());
     }
 
-    return Sensor(temperaturePin, humidityPin, brightnessPin);
+    return Sensor(Pins{std::move(*temperatureResult), std::move(*humidityResult), std::move(*brightnessResult)});
 }
 
 float Sensor::read(Type type) {
@@ -46,5 +50,3 @@ float Sensor::read(Type type) {
 
     return sensorValue;
 }
-Sensor::Pins::Pins(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness)
-    : temperature(temperature), humidity(humidity), brightness(brightness) {}

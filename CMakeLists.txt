@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+find_package(Threads REQUIRED)
+
 include(FetchContent)
 FetchContent_Declare(ftxui
     GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
@@ -27,6 +29,7 @@ FetchContent_MakeAvailable(json)
 add_library(SmartHomeCore STATIC
     SmartHome/Core/Hal/hal.cpp
     SmartHome/Core/Hal/gpio.cpp
+    SmartHome/Core/Hal/owned_pin.cpp
     SmartHome/Core/light.cpp
     SmartHome/Core/ac.cpp
     SmartHome/Core/sensor.cpp
@@ -55,6 +58,7 @@ target_include_directories(SmartHome PRIVATE
 )
 target_link_libraries(SmartHome PRIVATE
     SmartHomeCore
+    Threads::Threads
     ftxui::screen
     ftxui::dom
     ftxui::component

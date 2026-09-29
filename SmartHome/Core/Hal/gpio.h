@@ -2,47 +2,16 @@
 #define GPIO_H
 
 #include <array>
-#include <cstdint>
 #include <expected>
 #include <functional>
 #include <optional>
 #include <string>
 
+#include "owned_pin.h"
+
 namespace hal {
 
-class GpioPin {
-  public:
-    static constexpr int COUNT = 31;
-
-    static std::expected<GpioPin, std::string> create(uint8_t value) {
-        if (value >= COUNT) {
-            return std::unexpected("Invalid GPIO pin: expected an integer from 0 to 30");
-        }
-        return GpioPin(value);
-    }
-
-    uint8_t number() const {
-        return m_Value;
-    }
-
-  private:
-    explicit GpioPin(uint8_t value) : m_Value(value) {}
-
-    uint8_t m_Value;
-};
-
-enum class PinMode : uint8_t {
-    INPUT = 0u,
-    OUTPUT = 1u,
-    PWM_OUTPUT = 2u,
-    GPIO_CLOCK = 3u,
-};
-
-enum class PinState : uint8_t {
-    LOW = 0u,
-    HIGH = 1u,
-};
-
+// All HAL and device operations, including destruction, must use one thread.
 class Gpio {
   public:
     static std::expected<std::reference_wrapper<Gpio>, std::string> instance() {
@@ -57,22 +26,19 @@ class Gpio {
     Gpio(const Gpio &) = delete;
     Gpio &operator=(const Gpio &) = delete;
 
-    std::expected<void, std::string> setPinMode(GpioPin pin, PinMode mode);
-
-    std::expected<PinState, std::string> digitalRead(GpioPin pin);
-    std::expected<void, std::string> digitalWrite(GpioPin pin, PinState state);
-
-    std::expected<int, std::string> analogRead(GpioPin pin);
-
-    std::expected<void, std::string> pwmWrite(GpioPin pin, uint16_t value);
-
-    bool readDHT22(GpioPin pin, float &temp, float &humidity);
+    // Outputs start and finish at inactiveState; PWM starts and finishes at zero.
+    // Released outputs retain their inactive drive level, rather than floating.
+    std::expected<OwnedPin, std::string> take(GpioPin pin, PinMode mode, PinState inactiveState = PinState::LOW);
 
   private:
+    friend class OwnedPin;
+    void release(GpioPin pin) noexcept;
+
     Gpio();
     ~Gpio();
 
-    std::array<std::optional<PinMode>, GpioPin::COUNT> m_PinModes;
+    // Present means available; an empty slot belongs to an active OwnedPin.
+    std::array<std::optional<GpioPin>, GpioPin::COUNT> m_AvailablePins;
     bool m_Initialized;
 };
 

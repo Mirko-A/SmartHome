@@ -1,7 +1,8 @@
 #include "light.h"
 
-Light::Light(hal::GpioPin livingRoom, hal::GpioPin bedroom, hal::GpioPin kitchen)
-    : m_Pins(livingRoom, bedroom, kitchen) {}
+#include <hal.h>
+
+Light::Light(Pins pins) : m_Pins(std::move(pins)) {}
 
 std::expected<Light, std::string> Light::create(hal::GpioPin livingRoomPin, hal::GpioPin bedroomPin,
                                                 hal::GpioPin kitchenPin) {
@@ -11,34 +12,31 @@ std::expected<Light, std::string> Light::create(hal::GpioPin livingRoomPin, hal:
     }
     hal::Gpio &gpio = gpioResult->get();
 
-    if (auto r = gpio.setPinMode(livingRoomPin, hal::PinMode::OUTPUT); !r) {
-        return std::unexpected(r.error());
+    auto livingRoomResult = gpio.take(livingRoomPin, hal::PinMode::OUTPUT);
+    if (!livingRoomResult) {
+        return std::unexpected(livingRoomResult.error());
     }
-    if (auto r = gpio.setPinMode(bedroomPin, hal::PinMode::OUTPUT); !r) {
-        return std::unexpected(r.error());
+    auto bedroomResult = gpio.take(bedroomPin, hal::PinMode::OUTPUT);
+    if (!bedroomResult) {
+        return std::unexpected(bedroomResult.error());
     }
-    if (auto r = gpio.setPinMode(kitchenPin, hal::PinMode::OUTPUT); !r) {
-        return std::unexpected(r.error());
+    auto kitchenResult = gpio.take(kitchenPin, hal::PinMode::OUTPUT);
+    if (!kitchenResult) {
+        return std::unexpected(kitchenResult.error());
     }
 
-    return Light(livingRoomPin, bedroomPin, kitchenPin);
+    return Light(Pins{std::move(*livingRoomResult), std::move(*bedroomResult), std::move(*kitchenResult)});
 }
 
 std::expected<void, std::string> Light::setOn(bool on, Light::Location location) {
-    auto gpioResult = hal::Gpio::instance();
-    if (!gpioResult) {
-        return std::unexpected(gpioResult.error());
-    }
-    hal::Gpio &gpio = gpioResult->get();
-
     const auto state = on ? hal::PinState::HIGH : hal::PinState::LOW;
     switch (location) {
     case Light::Location::LIVING_ROOM:
-        return gpio.digitalWrite(m_Pins.livingRoom, state);
+        return m_Pins.livingRoom.digitalWrite(state);
     case Light::Location::BEDROOM:
-        return gpio.digitalWrite(m_Pins.bedroom, state);
+        return m_Pins.bedroom.digitalWrite(state);
     case Light::Location::KITCHEN:
-        return gpio.digitalWrite(m_Pins.kitchen, state);
+        return m_Pins.kitchen.digitalWrite(state);
     }
     return std::unexpected("Invalid light location");
 }

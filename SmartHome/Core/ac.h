@@ -5,7 +5,7 @@
 #include <expected>
 #include <string>
 
-#include "gpio.h"
+#include "owned_pin.h"
 
 class Ac {
   public:
@@ -16,10 +16,8 @@ class Ac {
     };
 
     struct Pins {
-        Pins(hal::GpioPin pin1, hal::GpioPin pin2) : pin1(pin1), pin2(pin2) {}
-
-        hal::GpioPin pin1;
-        hal::GpioPin pin2;
+        hal::OwnedPin pin1;
+        hal::OwnedPin pin2;
     };
 
   public:
@@ -48,7 +46,7 @@ class Ac {
     void Run();
 
   private:
-    Ac(hal::GpioPin pin1, hal::GpioPin pin2);
+    explicit Ac(Pins pins);
 
     Pins m_Pins;
     bool m_On;
