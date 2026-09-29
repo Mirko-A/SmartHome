@@ -32,10 +32,10 @@ std::expected<void, std::string> Gpio::setPinMode(GpioPin pin, PinMode mode) {
 
 #if HAL_HAS_WIRINGPI
     ::pinMode(pin.number(), static_cast<int>(mode));
-    m_PinModes[idx] = mode;
 #else
     (void)mode;
 #endif
+    m_PinModes[idx] = mode;
     return std::expected<void, std::string>();
 }
 
