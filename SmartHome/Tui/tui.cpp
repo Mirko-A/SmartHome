@@ -1,6 +1,13 @@
 #include "tui.h"
 
+#include <unistd.h>
+
 #include <algorithm>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <expected>
 #include <fstream>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/event.hpp>
@@ -8,12 +15,15 @@
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/screen.hpp>
 #include <mutex>
+#include <utility>
 
 #include "home_ctrl.h"
 
 static ftxui::Element sensorGauge(const std::string &label, int value, int min, int max,
                                   const std::string &unit);
 
+static std::expected<void, std::string> saveConfig(const std::string &path,
+                                                   const nlohmann::json &config);
 int tui_main(int argc, char *argv[]) {
     (void)argc;
     (void)argv;
@@ -94,6 +104,7 @@ int tui_main(int argc, char *argv[]) {
         acContainer,
     });
 
+    std::string saveError;
     ftxui::Component renderer = Renderer(interactiveContainer, [&]() -> ftxui::Element {
         // Sensor panel
         int temp, humidity, brightness;
@@ -162,6 +173,7 @@ int tui_main(int argc, char *argv[]) {
             ftxui::hbox({sensors}),
             ftxui::hbox({lights | ftxui::flex, speakers | ftxui::flex, ac | ftxui::flex}),
             ftxui::text("  Tab/arrows to navigate  Enter to toggle  q to quit") | ftxui::dim,
+            ftxui::paragraph(saveError) | ftxui::color(ftxui::Color::Red),
         });
     });
 
@@ -190,6 +202,7 @@ int tui_main(int argc, char *argv[]) {
             acContainer->TakeFocus();
             handled = true;
         } else if (event == ftxui::Event::Character('q')) {
+            saveError.clear();
             // Write back to cfg before quitting
             nlohmann::json homeCfgJson;
             {
@@ -197,11 +210,11 @@ int tui_main(int argc, char *argv[]) {
                 auto settings = home.settings();
                 if (auto result = settings.setAc(acOn, static_cast<Ac::Mode>(acModeIndex));
                     !result) {
-                    std::cerr << result.error() << std::endl;
+                    saveError = result.error();
                     return true;
                 }
                 if (auto result = settings.setSpeakers(volume, bass, pitch); !result) {
-                    std::cerr << result.error() << std::endl;
+                    saveError = result.error();
                     return true;
                 }
                 settings.setLights({livingRoomOn, bedroomOn, kitchenOn});
@@ -209,15 +222,10 @@ int tui_main(int argc, char *argv[]) {
                 homeCfgJson = home.toJson();
             }
 
-            // Save the home config to disk.
-            std::ofstream homeCfgFileOut(HOME_CFG_FILE_PATH.c_str());
-            if (homeCfgFileOut.is_open()) {
-                // Pretty print with 4 spaces indentation.
-                homeCfgFileOut << homeCfgJson.dump(4);
-                homeCfgFileOut.close();
-            } else {
-                std::cerr << "Error: Cannot open config file (out): " << HOME_CFG_FILE_PATH
-                          << std::endl;
+            if (auto result = saveConfig(HOME_CFG_FILE_PATH, homeCfgJson); !result) {
+                saveError = "Save failed: " + result.error() + " (" + HOME_CFG_FILE_PATH +
+                            "). Settings are still open; press q to retry.";
+                return true;
             }
 
             screen.ExitLoopClosure()();
@@ -259,4 +267,58 @@ static ftxui::Element sensorGauge(const std::string &label, int value, int min, 
         ftxui::text(std::to_string(value) + unit) | size(ftxui::WIDTH, ftxui::EQUAL, 7),
         ftxui::gauge(ratio) | ftxui::flex,
     });
+}
+
+static std::expected<void, std::string> saveConfig(const std::string &path,
+                                                   const nlohmann::json &config) {
+    std::string serialized;
+    try {
+        serialized = config.dump(4);
+    } catch (const nlohmann::json::exception &error) {
+        return std::unexpected(std::string("Cannot serialize config: ") + error.what());
+    }
+
+    // Create exclusively beside the destination so replacement stays on one filesystem.
+    std::string temporaryPath = path + ".tmp.XXXXXX";
+    int fd = ::mkstemp(temporaryPath.data());
+    if (fd < 0) {
+        return std::unexpected("Cannot create temporary config: " +
+                               std::string(std::strerror(errno)));
+    }
+    std::FILE *stream = ::fdopen(fd, "wb");
+    if (!stream) {
+        int error = errno;
+        ::close(fd);
+        ::unlink(temporaryPath.c_str());
+        return std::unexpected("Cannot open config stream: " + std::string(std::strerror(error)));
+    }
+
+    struct TemporaryFile {
+        ~TemporaryFile() {
+            if (stream) {
+                std::fclose(stream);
+            }
+            if (!committed) {
+                ::unlink(path.c_str());
+            }
+        }
+
+        std::FILE *stream;
+        const std::string &path;
+        bool committed = false;
+    } temporary{stream, temporaryPath};
+
+    if (std::fwrite(serialized.data(), 1, serialized.size(), temporary.stream) !=
+        serialized.size()) {
+        return std::unexpected("Cannot write config: " + std::string(std::strerror(errno)));
+    }
+    // Closing also flushes buffered output; only replace the config if it succeeds.
+    if (std::fclose(std::exchange(temporary.stream, nullptr)) != 0) {
+        return std::unexpected("Cannot close config: " + std::string(std::strerror(errno)));
+    }
+    if (::rename(temporaryPath.c_str(), path.c_str()) != 0) {
+        return std::unexpected("Cannot replace config: " + std::string(std::strerror(errno)));
+    }
+    temporary.committed = true;
+    return {};
 }
