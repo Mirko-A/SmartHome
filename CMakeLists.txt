@@ -31,6 +31,7 @@ add_library(SmartHomeCore STATIC
     SmartHome/Core/ac.cpp
     SmartHome/Core/sensor.cpp
     SmartHome/Core/home_ctrl.cpp
+    SmartHome/Core/home_settings.cpp
 #    Dependencies/DHT22/src/DHT22.cpp
 )
 

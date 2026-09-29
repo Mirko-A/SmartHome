@@ -3,8 +3,7 @@
 std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group, const char *key);
 
 HomeControl::HomeControl(Light light, Ac ac, Sensor sensor)
-    : m_LightSettings(), m_AcSettings(), m_SensorReadings(), m_SpeakerSettings(), m_Light(std::move(light)),
-      m_Ac(std::move(ac)), m_Sensor(std::move(sensor)), m_Dirty(false) {}
+    : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)), m_Dirty(false) {}
 
 std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json &pinCfgJson) {
     // Validate every pin before device factories start configuring hardware.
@@ -59,18 +58,13 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
     return HomeControl(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
 }
 
-void HomeControl::loadFromJson(const nlohmann::json &json) {
-    m_LightSettings.loadFromJson(json["lights"]);
-    m_SensorReadings.loadFromJson(json["sensors"]);
-    m_AcSettings.loadFromJson(json["ac"]);
-    m_SpeakerSettings.loadFromJson(json["speakers"]);
+std::expected<void, std::string> HomeControl::loadFromJson(const nlohmann::json &json) {
+    return m_Settings.loadFromJson(json);
 }
 
-nlohmann::json HomeControl::toJson() {
-    nlohmann::json serialized = {
-        m_LightSettings.toJson(),   m_SensorReadings.toJson(), m_AcSettings.toJson(),
-        m_SpeakerSettings.toJson(), {"dirty", m_Dirty},
-    };
+nlohmann::json HomeControl::toJson() const {
+    auto serialized = m_Settings.toJson();
+    serialized["dirty"] = m_Dirty;
     return serialized;
 }
 

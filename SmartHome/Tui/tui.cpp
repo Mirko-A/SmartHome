@@ -1,5 +1,6 @@
 #include "tui.h"
 
+#include <algorithm>
 #include <fstream>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/event.hpp>
@@ -51,25 +52,28 @@ int tui_main(int argc, char *argv[]) {
         return -1;
     }
     HomeControl home = std::move(*homeResult);
-    home.loadFromJson(homeCfgJson);
+    if (auto result = home.loadFromJson(homeCfgJson); !result) {
+        std::cerr << "Error loading home settings: " << result.error() << std::endl;
+        return -1;
+    }
 
     // Protect access to the home object since it will be updated from the ticker
     // thread and read from the UI thread.
     std::mutex homeMutex;
 
     // --- Lights ---
-    bool livingRoomOn = home.m_LightSettings.livingRoomLightOn;
-    bool bedroomOn = home.m_LightSettings.bedroomLightOn;
-    bool kitchenOn = home.m_LightSettings.kitchenLightOn;
+    bool livingRoomOn = home.settings().lights().livingRoomLightOn;
+    bool bedroomOn = home.settings().lights().bedroomLightOn;
+    bool kitchenOn = home.settings().lights().kitchenLightOn;
 
     // --- Speakers ---
-    int volume = home.m_SpeakerSettings.volume;
-    int bass = home.m_SpeakerSettings.bass;
-    int pitch = home.m_SpeakerSettings.pitch;
+    int volume = home.settings().speakers().volume;
+    int bass = home.settings().speakers().bass;
+    int pitch = home.settings().speakers().pitch;
 
     // --- AC ---
-    bool acOn = home.m_AcSettings.on;
-    int acModeIndex = static_cast<int>(home.m_AcSettings.mode);
+    bool acOn = home.settings().ac().on;
+    int acModeIndex = static_cast<int>(home.settings().ac().mode);
 
     // Light checkboxes
     ftxui::Component livingRoomCheck = ftxui::Checkbox("Living Room", &livingRoomOn);
@@ -100,9 +104,9 @@ int tui_main(int argc, char *argv[]) {
         int temp, humidity, brightness;
         {
             std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
-            temp = home.m_SensorReadings.temperature;
-            humidity = home.m_SensorReadings.humidity;
-            brightness = home.m_SensorReadings.brightness;
+            temp = home.settings().sensors().temperature;
+            humidity = home.settings().sensors().humidity;
+            brightness = home.settings().sensors().brightness;
         }
         ftxui::Element sensorsBox = ftxui::vbox({
             sensorGauge("Temperature", temp, -10, 50, " C"),
@@ -191,14 +195,17 @@ int tui_main(int argc, char *argv[]) {
             nlohmann::json homeCfgJson;
             {
                 std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
-                home.m_AcSettings.on = acOn;
-                home.m_AcSettings.mode = static_cast<Ac::Mode>(acModeIndex);
-                home.m_SpeakerSettings.volume = static_cast<int16_t>(volume);
-                home.m_SpeakerSettings.bass = static_cast<int16_t>(bass);
-                home.m_SpeakerSettings.pitch = static_cast<int16_t>(pitch);
-                home.m_LightSettings.livingRoomLightOn = livingRoomOn;
-                home.m_LightSettings.bedroomLightOn = bedroomOn;
-                home.m_LightSettings.kitchenLightOn = kitchenOn;
+                auto settings = home.settings();
+                if (auto result = settings.setAc(acOn, static_cast<Ac::Mode>(acModeIndex)); !result) {
+                    std::cerr << result.error() << std::endl;
+                    return true;
+                }
+                if (auto result = settings.setSpeakers(volume, bass, pitch); !result) {
+                    std::cerr << result.error() << std::endl;
+                    return true;
+                }
+                settings.setLights({livingRoomOn, bedroomOn, kitchenOn});
+                home.settings() = settings;
                 homeCfgJson = home.toJson();
             }
 
@@ -221,23 +228,11 @@ int tui_main(int argc, char *argv[]) {
             {
                 std::lock_guard<std::mutex> guard = std::lock_guard<std::mutex>(homeMutex);
 
-                home.m_SensorReadings.brightness += delta;
-                if (home.m_SensorReadings.brightness < 0)
-                    home.m_SensorReadings.brightness = 0;
-                else if (home.m_SensorReadings.brightness > 1000)
-                    home.m_SensorReadings.brightness = 1000;
-
-                home.m_SensorReadings.humidity += delta;
-                if (home.m_SensorReadings.humidity < 0)
-                    home.m_SensorReadings.humidity = 0;
-                else if (home.m_SensorReadings.humidity > 100)
-                    home.m_SensorReadings.humidity = 100;
-
-                home.m_SensorReadings.temperature += delta;
-                if (home.m_SensorReadings.temperature < -10)
-                    home.m_SensorReadings.temperature = -10;
-                else if (home.m_SensorReadings.temperature > 50)
-                    home.m_SensorReadings.temperature = 50;
+                auto sensors = home.settings().sensors();
+                sensors.brightness = static_cast<int16_t>(std::clamp(sensors.brightness + delta, 0, 1000));
+                sensors.humidity = static_cast<int16_t>(std::clamp(sensors.humidity + delta, 0, 100));
+                sensors.temperature = static_cast<int16_t>(std::clamp(sensors.temperature + delta, -10, 50));
+                home.settings().setSensors(sensors);
             }
             handled = true;
         }
