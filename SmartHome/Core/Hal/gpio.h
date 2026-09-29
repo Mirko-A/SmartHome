@@ -10,39 +10,25 @@
 
 namespace hal {
 
-enum class GpioPin : uint8_t {
-    GPIO_0 = 0u,
-    GPIO_1,
-    GPIO_2,
-    GPIO_3,
-    GPIO_4,
-    GPIO_5,
-    GPIO_6,
-    GPIO_7,
-    GPIO_8,
-    GPIO_9,
-    GPIO_10,
-    GPIO_11,
-    GPIO_12,
-    GPIO_13,
-    GPIO_14,
-    GPIO_15,
-    GPIO_16,
-    GPIO_17,
-    GPIO_18,
-    GPIO_19,
-    GPIO_20,
-    GPIO_21,
-    GPIO_22,
-    GPIO_23,
-    GPIO_24,
-    GPIO_25,
-    GPIO_26,
-    GPIO_27,
-    GPIO_28,
-    GPIO_29,
-    GPIO_30,
-    COUNT,
+class GpioPin {
+  public:
+    static constexpr int COUNT = 31;
+
+    static std::expected<GpioPin, std::string> create(uint8_t value) {
+        if (value >= COUNT) {
+            return std::unexpected("Invalid GPIO pin: expected an integer from 0 to 30");
+        }
+        return GpioPin(value);
+    }
+
+    uint8_t number() const {
+        return m_Value;
+    }
+
+  private:
+    explicit GpioPin(uint8_t value) : m_Value(value) {}
+
+    uint8_t m_Value;
 };
 
 enum class PinMode : uint8_t {
@@ -86,7 +72,7 @@ class Gpio {
     Gpio();
     ~Gpio();
 
-    std::array<std::optional<PinMode>, static_cast<std::size_t>(GpioPin::COUNT)> m_PinModes;
+    std::array<std::optional<PinMode>, GpioPin::COUNT> m_PinModes;
     bool m_Initialized;
 };
 

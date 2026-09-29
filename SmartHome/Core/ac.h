@@ -16,10 +16,7 @@ class Ac {
     };
 
     struct Pins {
-        Pins(hal::GpioPin pin1, hal::GpioPin pin2) {
-            this->pin1 = pin1;
-            this->pin2 = pin2;
-        };
+        Pins(hal::GpioPin pin1, hal::GpioPin pin2) : pin1(pin1), pin2(pin2) {}
 
         hal::GpioPin pin1;
         hal::GpioPin pin2;

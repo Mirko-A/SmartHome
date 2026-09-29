@@ -25,24 +25,20 @@ std::expected<Light, std::string> Light::create(hal::GpioPin livingRoomPin, hal:
 }
 
 std::expected<void, std::string> Light::setOn(bool on, Light::Location location) {
-    hal::GpioPin pin;
-    switch (location) {
-    case Light::Location::LIVING_ROOM:
-        pin = m_Pins.livingRoom;
-        break;
-    case Light::Location::BEDROOM:
-        pin = m_Pins.bedroom;
-        break;
-    case Light::Location::KITCHEN:
-        pin = m_Pins.kitchen;
-        break;
-    }
-
     auto gpioResult = hal::Gpio::instance();
     if (!gpioResult) {
         return std::unexpected(gpioResult.error());
     }
     hal::Gpio &gpio = gpioResult->get();
 
-    return gpio.digitalWrite(pin, on ? hal::PinState::HIGH : hal::PinState::LOW);
+    const auto state = on ? hal::PinState::HIGH : hal::PinState::LOW;
+    switch (location) {
+    case Light::Location::LIVING_ROOM:
+        return gpio.digitalWrite(m_Pins.livingRoom, state);
+    case Light::Location::BEDROOM:
+        return gpio.digitalWrite(m_Pins.bedroom, state);
+    case Light::Location::KITCHEN:
+        return gpio.digitalWrite(m_Pins.kitchen, state);
+    }
+    return std::unexpected("Invalid light location");
 }

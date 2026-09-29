@@ -15,11 +15,8 @@ class Light {
     };
 
     struct Pins {
-        Pins(hal::GpioPin livingRoom, hal::GpioPin bedroom, hal::GpioPin kitchen) {
-            this->livingRoom = livingRoom;
-            this->bedroom = bedroom;
-            this->kitchen = kitchen;
-        };
+        Pins(hal::GpioPin livingRoom, hal::GpioPin bedroom, hal::GpioPin kitchen)
+            : livingRoom(livingRoom), bedroom(bedroom), kitchen(kitchen) {}
 
         hal::GpioPin livingRoom;
         hal::GpioPin bedroom;

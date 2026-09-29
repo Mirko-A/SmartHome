@@ -46,8 +46,5 @@ float Sensor::read(Type type) {
 
     return sensorValue;
 }
-Sensor::Pins::Pins(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness) {
-    this->temperature = temperature;
-    this->humidity = humidity;
-    this->brightness = brightness;
-};
+Sensor::Pins::Pins(hal::GpioPin temperature, hal::GpioPin humidity, hal::GpioPin brightness)
+    : temperature(temperature), humidity(humidity), brightness(brightness) {}
