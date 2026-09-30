@@ -1,12 +1,13 @@
-#include "mainwindow.h"
+#include "main_window.h"
 
 #include <assert.h>
 
 #include <QDateTime>
 #include <QFileDialog>
-#include <fstream>
+#include <nlohmann/json.hpp>
 
-#include "ui_mainwindow.h"
+#include "home_settings.h"
+#include "ui_main_window.h"
 
 #define CFG_JSON_FILE_PATH CFG_JSON_FILE_PATH_QSTR.toStdString().c_str()
 #define INI_JSON_FILE_PATH INI_JSON_FILE_PATH_QSTR.toStdString().c_str()
@@ -42,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->pages->setCurrentIndex(
         static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
 
-    homeCfg = new HomeConfig;
+    homeSettings = new HomeSettings;
     loadHomeCfgWidgets();
 
     mediaPlayer = new MediaPlayer;
@@ -61,39 +62,39 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
     delete ui;
 
-    delete homeCfg;
+    delete homeSettings;
     delete mediaPlayer;
 
     delete updateTimer;
 }
 
 void MainWindow::updateLightsUI() {
-    ui->livingRoomLightBtn->setChecked(homeCfg->lights.livingRoomLightOn);
-    ui->bedroomLightBtn->setChecked(homeCfg->lights.bedroomLightOn);
-    ui->kitchenLightBtn->setChecked(homeCfg->lights.kitchenLightOn);
+    ui->livingRoomLightBtn->setChecked(homeSettings->lights().livingRoomLightOn);
+    ui->bedroomLightBtn->setChecked(homeSettings->lights().bedroomLightOn);
+    ui->kitchenLightBtn->setChecked(homeSettings->lights().kitchenLightOn);
 }
 void MainWindow::updateSensorsUI() {
-    ui->temperatureSensorValueLabel->setText(QString::number(homeCfg->sensors.temperature));
-    ui->humiditySensorValueLabel->setText(QString::number(homeCfg->sensors.humidity));
-    ui->brightnessSensorValueLabel->setText(QString::number(homeCfg->sensors.brightness));
+    ui->temperatureSensorValueLabel->setText(QString::number(homeSettings->sensors().temperature));
+    ui->humiditySensorValueLabel->setText(QString::number(homeSettings->sensors().humidity));
+    ui->brightnessSensorValueLabel->setText(QString::number(homeSettings->sensors().brightness));
 }
 void MainWindow::updateACUI() {
-    ui->ACOnBtn->setChecked(homeCfg->AC.on);
-    ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
-    ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeCfg->AC.mode)));
+    ui->ACOnBtn->setChecked(homeSettings->ac().on);
+    ui->ACModeValueLabel->setText(
+        QString::fromStdString(Ac::modeAsString(homeSettings->ac().mode)));
 }
 void MainWindow::updateSpeakersUI() {
-    ui->volumeSlider->setValue(homeCfg->speakers.volume);
-    ui->volumeSliderValueLabel->setText(QString::number(homeCfg->speakers.volume));
+    ui->volumeSlider->setValue(homeSettings->speakers().volume);
+    ui->volumeSliderValueLabel->setText(QString::number(homeSettings->speakers().volume));
 
-    ui->bassSlider->setValue(homeCfg->speakers.bass);
-    ui->bassSliderValueLabel->setText(QString::number(homeCfg->speakers.bass));
+    ui->bassSlider->setValue(homeSettings->speakers().bass);
+    ui->bassSliderValueLabel->setText(QString::number(homeSettings->speakers().bass));
 
-    ui->pitchSlider->setValue(homeCfg->speakers.pitch);
-    ui->pitchSliderValueLabel->setText(QString::number(homeCfg->speakers.pitch));
+    ui->pitchSlider->setValue(homeSettings->speakers().pitch);
+    ui->pitchSliderValueLabel->setText(QString::number(homeSettings->speakers().pitch));
 }
 
-void MainWindow::updateHomeCfgWidgets() {
+void MainWindow::updateHomeWidgets() {
     updateLightsUI();
     updateSensorsUI();
     updateACUI();
@@ -130,7 +131,8 @@ void MainWindow::initAnalyticsModel() {
     ui->kitchenLightChartView->setChart(analyticsModel->m_kitchenLightChart);
 
     ui->ACOnChartView->setChart(analyticsModel->m_ACOnChart);
-    ui->ACTemperatureChartView->setChart(analyticsModel->m_ACTemperatureChart);
+    // AC temperature analytics are disabled until the chart is initialized again.
+    // ui->ACTemperatureChartView->setChart(analyticsModel->m_ACTemperatureChart);
 
     ui->temperatureSensorChartView->setChart(analyticsModel->m_temperatureSensorChart);
     ui->humiditySensorChartView->setChart(analyticsModel->m_humiditySensorChart);
@@ -141,57 +143,59 @@ void MainWindow::updateUI() {
     updateDateTimeWidget();
 
     // Config has been updated by 3rd party (python script)
-    reloadHomeCfgWidgetsIfDirty();
+    reloadHomeWidgetsIfDirty();
 }
 
 void MainWindow::onUpdate() {
     static size_t tickCounter = 0;
 
     if ((tickCounter % ONE_SEC_IN_TICKS) == 0)
-        analyticsModel->updateAnalyticsData(*homeCfg);
+        analyticsModel->updateAnalyticsData(*homeSettings);
 
-    homeCfg->onUpdate();
+    // FIXME: This doesn't exist anymore.
+    // homeSettings->onUpdate();
     updateUI();
 
     // TODO: JSON file handling
-    saveHomeCfgAsJSON();
+    saveHomeSettings();
 
     tickCounter++;
 }
 
-void MainWindow::saveHomeCfgAsJSON() {
-    std::ofstream o(CFG_JSON_FILE_PATH);
-    o << std::setw(4) << homeCfg->toJSON() << std::endl;
+void MainWindow::saveHomeSettings() {
+    // FIXME:
+    // std::ofstream o(CFG_JSON_FILE_PATH);
+    // o << std::setw(4) << homeSettings->serializeJson() << std::endl;
 }
 
-nlohmann::json MainWindow::loadHomeCfgAsJson() {
-    std::ifstream i;
-    i.open(CFG_JSON_FILE_PATH);
-
-    if (!i.good())
-        i.open(INI_JSON_FILE_PATH);
-
-    nlohmann::json j;
-    i >> j;
-
-    return j;
+nlohmann::json MainWindow::loadHomeSettings() {
+    // FIXME:
+    // std::ifstream i;
+    // i.open(CFG_JSON_FILE_PATH);
+    // if (!i.good()) {
+    //     i.open(INI_JSON_FILE_PATH);
+    // }
+    //
+    nlohmann::json json;
+    // i >> json;
+    return json;
 }
 
 void MainWindow::loadHomeCfgWidgets() {
-    nlohmann::json j = loadHomeCfgAsJson();
-    homeCfg->fromJSON(j);
-    updateHomeCfgWidgets();
+    // FIXME:
+    // homeSettings->deserializeJson(loadHomeSettings());
+    // updateHomeWidgets();
 }
 
-void MainWindow::reloadHomeCfgWidgetsIfDirty() {
-    nlohmann::json j = loadHomeCfgAsJson();
-
-    homeCfg->loadDirtyFlag(j);
-    if (homeCfg->isDirty) {
-        homeCfg->fromJSON(j);
-        updateHomeCfgWidgets();
-        homeCfg->isDirty = false;
-    }
+void MainWindow::reloadHomeWidgetsIfDirty() {
+    nlohmann::json json = loadHomeSettings();
+    // homeSettings->loadDirtyFlag(json);
+    // FIXME:
+    // if (homeSettings->isDirty) {
+    //     homeSettings->deserializeJson(json);
+    //     updateHomeWidgets();
+    //     homeSettings->isDirty = false;
+    // }
 }
 
 void MainWindow::updateCurrentPage(PageIndex index) {
@@ -219,7 +223,7 @@ void MainWindow::on_analyticsBtn_clicked() {
 
 void MainWindow::on_livingRoomLightBtn_toggled(bool checked) {
     // TODO: handle actual light
-    homeCfg->lights.livingRoomLightOn = checked;
+    // homeSettings->lights().livingRoomLightOn = checked;
 
     if (checked) {
         ui->livingRoomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
@@ -230,7 +234,7 @@ void MainWindow::on_livingRoomLightBtn_toggled(bool checked) {
 
 void MainWindow::on_bedroomLightBtn_toggled(bool checked) {
     // TODO: handle actual light
-    homeCfg->lights.bedroomLightOn = checked;
+    // homeSettings->lights.bedroomLightOn = checked;
 
     if (checked) {
         ui->bedroomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
@@ -241,7 +245,7 @@ void MainWindow::on_bedroomLightBtn_toggled(bool checked) {
 
 void MainWindow::on_kitchenLightBtn_toggled(bool checked) {
     // TODO: handle actual light
-    homeCfg->lights.kitchenLightOn = checked;
+    // homeSettings->lights.kitchenLightOn = checked;
 
     if (checked) {
         ui->kitchenLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
@@ -252,7 +256,7 @@ void MainWindow::on_kitchenLightBtn_toggled(bool checked) {
 
 void MainWindow::on_ACOnBtn_toggled(bool checked) {
     // TODO: handle actual light
-    homeCfg->AC.on = checked;
+    // homeSettings->AC.on = checked;
 
     if (checked) {
         ui->ACOnBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
@@ -262,77 +266,69 @@ void MainWindow::on_ACOnBtn_toggled(bool checked) {
 }
 
 void MainWindow::on_ACTemperatureUp_clicked() {
-    // TODO: handle actual light
-    homeCfg->AC.temperature += AC_TEMP_STEP;
-
-    if (homeCfg->AC.temperature > MAX_AC_TEMP)
-        homeCfg->AC.temperature = MAX_AC_TEMP;
-
-    ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
+    // FIXME: AC has no temp anymore
 }
 
 void MainWindow::on_ACTemperatureDown_clicked() {
-    // TODO: handle actual light
-    homeCfg->AC.temperature -= AC_TEMP_STEP;
-
-    if (homeCfg->AC.temperature < MIN_AC_TEMP)
-        homeCfg->AC.temperature = MIN_AC_TEMP;
-
-    ui->ACTemperatureValueLabel->setText(QString::number(homeCfg->AC.temperature));
+    // FIXME: AC has no temp anymore
 }
 
 void MainWindow::on_ACModeUp_clicked() {
-    uint8_t currentMode = static_cast<uint8_t>(homeCfg->AC.mode);
+    // FIXME:
+    // Ac::Mode currentMode = homeSettings->ac().mode;
+    // if (currentMode != 0) {
+    //     currentMode++;
+    // }
 
-    uint8_t modeCnt = static_cast<uint8_t>(ACMode::AC_MODE_CNT);
-
-    if (currentMode < (modeCnt - 1)) {
-        currentMode++;
-    }
-
-    homeCfg->AC.mode = static_cast<ACMode>(currentMode);
-    ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeCfg->AC.mode)));
+    // homeSettings->AC.mode = static_cast<ACMode>(currentMode);
+    // ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeSettings->AC.mode)));
 }
 
 void MainWindow::on_ACModeDown_clicked() {
-    uint8_t currentMode = static_cast<uint8_t>(homeCfg->AC.mode);
-
-    if (currentMode > 0) {
-        currentMode--;
-    }
-
-    homeCfg->AC.mode = static_cast<ACMode>(currentMode);
-    ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeCfg->AC.mode)));
+    // FIXME:
+    // uint8_t currentMode = static_cast<uint8_t>(homeSettings->AC.mode);
+    // if (currentMode > 0) {
+    //     currentMode--;
+    // }
+    //
+    // homeSettings->AC.mode = static_cast<ACMode>(currentMode);
+    // ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeSettings->AC.mode)));
 }
 
 void MainWindow::on_volumeSlider_sliderMoved(int position) {
-    homeCfg->speakers.volume = position;
-    ui->volumeSliderValueLabel->setText(QString::number(position));
+    // FIXME:
+    // homeSettings->speakers.volume = position;
+    // ui->volumeSliderValueLabel->setText(QString::number(position));
 }
 
 void MainWindow::on_volumeSlider_valueChanged(int value) {
-    homeCfg->speakers.volume = value;
-    ui->volumeSliderValueLabel->setText(QString::number(value));
+    // FIXME:
+    // homeSettings->speakers.volume = value;
+    // ui->volumeSliderValueLabel->setText(QString::number(value));
 }
 
 void MainWindow::on_bassSlider_sliderMoved(int position) {
-    homeCfg->speakers.bass = position;
-    ui->bassSliderValueLabel->setText(QString::number(position));
+    // FIXME:
+    // homeSettings->speakers.bass = position;
+    // ui->bassSliderValueLabel->setText(QString::number(position));
 }
 
 void MainWindow::on_bassSlider_valueChanged(int value) {
-    homeCfg->speakers.bass = value;
-    ui->bassSliderValueLabel->setText(QString::number(value));
+    // FIXME:
+    // homeSettings->speakers.bass = value;
+    // ui->bassSliderValueLabel->setText(QString::number(value));
 }
 
 void MainWindow::on_pitchSlider_sliderMoved(int position) {
-    homeCfg->speakers.pitch = position;
-    ui->pitchSliderValueLabel->setText(QString::number(position));
+    // FIXME:
+    // homeSettings->speakers.pitch = position;
+    // ui->pitchSliderValueLabel->setText(QString::number(position));
 }
 
 void MainWindow::on_pitchSlider_valueChanged(int value) {
-    homeCfg->speakers.pitch = value;
-    ui->pitchSliderValueLabel->setText(QString::number(value));
+    // FIXME:
+    // homeSettings->speakers.pitch = value;
+    // ui->pitchSliderValueLabel->setText(QString::number(value));
 }
 
 void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex,

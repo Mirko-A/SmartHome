@@ -7,7 +7,7 @@
 #include <QtCharts/QChart>
 #include <QtCharts/QLineSeries>
 
-#include "home_config.h"
+#include "home_settings.h"
 
 enum class AnalyticsPage {
     LIGHTS = 0,
@@ -75,7 +75,7 @@ struct Histograms {
 };
 
 struct LineGraphs {
-    LineGraph *ACTemperature;
+    LineGraph *ACTemperature = nullptr;
     LineGraph *temperatureSensor;
     LineGraph *humiditySensor;
     LineGraph *brightnessSensor;
@@ -108,16 +108,16 @@ class AnalyticsModel {
     void initCharts();
 
   public:
-    void updateAnalyticsData(const HomeConfig &homeCfg);
+    void updateAnalyticsData(const HomeSettings &homeCfg);
 
   private:
     void initChartsWithHistogram();
     void initChartsWithLineGraph();
 
     void shiftHistograms();
-    void updateHistograms(const HomeConfig &homeCfg);
+    void updateHistograms(const HomeSettings &homeCfg);
 
-    void updateLineGraphs(const HomeConfig &homeCfg);
+    void updateLineGraphs(const HomeSettings &homeCfg);
 
     void onUpdate();
 
@@ -134,8 +134,8 @@ class AnalyticsModel {
     QtCharts::QChart *m_kitchenLightChart;
 
     QtCharts::QChart *m_ACOnChart;
-    QtCharts::QChart *m_ACTemperatureChart;
-    QtCharts::QChart *m_ACModeChart;
+    QtCharts::QChart *m_ACTemperatureChart = nullptr;
+    QtCharts::QChart *m_ACModeChart = nullptr;
 
     QtCharts::QChart *m_temperatureSensorChart;
     QtCharts::QChart *m_humiditySensorChart;

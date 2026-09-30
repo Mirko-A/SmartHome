@@ -1,9 +1,3 @@
-#if 0
-#include <QApplication>
-
-#include "mainwindow.h"
-#endif
-
 #include <iostream>
 #include <string>
 

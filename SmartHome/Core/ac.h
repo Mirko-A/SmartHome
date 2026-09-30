@@ -23,6 +23,19 @@ class Ac {
   public:
     static std::expected<Ac, std::string> create(hal::GpioPin pin1, hal::GpioPin pin2);
 
+    static const char *modeAsString(const Mode &mode) {
+        const char *m;
+        switch (mode) {
+        case Ac::Mode::NORMAL:
+            return m = "Normal";
+        case Ac::Mode::FAST:
+            return m = "Fast";
+        case Ac::Mode::TURBO:
+            return m = "Turbo";
+        }
+        return m;
+    }
+
     Ac(const Ac &) = delete;
     Ac &operator=(const Ac &) = delete;
     Ac(Ac &&) = default;
@@ -31,17 +44,6 @@ class Ac {
     void setOn(bool on);
     void setMode(Ac::Mode mode);
     void setSpeed(uint8_t speed);
-
-    std::string modeAsString() const {
-        switch (m_Mode) {
-        case Ac::Mode::NORMAL:
-            return "Normal";
-        case Ac::Mode::FAST:
-            return "Fast";
-        case Ac::Mode::TURBO:
-            return "Turbo";
-        }
-    }
 
     void Run();
 

@@ -6,7 +6,7 @@
 #include <QTimer>
 
 #include "analytics_model.h"
-#include "home_config.h"
+#include "home_settings.h"
 #include "media_player.h"
 
 QT_BEGIN_NAMESPACE
@@ -81,17 +81,17 @@ class MainWindow : public QMainWindow {
     void updateCurrentPage(PageIndex index);
     void updateDateTimeWidget();
 
-    nlohmann::json loadHomeCfgAsJson();
-    void saveHomeCfgAsJSON();
+    nlohmann::json loadHomeSettings();
+    void saveHomeSettings();
 
     void updateLightsUI();
     void updateSensorsUI();
     void updateACUI();
     void updateSpeakersUI();
-    void updateHomeCfgWidgets();
+    void updateHomeWidgets();
 
     void loadHomeCfgWidgets();
-    void reloadHomeCfgWidgetsIfDirty();
+    void reloadHomeWidgetsIfDirty();
 
     void loadMediaPlayerWidgets();
     void loadMediaPlayerControlWidgets();
@@ -108,7 +108,7 @@ class MainWindow : public QMainWindow {
   private:
     Ui::MainWindow *ui;
 
-    HomeConfig *homeCfg;
+    HomeSettings *homeSettings;
     MediaPlayer *mediaPlayer;
     AnalyticsModel *analyticsModel;
 

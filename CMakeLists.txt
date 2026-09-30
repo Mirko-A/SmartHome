@@ -5,20 +5,22 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Threads REQUIRED)
-
 include(FetchContent)
+
+find_package(Threads REQUIRED)
+find_package(Qt5 REQUIRED
+    COMPONENTS Widgets Multimedia MultimediaWidgets Charts
+)
+
 FetchContent_Declare(ftxui
     GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
     GIT_TAG v5.0.0
 )
-FetchContent_MakeAvailable(ftxui)
-
 FetchContent_Declare(json
     GIT_REPOSITORY https://github.com/nlohmann/json
     GIT_TAG v3.11.3
 )
-FetchContent_MakeAvailable(json)
+FetchContent_MakeAvailable(ftxui json)
 
 #if(NOT EXISTS "${CMAKE_SOURCE_DIR}/Dependencies/DHT22/include/DHT22.h")
 #    message(FATAL_ERROR
@@ -48,24 +50,45 @@ target_link_libraries(SmartHomeCore PUBLIC nlohmann_json::nlohmann_json)
 #target_link_libraries(SmartHomeCore PUBLIC wiringPi)
 
 add_executable(SmartHome
+    # Entry point
     SmartHome/main.cpp
+    # GUI
     SmartHome/Gui/gui.cpp
+    SmartHome/Gui/analytics_model.cpp
+    SmartHome/Gui/main_window.cpp
+    SmartHome/Gui/media_player.cpp
+    SmartHome/Gui/player_controls.cpp
+    SmartHome/Gui/playlist_model.cpp
+    SmartHome/Gui/video_widget.cpp
+    # TUI
     SmartHome/Tui/tui.cpp
     SmartHome/Tui/tui_app.cpp
     SmartHome/Tui/config_io.cpp
-    SmartHome/Tui/components/light.cpp
-    SmartHome/Tui/components/speaker.cpp
     SmartHome/Tui/components/ac.cpp
+    SmartHome/Tui/components/light.cpp
     SmartHome/Tui/components/sensors.cpp
+    SmartHome/Tui/components/speaker.cpp
+)
+set_target_properties(SmartHome PROPERTIES
+    AUTOMOC ON
+    AUTOUIC ON
 )
 target_include_directories(SmartHome PRIVATE
     SmartHome/Gui/
     SmartHome/Tui/
 )
 target_link_libraries(SmartHome PRIVATE
+    # Internal
     SmartHomeCore
+    # External
     Threads::Threads
+
     ftxui::screen
     ftxui::dom
     ftxui::component
+
+    Qt5::Widgets
+    Qt5::Multimedia
+    Qt5::MultimediaWidgets
+    Qt5::Charts
 )

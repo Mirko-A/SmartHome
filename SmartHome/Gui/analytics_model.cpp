@@ -4,6 +4,8 @@
 #include <QStringList>
 #include <QValueAxis>
 
+#include "home_settings.h"
+
 // TODO: For testing it is reduced to 60
 // #define ONE_HOUR_IN_SEC 3600
 #define ONE_HOUR_IN_SEC 60
@@ -171,11 +173,12 @@ void AnalyticsModel::initChartsWithHistogram() {
 
 void AnalyticsModel::initChartsWithLineGraph() {
     {
-        auto ACTemperatureChartWithLineGraph = createChartWithLineGraph(
-            "AC Temperature", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
-            QPair<size_t, size_t>(0, MAX_AC_TEMP));
-        m_ACTemperatureChart = ACTemperatureChartWithLineGraph.first;
-        m_analyticsData->lineGraphs->ACTemperature = ACTemperatureChartWithLineGraph.second;
+        // FIXME:
+        // auto ACTemperatureChartWithLineGraph = createChartWithLineGraph(
+        //     "AC Temperature", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
+        //     QPair<size_t, size_t>(0, MAX_AC_TEMP));
+        // m_ACTemperatureChart = ACTemperatureChartWithLineGraph.first;
+        // m_analyticsData->lineGraphs->ACTemperature = ACTemperatureChartWithLineGraph.second;
     }
 
     // TODO: Set correct max sensor values
@@ -263,41 +266,41 @@ void AnalyticsModel::shiftHistograms() {
     m_analyticsData->histograms->ACOn->shift();
 }
 
-void AnalyticsModel::updateHistograms(const HomeConfig &homeCfg) {
-    if (homeCfg.lights.livingRoomLightOn) {
+void AnalyticsModel::updateHistograms(const HomeSettings &settings) {
+    if (settings.lights().livingRoomLightOn) {
         m_analyticsData->histograms->livingRoomLight->update();
     }
-    if (homeCfg.lights.bedroomLightOn) {
+    if (settings.lights().bedroomLightOn) {
         m_analyticsData->histograms->bedroomLight->update();
     }
-    if (homeCfg.lights.kitchenLightOn) {
+    if (settings.lights().kitchenLightOn) {
         m_analyticsData->histograms->kitchenLight->update();
     }
-    if (homeCfg.AC.on) {
+    if (settings.ac().on) {
         m_analyticsData->histograms->ACOn->update();
     }
 }
 
-void AnalyticsModel::updateLineGraphs(const HomeConfig &homeCfg) {
-    if (homeCfg.AC.on) {
-        m_analyticsData->lineGraphs->ACTemperature->update(homeCfg.AC.temperature);
-    } else {
-        m_analyticsData->lineGraphs->ACTemperature->update(0);
-    }
+void AnalyticsModel::updateLineGraphs(const HomeSettings &settings) {
+    // if (settings.ac().on) {
+    //     m_analyticsData->lineGraphs->ACTemperature->update(settings.AC.temperature);
+    // } else {
+    //     m_analyticsData->lineGraphs->ACTemperature->update(0);
+    // }
 
-    m_analyticsData->lineGraphs->temperatureSensor->update(homeCfg.sensors.temperature);
-    m_analyticsData->lineGraphs->humiditySensor->update(homeCfg.sensors.humidity);
-    m_analyticsData->lineGraphs->brightnessSensor->update(homeCfg.sensors.brightness);
+    m_analyticsData->lineGraphs->temperatureSensor->update(settings.sensors().temperature);
+    m_analyticsData->lineGraphs->humiditySensor->update(settings.sensors().humidity);
+    m_analyticsData->lineGraphs->brightnessSensor->update(settings.sensors().brightness);
 }
 
-void AnalyticsModel::updateAnalyticsData(const HomeConfig &homeCfg) {
+void AnalyticsModel::updateAnalyticsData(const HomeSettings &settings) {
     if (histogramTickCount == MAX_HISTOGRAM_VALUE) {
         shiftHistograms();
         histogramTickCount = 0;
     }
 
-    updateHistograms(homeCfg);
-    updateLineGraphs(homeCfg);
+    updateHistograms(settings);
+    updateLineGraphs(settings);
 
     histogramTickCount++;
 }
