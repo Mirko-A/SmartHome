@@ -35,6 +35,7 @@ class OwnedPin {
 
     OwnedPin(Gpio &gpio, GpioPin pin, PinMode mode, PinState inactiveState);
 
+  private:
     Gpio *m_Gpio;
     GpioPin m_Pin;
     PinMode m_Mode;

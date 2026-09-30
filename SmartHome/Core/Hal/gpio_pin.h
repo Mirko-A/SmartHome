@@ -26,6 +26,7 @@ class GpioPin {
   private:
     explicit GpioPin(uint8_t number) : m_Number(number) {}
 
+  private:
     uint8_t m_Number;
 };
 

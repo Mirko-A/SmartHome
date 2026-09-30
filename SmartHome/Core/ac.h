@@ -48,6 +48,7 @@ class Ac {
   private:
     explicit Ac(Pins pins);
 
+  private:
     Pins m_Pins;
     bool m_On;
     Ac::Mode m_Mode;
