@@ -1,6 +1,8 @@
 #include "home_ctrl.h"
 
+#include <array>
 #include <nlohmann/json.hpp>
+#include <unordered_map>
 
 std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group,
                                                   const char *key);
@@ -9,7 +11,12 @@ HomeControl::HomeControl(Light light, Ac ac, Sensor sensor)
     : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)),
       m_Dirty(false) {}
 
-std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json &pinCfgJson) {
+std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json &pinCfgJson,
+                                                            const nlohmann::json &homeCfgJson) {
+    HomeSettings settings;
+    if (auto result = settings.deserializeJson(homeCfgJson); !result) {
+        return std::unexpected(result.error());
+    }
     // Validate every pin before device factories start configuring hardware.
     auto livingRoomPin = parsePin(pinCfgJson, "lights", "living_room");
     if (!livingRoomPin) {
@@ -44,6 +51,25 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
         return std::unexpected(acPin2.error());
     }
 
+    const std::array pins{*livingRoomPin, *bedroomPin,    *kitchenPin, *temperaturePin,
+                          *humidityPin,   *brightnessPin, *acPin1,     *acPin2};
+    const std::array paths{
+        "lights.living_room", "lights.bedroom",     "lights.kitchen", "sensors.temperature",
+        "sensors.humidity",   "sensors.brightness", "ac.pin1",        "ac.pin2"};
+    std::unordered_map<uint8_t, const char *> seenPins;
+    seenPins.reserve(pins.size());
+    for (size_t i = 0; i < pins.size(); ++i) {
+        const auto [seen, inserted] = seenPins.emplace(pins[i].number(), paths[i]);
+        if (!inserted) {
+            return std::unexpected(std::string(paths[i]) + ": GPIO pin already assigned to " +
+                                   seen->second);
+        }
+        if (i >= 6 && pins[i].number() != 12 && pins[i].number() != 18) {
+            return std::unexpected(std::string(paths[i]) +
+                                   ": PWM output requires GPIO pin 12 or 18");
+        }
+    }
+
     auto lightResult = Light::create(*livingRoomPin, *bedroomPin, *kitchenPin);
     if (!lightResult) {
         return std::unexpected(lightResult.error());
@@ -59,7 +85,9 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
         return std::unexpected(acResult.error());
     }
 
-    return HomeControl(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
+    HomeControl home(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
+    home.m_Settings = settings;
+    return home;
 }
 
 std::expected<void, std::string> HomeControl::deserializeJson(const nlohmann::json &json) {

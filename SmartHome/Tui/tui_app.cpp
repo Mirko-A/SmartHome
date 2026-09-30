@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <ftxui/dom/elements.hpp>
 #include <thread>
+#include <utility>
 
 #include "components/ac.h"
 #include "components/light.h"
@@ -15,8 +16,9 @@
 
 namespace smart_home::tui {
 
-TuiApp::TuiApp(HomeControl &home)
-    : m_home(home), m_state(home.settings()), m_screen(ftxui::ScreenInteractive::Fullscreen()),
+TuiApp::TuiApp(HomeControl &home, std::string homeConfigPath)
+    : m_home(home), m_homeConfigPath(std::move(homeConfigPath)), m_state(home.settings()),
+      m_screen(ftxui::ScreenInteractive::Fullscreen()),
       m_lightsPanel(components::makeLightsPanel(m_state)),
       m_speakersPanel(components::makeSpeakersPanel(m_state)),
       m_acPanel(components::makeAcPanel(m_state)) {
@@ -79,8 +81,8 @@ void TuiApp::saveAndQuit() {
     settings.setLights(m_state.lights.livingRoom, m_state.lights.bedroom, m_state.lights.kitchen);
     m_home.settings() = settings;
 
-    if (auto result = saveConfig(HOME_CFG_FILE_PATH, m_home.serializeJson()); !result) {
-        m_saveError = "Save failed: " + result.error() + " (" + HOME_CFG_FILE_PATH +
+    if (auto result = saveConfig(m_homeConfigPath, m_home.serializeJson()); !result) {
+        m_saveError = "Save failed: " + result.error() + " (" + m_homeConfigPath +
                       "). Settings are still open; press q to retry.";
         return;
     }

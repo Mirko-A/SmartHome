@@ -6,30 +6,35 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <fstream>
+#include <memory>
 #include <utility>
 
 namespace smart_home::tui {
 
-std::expected<nlohmann::json, std::string> loadConfig(const std::string &path,
-                                                      const std::string &fallbackPath) {
-    std::string sourcePath = path;
-    std::ifstream stream(sourcePath);
-    if (!stream.good() && !fallbackPath.empty()) {
-        sourcePath = fallbackPath;
-        stream.clear();
-        stream.open(sourcePath);
+std::expected<nlohmann::json, std::string> loadConfig(const std::string &path) {
+    const auto closeFile = [](std::FILE *file) { std::fclose(file); };
+    std::unique_ptr<std::FILE, decltype(closeFile)> stream(std::fopen(path.c_str(), "rb"),
+                                                           closeFile);
+    const int openError = stream ? 0 : errno;
+    if (!stream) {
+        if (openError == ENOENT) {
+            return std::unexpected("Missing config: " + path);
+        }
+        return std::unexpected("Cannot open config (" + path + "): " + std::strerror(openError));
     }
-    if (!stream.good()) {
-        return std::unexpected("Cannot open config: " + path +
-                               (fallbackPath.empty() ? "" : " or " + fallbackPath));
+    std::string contents;
+    char buffer[4096];
+    while (const auto count = std::fread(buffer, 1, sizeof(buffer), stream.get())) {
+        contents.append(buffer, count);
+    }
+    if (std::ferror(stream.get())) {
+        const int readError = errno;
+        return std::unexpected("Cannot read config (" + path + "): " + std::strerror(readError));
     }
     try {
-        nlohmann::json config;
-        stream >> config;
-        return config;
+        return nlohmann::json::parse(contents);
     } catch (const nlohmann::json::exception &error) {
-        return std::unexpected("Cannot parse config (" + sourcePath + "): " + error.what());
+        return std::unexpected("Cannot parse config (" + path + "): " + error.what());
     }
 }
 

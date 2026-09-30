@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <mode>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <mode> [--config-dir DIRECTORY]" << std::endl;
         std::cerr << "Modes: gui, tui" << std::endl;
         return 1;
     }

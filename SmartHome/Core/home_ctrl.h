@@ -12,17 +12,15 @@
 #include "nlohmann/json_fwd.hpp"
 #include "sensor.h"
 
-const std::string HOME_INI_FILE_PATH = "../resource/ini_cfg.json";
-const std::string HOME_CFG_FILE_PATH = "../resource/home_cfg.json";
-const std::string PIN_CFG_FILE_PATH = "../resource/pin_cfg.json";
-
 constexpr int MAX_AC_TEMP = 30;
 constexpr int MIN_AC_TEMP = 15;
 constexpr int AC_TEMP_STEP = 1;
 
 class HomeControl {
   public:
-    static std::expected<HomeControl, std::string> create(const nlohmann::json &pinCfgJson);
+    // Validate both configurations before configuring any hardware.
+    static std::expected<HomeControl, std::string> create(const nlohmann::json &pinCfgJson,
+                                                          const nlohmann::json &homeCfgJson);
 
     HomeControl(const HomeControl &) = delete;
     HomeControl &operator=(const HomeControl &) = delete;
@@ -46,8 +44,8 @@ class HomeControl {
     HomeControl() = delete;
     HomeControl(Light light, Ac ac, Sensor sensor);
 
+  private:
     HomeSettings m_Settings;
-
     Light m_Light;
     Ac m_Ac;
     Sensor m_Sensor;

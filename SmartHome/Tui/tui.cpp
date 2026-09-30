@@ -1,5 +1,6 @@
 #include "tui.h"
 
+#include <filesystem>
 #include <iostream>
 #include <utility>
 
@@ -10,31 +11,33 @@
 namespace smart_home::tui {
 
 int main(int argc, char *argv[]) {
-    (void)argc;
-    (void)argv;
+    std::filesystem::path configDirectory = "../resource";
+    if (argc == 3 && std::string(argv[1]) == "--config-dir" && argv[2][0] != '\0') {
+        configDirectory = argv[2];
+    } else if (argc != 1) {
+        std::cerr << "Usage: " << argv[0] << " tui [--config-dir DIRECTORY]" << std::endl;
+        return 1;
+    }
+    const auto pinConfigPath = (configDirectory / "pin_cfg.json").string();
+    const auto homeConfigPath = (configDirectory / "home_cfg.json").string();
 
-    auto pinConfig = loadConfig(PIN_CFG_FILE_PATH);
+    auto pinConfig = loadConfig(pinConfigPath);
     if (!pinConfig) {
         std::cerr << "Error: " << pinConfig.error() << std::endl;
         return -1;
     }
-    auto homeConfig = loadConfig(HOME_CFG_FILE_PATH, HOME_INI_FILE_PATH);
+    auto homeConfig = loadConfig(homeConfigPath);
     if (!homeConfig) {
         std::cerr << "Error: " << homeConfig.error() << std::endl;
         return -1;
     }
-    auto homeResult = HomeControl::create(*pinConfig);
+    auto homeResult = HomeControl::create(*pinConfig, *homeConfig);
     if (!homeResult) {
-        std::cerr << "Error initializing pins: " << homeResult.error() << std::endl;
+        std::cerr << "Error initializing home: " << homeResult.error() << std::endl;
         return -1;
     }
     HomeControl home = std::move(*homeResult);
-    if (auto result = home.deserializeJson(*homeConfig); !result) {
-        std::cerr << "Error loading home settings: " << result.error() << std::endl;
-        return -1;
-    }
-
-    TuiApp app(home);
+    TuiApp app(home, homeConfigPath);
     app.run();
     return 0;
 }
