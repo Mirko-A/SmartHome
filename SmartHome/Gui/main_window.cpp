@@ -13,23 +13,23 @@
 #define INI_JSON_FILE_PATH INI_JSON_FILE_PATH_QSTR.toStdString().c_str()
 
 const QVector<QString> PAGE_ICON_PATHS = {
-    "../resource/icons/three-dots-0-purple.svg",
-    "../resource/icons/three-dots-1-purple.svg",
-    "../resource/icons/three-dots-2-purple.svg",
+    ":/icons/three-dots-0-purple.svg",
+    ":/icons/three-dots-1-purple.svg",
+    ":/icons/three-dots-2-purple.svg",
 };
 
 const QVector<QVector<QString>> ANALYTICS_PAGE_PATHS = {
     // INACTIVE ICONS
     {
-        "../resource/icons/analytics-lights-off.svg",
-        "../resource/icons/analytics-ac-off.svg",
-        "../resource/icons/analytics-sensors-off.svg",
+        ":/icons/analytics-lights-off.svg",
+        ":/icons/analytics-ac-off.svg",
+        ":/icons/analytics-sensors-off.svg",
     },
     // ACTIVE ICONS
     {
-        "../resource/icons/analytics-lights-on.svg",
-        "../resource/icons/analytics-ac-on.svg",
-        "../resource/icons/analytics-sensors-on.svg",
+        ":/icons/analytics-lights-on.svg",
+        ":/icons/analytics-ac-on.svg",
+        ":/icons/analytics-sensors-on.svg",
     },
 };
 
@@ -226,9 +226,9 @@ void MainWindow::on_livingRoomLightBtn_toggled(bool checked) {
     // homeSettings->lights().livingRoomLightOn = checked;
 
     if (checked) {
-        ui->livingRoomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
+        ui->livingRoomLightBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
     } else {
-        ui->livingRoomLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
+        ui->livingRoomLightBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
     }
 }
 
@@ -237,9 +237,9 @@ void MainWindow::on_bedroomLightBtn_toggled(bool checked) {
     // homeSettings->lights.bedroomLightOn = checked;
 
     if (checked) {
-        ui->bedroomLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
+        ui->bedroomLightBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
     } else {
-        ui->bedroomLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
+        ui->bedroomLightBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
     }
 }
 
@@ -248,9 +248,9 @@ void MainWindow::on_kitchenLightBtn_toggled(bool checked) {
     // homeSettings->lights.kitchenLightOn = checked;
 
     if (checked) {
-        ui->kitchenLightBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
+        ui->kitchenLightBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
     } else {
-        ui->kitchenLightBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
+        ui->kitchenLightBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
     }
 }
 
@@ -259,9 +259,9 @@ void MainWindow::on_ACOnBtn_toggled(bool checked) {
     // homeSettings->AC.on = checked;
 
     if (checked) {
-        ui->ACOnBtn->setIcon(QIcon("../resource/icons/toggle-on-colored.svg"));
+        ui->ACOnBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
     } else {
-        ui->ACOnBtn->setIcon(QIcon("../resource/icons/toggle-off-colored.svg"));
+        ui->ACOnBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
     }
 }
 

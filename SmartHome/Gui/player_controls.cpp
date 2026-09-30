@@ -33,15 +33,15 @@ void PlayerControls::setState(QMediaPlayer::State state) {
         switch (state) {
         case QMediaPlayer::StoppedState:
             m_stopButton->setEnabled(false);
-            m_playButton->setIcon(QIcon("../resource/icons/play.svg"));
+            m_playButton->setIcon(QIcon(":/icons/play.svg"));
             break;
         case QMediaPlayer::PlayingState:
             m_stopButton->setEnabled(true);
-            m_playButton->setIcon(QIcon("../resource/icons/pause.svg"));
+            m_playButton->setIcon(QIcon(":/icons/pause.svg"));
             break;
         case QMediaPlayer::PausedState:
             m_stopButton->setEnabled(true);
-            m_playButton->setIcon(QIcon("../resource/icons/play.svg"));
+            m_playButton->setIcon(QIcon(":/icons/play.svg"));
             break;
         }
     }
@@ -64,8 +64,7 @@ void PlayerControls::setMuted(bool muted) {
     if (m_playerMuted != muted) {
         m_playerMuted = muted;
 
-        m_muteButton->setIcon(
-            QIcon(muted ? "../resource/icons/volume-x.svg" : "../resource/icons/volume-2.svg"));
+        m_muteButton->setIcon(QIcon(muted ? ":/icons/volume-x.svg" : ":/icons/volume-2.svg"));
     }
 }
 

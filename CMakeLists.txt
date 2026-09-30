@@ -68,10 +68,13 @@ add_executable(SmartHome
     SmartHome/Tui/components/light.cpp
     SmartHome/Tui/components/sensors.cpp
     SmartHome/Tui/components/speaker.cpp
+    # Resources
+    SmartHome/icons_resource.qrc
 )
 set_target_properties(SmartHome PROPERTIES
     AUTOMOC ON
     AUTOUIC ON
+    AUTORCC ON
 )
 target_include_directories(SmartHome PRIVATE
     SmartHome/Gui/
