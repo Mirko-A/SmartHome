@@ -40,17 +40,17 @@ void Ac::Run() {
     if (m_On) {
         // Start AC
         switch (m_Mode) {
-        case Ac::Mode::NORMAL: {
+        case Ac::Mode::NORMAL:
             // Run at m_Speed
-        } break;
-        case Ac::Mode::FAST: {
+            break;
+        case Ac::Mode::FAST:
             // Run at 1.5 * m_Speed
-        } break;
-        case Ac::Mode::TURBO: {
+            break;
+        case Ac::Mode::TURBO:
             // Run at 2 * m_Speed
-        } break;
-        default: {
-        } break;
+            break;
+        default:
+            break;
         }
     } else {
         // Stop AC

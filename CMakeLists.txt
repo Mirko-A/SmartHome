@@ -51,6 +51,12 @@ add_executable(SmartHome
     SmartHome/main.cpp
     SmartHome/Gui/gui.cpp
     SmartHome/Tui/tui.cpp
+    SmartHome/Tui/tui_app.cpp
+    SmartHome/Tui/config_io.cpp
+    SmartHome/Tui/components/light.cpp
+    SmartHome/Tui/components/speaker.cpp
+    SmartHome/Tui/components/ac.cpp
+    SmartHome/Tui/components/sensors.cpp
 )
 target_include_directories(SmartHome PRIVATE
     SmartHome/Gui/

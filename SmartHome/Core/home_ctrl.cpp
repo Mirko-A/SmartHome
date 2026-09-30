@@ -1,5 +1,7 @@
 #include "home_ctrl.h"
 
+#include <nlohmann/json.hpp>
+
 std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group,
                                                   const char *key);
 
@@ -60,12 +62,12 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
     return HomeControl(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
 }
 
-std::expected<void, std::string> HomeControl::loadFromJson(const nlohmann::json &json) {
-    return m_Settings.loadFromJson(json);
+std::expected<void, std::string> HomeControl::deserializeJson(const nlohmann::json &json) {
+    return m_Settings.deserializeJson(json);
 }
 
-nlohmann::json HomeControl::toJson() const {
-    auto serialized = m_Settings.toJson();
+nlohmann::json HomeControl::serializeJson() const {
+    auto serialized = m_Settings.serializeJson();
     serialized["dirty"] = m_Dirty;
     return serialized;
 }

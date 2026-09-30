@@ -6,9 +6,8 @@
 #include <string>
 
 #include "ac.h"
-#include "nlohmann/json.hpp"
+#include "nlohmann/json_fwd.hpp"
 
-// Readable snapshots; modifying these values cannot change stored settings.
 struct LightSettings {
     bool livingRoomLightOn = false;
     bool bedroomLightOn = false;
@@ -32,6 +31,7 @@ struct SpeakerSettings {
     int16_t pitch = 0;
 };
 
+// Readable snapshots; modifying these values cannot change stored settings.
 class HomeSettings {
   public:
     LightSettings lights() const {
@@ -47,18 +47,14 @@ class HomeSettings {
         return m_Speakers;
     }
 
-    void setLights(LightSettings lights) {
-        m_Lights = lights;
-    }
-    void setSensors(SensorReadings sensors) {
-        m_Sensors = sensors;
-    }
-    std::expected<void, std::string> setAc(bool on, Ac::Mode mode);
+    void setLights(bool livingRoom, bool bedroom, bool kitchen);
+    void setSensors(int16_t temperature, int16_t humidity, int16_t brightness);
+    void setAc(bool on, Ac::Mode mode);
     // Speaker controls use the same 0..100 range as the TUI sliders.
     std::expected<void, std::string> setSpeakers(int volume, int bass, int pitch);
 
-    std::expected<void, std::string> loadFromJson(const nlohmann::json &json);
-    nlohmann::json toJson() const;
+    std::expected<void, std::string> deserializeJson(const nlohmann::json &json);
+    nlohmann::json serializeJson() const;
 
   private:
     LightSettings m_Lights;

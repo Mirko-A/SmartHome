@@ -1,6 +1,7 @@
 #include "home_settings.h"
 
 #include <limits>
+#include <nlohmann/json.hpp>
 #include <stdexcept>
 #include <utility>
 
@@ -25,15 +26,30 @@ int readInteger(const nlohmann::json &json, const char *group, const char *key, 
 
 } // namespace
 
-std::expected<void, std::string> HomeSettings::setAc(bool on, Ac::Mode mode) {
+void HomeSettings::setLights(bool livingRoom, bool bedroom, bool kitchen) {
+    m_Lights = LightSettings{
+        .livingRoomLightOn = livingRoom,
+        .bedroomLightOn = bedroom,
+        .kitchenLightOn = kitchen,
+    };
+}
+
+void HomeSettings::setSensors(int16_t temperature, int16_t humidity, int16_t brightness) {
+    m_Sensors = SensorReadings{
+        .temperature = temperature,
+        .humidity = humidity,
+        .brightness = brightness,
+    };
+}
+
+void HomeSettings::setAc(bool on, Ac::Mode mode) {
     switch (mode) {
     case Ac::Mode::NORMAL:
     case Ac::Mode::FAST:
     case Ac::Mode::TURBO:
         m_Ac = {on, mode};
-        return {};
     }
-    return std::unexpected("ac.mode: invalid AC mode");
+    return;
 }
 
 std::expected<void, std::string> HomeSettings::setSpeakers(int volume, int bass, int pitch) {
@@ -45,28 +61,24 @@ std::expected<void, std::string> HomeSettings::setSpeakers(int volume, int bass,
     return {};
 }
 
-std::expected<void, std::string> HomeSettings::loadFromJson(const nlohmann::json &json) {
+std::expected<void, std::string> HomeSettings::deserializeJson(const nlohmann::json &json) {
     HomeSettings candidate;
     try {
         const auto &lights = json.at("lights");
-        candidate.setLights({lights.at("living_room").get<bool>(), lights.at("bedroom").get<bool>(),
-                             lights.at("kitchen").get<bool>()});
+        candidate.setLights(lights.at("living_room").get<bool>(), lights.at("bedroom").get<bool>(),
+                            lights.at("kitchen").get<bool>());
 
         constexpr int minReading = std::numeric_limits<int16_t>::min();
         constexpr int maxReading = std::numeric_limits<int16_t>::max();
-        candidate.setSensors({
+        candidate.setSensors(
             static_cast<int16_t>(
                 readInteger(json, "sensors", "temperature", minReading, maxReading)),
             static_cast<int16_t>(readInteger(json, "sensors", "humidity", minReading, maxReading)),
             static_cast<int16_t>(
-                readInteger(json, "sensors", "brightness", minReading, maxReading)),
-        });
+                readInteger(json, "sensors", "brightness", minReading, maxReading)));
 
-        auto ac = candidate.setAc(json.at("ac").at("on").get<bool>(),
-                                  static_cast<Ac::Mode>(readInteger(json, "ac", "mode", 0, 2)));
-        if (!ac) {
-            return std::unexpected(ac.error());
-        }
+        candidate.setAc(json.at("ac").at("on").get<bool>(),
+                        static_cast<Ac::Mode>(readInteger(json, "ac", "mode", 0, 2)));
         auto speakers = candidate.setSpeakers(readInteger(json, "speakers", "volume", 0, 100),
                                               readInteger(json, "speakers", "bass", 0, 100),
                                               readInteger(json, "speakers", "pitch", 0, 100));
@@ -83,7 +95,7 @@ std::expected<void, std::string> HomeSettings::loadFromJson(const nlohmann::json
     return {};
 }
 
-nlohmann::json HomeSettings::toJson() const {
+nlohmann::json HomeSettings::serializeJson() const {
     return {
         {"lights",
          {{"living_room", m_Lights.livingRoomLightOn},

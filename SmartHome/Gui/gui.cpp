@@ -2,7 +2,9 @@
 
 #include <iostream>
 
-int gui_main(int argc, char *argv[]) {
+namespace smart_home::gui {
+
+int main(int argc, char *argv[]) {
 #if 0
     QApplication app(argc, argv);
     MainWindow window;
@@ -17,3 +19,5 @@ int gui_main(int argc, char *argv[]) {
     return 0;
 #endif
 }
+
+} // namespace smart_home::gui

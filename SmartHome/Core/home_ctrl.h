@@ -9,7 +9,7 @@
 #include "ac.h"
 #include "home_settings.h"
 #include "light.h"
-#include "nlohmann/json.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include "sensor.h"
 
 const std::string HOME_INI_FILE_PATH = "../resource/ini_cfg.json";
@@ -32,8 +32,8 @@ class HomeControl {
     std::expected<void, std::string> onUpdate();
 
     void loadDirtyFlag(const nlohmann::json &thisAsJson);
-    std::expected<void, std::string> loadFromJson(const nlohmann::json &json);
-    nlohmann::json toJson() const;
+    std::expected<void, std::string> deserializeJson(const nlohmann::json &json);
+    nlohmann::json serializeJson() const;
 
     HomeSettings &settings() {
         return m_Settings;

@@ -25,9 +25,9 @@ int main(int argc, char *argv[]) {
     argc -= 1;
 
     if (mode == "gui") {
-        return gui_main(argc, argv);
+        return smart_home::gui::main(argc, argv);
     } else if (mode == "tui") {
-        return tui_main(argc, argv);
+        return smart_home::tui::main(argc, argv);
     } else {
         std::cerr << "Unknown mode: " << mode << std::endl;
         return 1;
