@@ -60,8 +60,11 @@ add_executable(SmartHome
     SmartHome/Gui/Pages/Devices/Components/sensors_panel.cpp
     SmartHome/Gui/Pages/Devices/Components/speakers_panel.cpp
     SmartHome/Gui/Pages/Devices/devices_page.cpp
-    SmartHome/Gui/analytics_model.cpp
-    SmartHome/Gui/main_window.cpp
+    SmartHome/Gui/Pages/Analytics/analytics_model.cpp
+    SmartHome/Gui/Pages/Analytics/analytics_page.cpp
+    SmartHome/Gui/Pages/Analytics/Charts/histogram.cpp
+    SmartHome/Gui/Pages/Analytics/Charts/line_graph.cpp
+    SmartHome/Gui/Shell/main_window.cpp
     SmartHome/Gui/Pages/Media/media_page.cpp
     SmartHome/Gui/Pages/Media/media_player.cpp
     SmartHome/Gui/Pages/Media/player_controls.cpp

@@ -8,7 +8,11 @@ GuiApp::GuiApp(std::string path, QObject *parent)
     m_worker->moveToThread(&m_thread);
     connect(&m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
     m_thread.start();
-    connect(&m_timer, &QTimer::timeout, this, [this] { emit tick(); });
+    m_clock.start();
+    connect(&m_timer, &QTimer::timeout, this, [this] {
+        sampleAnalytics();
+        emit tick();
+    });
     m_timer.start(100);
 }
 
@@ -38,7 +42,7 @@ void GuiApp::edit(const HomeSettings &settings) {
     if (!editable())
         return;
     m_state.pending = settings;
-
+    sampleAnalytics();
     // Keep an outstanding I/O error visible even when the user continues editing.
     emit changed();
 }
@@ -69,7 +73,7 @@ void GuiApp::reload() {
                         m_accepted = std::move(*result);
                         m_state.pending = m_state.saved = candidate;
                         m_state.loaded = true;
-
+                        sampleAnalytics();
                     } else {
                         m_error = QString::fromStdString(result.error().message);
                     }
@@ -111,6 +115,10 @@ void GuiApp::save() {
                 Qt::QueuedConnection);
         },
         Qt::QueuedConnection);
+}
+void GuiApp::sampleAnalytics() {
+    if (m_state.loaded)
+        m_analytics.update(m_state.pending, m_clock.elapsed());
 }
 
 void GuiApp::setLight(Light light, bool on) {
