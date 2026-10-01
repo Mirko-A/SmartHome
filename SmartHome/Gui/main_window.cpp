@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 
 #include "home_settings.h"
+#include "Pages/Devices/devices_page.h"
 #include "ui_main_window.h"
 
 const QVector<QString> PAGE_ICON_PATHS = {
@@ -40,25 +41,12 @@ const QVector<QVector<QString>> ANALYTICS_PAGE_PATHS = {
 // constexpr int ONE_SEC_IN_TICKS = 20;
 constexpr int ONE_SEC_IN_TICKS = 2;
 
-MainWindow::MainWindow(std::string configPath, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow),
-      m_session(new smart_home::gui::GuiSession(std::move(configPath), this)) {
+MainWindow::MainWindow(smart_home::gui::GuiApp &app, QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), m_session(&app) {
     ui->setupUi(this);
     connect(ui->devicesBtn, &QAbstractButton::clicked, this, &MainWindow::devicesBtnClicked);
     connect(ui->mediaBtn, &QAbstractButton::clicked, this, &MainWindow::mediaBtnClicked);
     connect(ui->analyticsBtn, &QAbstractButton::clicked, this, &MainWindow::analyticsBtnClicked);
-    connect(ui->livingRoomLightBtn, &QAbstractButton::toggled, this,
-            &MainWindow::livingRoomLightBtnToggled);
-    connect(ui->bedroomLightBtn, &QAbstractButton::toggled, this,
-            &MainWindow::bedroomLightBtnToggled);
-    connect(ui->kitchenLightBtn, &QAbstractButton::toggled, this,
-            &MainWindow::kitchenLightBtnToggled);
-    connect(ui->ACOnBtn, &QAbstractButton::toggled, this, &MainWindow::acOnBtnToggled);
-    connect(ui->ACModeUp, &QAbstractButton::clicked, this, &MainWindow::acModeUpClicked);
-    connect(ui->ACModeDown, &QAbstractButton::clicked, this, &MainWindow::acModeDownClicked);
-    connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeSliderValueChanged);
-    connect(ui->bassSlider, &QSlider::valueChanged, this, &MainWindow::bassSliderValueChanged);
-    connect(ui->pitchSlider, &QSlider::valueChanged, this, &MainWindow::pitchSliderValueChanged);
     connect(ui->analyticsPageLightsBtn, &QAbstractButton::clicked, this,
             &MainWindow::analyticsPageLightsBtnClicked);
     connect(ui->analyticsPageACBtn, &QAbstractButton::clicked, this,
@@ -79,81 +67,26 @@ MainWindow::MainWindow(std::string configPath, QWidget *parent)
     m_configStatus->setWordWrap(true);
     m_configStatus->setTextFormat(Qt::PlainText);
     statusBar()->addWidget(m_configStatus, 1);
-    connect(m_saveAction, &QAction::triggered, m_session, &smart_home::gui::GuiSession::save);
+    connect(m_saveAction, &QAction::triggered, m_session, &smart_home::gui::GuiApp::save);
     connect(m_reloadAction, &QAction::triggered, this, &MainWindow::reloadSettings);
-    connect(m_session, &smart_home::gui::GuiSession::changed, this, &MainWindow::refreshSession);
-    // There is no AC target temperature in the settings model.
-    ui->ACTemperatureUp->setEnabled(false);
-    ui->ACTemperatureDown->setEnabled(false);
-    ui->ACTemperatureUp->setToolTip("Target temperature is unsupported");
-    ui->ACTemperatureDown->setToolTip("Target temperature is unsupported");
-    ui->volumeSlider->setRange(0, 100);
-    ui->bassSlider->setRange(0, 100);
-    ui->pitchSlider->setRange(0, 100);
+    connect(m_session, &smart_home::gui::GuiApp::changed, this, &MainWindow::refreshSession);
+    auto *devices = new DevicesPage(app, ui->pages);
+    auto *placeholder = ui->pages->widget(0);
+    ui->pages->removeWidget(placeholder);
+    delete placeholder;
+    ui->pages->insertWidget(0, devices);
+    ui->pages->setCurrentIndex(0);
     refreshSession();
-    m_session->reload();
 
     initAnalyticsModel();
     ui->analyticsPages->setCurrentIndex(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS));
 
-    updateTimer = new QTimer(this);
-    connect(updateTimer, &QTimer::timeout, this, &MainWindow::onUpdate);
-    updateTimer->start(50);
+    connect(&app, &smart_home::gui::GuiApp::tick, this, &MainWindow::onUpdate);
 }
 
 MainWindow::~MainWindow() {
-    updateTimer->stop();
     analyticsModel.reset();
     delete ui;
-
-    delete m_session;
-
-    delete updateTimer;
-}
-
-void MainWindow::updateLightsUI() {
-    ui->livingRoomLightBtn->setChecked(m_session->settings().lights().livingRoomLightOn);
-    ui->bedroomLightBtn->setChecked(m_session->settings().lights().bedroomLightOn);
-    ui->kitchenLightBtn->setChecked(m_session->settings().lights().kitchenLightOn);
-}
-void MainWindow::updateSensorsUI() {
-    ui->temperatureSensorValueLabel->setText(
-        QString::number(m_session->settings().sensors().temperature));
-    ui->humiditySensorValueLabel->setText(
-        QString::number(m_session->settings().sensors().humidity));
-    ui->brightnessSensorValueLabel->setText(
-        QString::number(m_session->settings().sensors().brightness));
-}
-void MainWindow::updateACUI() {
-    ui->ACOnBtn->setChecked(m_session->settings().ac().on);
-    ui->ACModeValueLabel->setText(
-        QString::fromStdString(Ac::modeAsString(m_session->settings().ac().mode)));
-}
-void MainWindow::updateSpeakersUI() {
-    ui->volumeSlider->setValue(m_session->settings().speakers().volume);
-    ui->volumeSliderValueLabel->setText(QString::number(m_session->settings().speakers().volume));
-
-    ui->bassSlider->setValue(m_session->settings().speakers().bass);
-    ui->bassSliderValueLabel->setText(QString::number(m_session->settings().speakers().bass));
-
-    ui->pitchSlider->setValue(m_session->settings().speakers().pitch);
-    ui->pitchSliderValueLabel->setText(QString::number(m_session->settings().speakers().pitch));
-}
-
-void MainWindow::updateHomeWidgets() {
-    const QSignalBlocker living(ui->livingRoomLightBtn), bedroom(ui->bedroomLightBtn),
-        kitchen(ui->kitchenLightBtn), ac(ui->ACOnBtn), volume(ui->volumeSlider),
-        bass(ui->bassSlider), pitch(ui->pitchSlider);
-
-    updateLightsUI();
-    updateSensorsUI();
-    updateACUI();
-    updateSpeakersUI();
-    for (auto *button :
-         {ui->livingRoomLightBtn, ui->bedroomLightBtn, ui->kitchenLightBtn, ui->ACOnBtn}) {
-        button->setIcon(QIcon(button->isChecked() ? ":/icons/toggle-on-colored.svg"
-                                                  : ":/icons/toggle-off-colored.svg"));
-    }
 }
 
 void MainWindow::initAnalyticsModel() {
@@ -187,35 +120,6 @@ void MainWindow::refreshSession() {
     m_configStatus->setText(m_session->status());
     m_saveAction->setEnabled(m_session->loaded() && m_session->dirty() && !m_session->busy());
     m_reloadAction->setEnabled(!m_session->busy());
-    const bool editable = m_session->editable();
-    for (QWidget *widget : std::initializer_list<QWidget *>{
-             ui->livingRoomLightBtn, ui->bedroomLightBtn, ui->kitchenLightBtn, ui->ACOnBtn,
-             ui->ACModeUp, ui->ACModeDown}) {
-        widget->setEnabled(editable);
-    }
-    ui->volumeSlider->setEnabled(editable);
-    ui->bassSlider->setEnabled(editable);
-    ui->pitchSlider->setEnabled(editable);
-    if (m_session->loaded()) {
-        updateHomeWidgets();
-    } else {
-        ui->temperatureSensorValueLabel->setText("—");
-        ui->humiditySensorValueLabel->setText("—");
-        ui->brightnessSensorValueLabel->setText("—");
-    }
-}
-
-void MainWindow::editControls() {
-    if (!m_session->editable())
-        return;
-    auto settings = m_session->settings();
-    settings.setLights(ui->livingRoomLightBtn->isChecked(), ui->bedroomLightBtn->isChecked(),
-                       ui->kitchenLightBtn->isChecked());
-    settings.setAc(ui->ACOnBtn->isChecked(), settings.ac().mode);
-    if (settings.setSpeakers(ui->volumeSlider->value(), ui->bassSlider->value(),
-                             ui->pitchSlider->value())) {
-        m_session->edit(settings);
-    }
 }
 
 void MainWindow::reloadSettings() {
@@ -266,47 +170,6 @@ void MainWindow::mediaBtnClicked() {
 
 void MainWindow::analyticsBtnClicked() {
     updateCurrentPage(PageIndex::ANALYTICS);
-}
-
-void MainWindow::livingRoomLightBtnToggled(bool) {
-    editControls();
-}
-void MainWindow::bedroomLightBtnToggled(bool) {
-    editControls();
-}
-void MainWindow::kitchenLightBtnToggled(bool) {
-    editControls();
-}
-void MainWindow::acOnBtnToggled(bool) {
-    editControls();
-}
-
-void MainWindow::acModeUpClicked() {
-    auto settings = m_session->settings();
-    const int mode = static_cast<int>(settings.ac().mode);
-    if (mode < static_cast<int>(Ac::Mode::TURBO)) {
-        settings.setAc(settings.ac().on, static_cast<Ac::Mode>(mode + 1));
-        m_session->edit(settings);
-    }
-}
-
-void MainWindow::acModeDownClicked() {
-    auto settings = m_session->settings();
-    const int mode = static_cast<int>(settings.ac().mode);
-    if (mode > static_cast<int>(Ac::Mode::NORMAL)) {
-        settings.setAc(settings.ac().on, static_cast<Ac::Mode>(mode - 1));
-        m_session->edit(settings);
-    }
-}
-
-void MainWindow::volumeSliderValueChanged(int) {
-    editControls();
-}
-void MainWindow::bassSliderValueChanged(int) {
-    editControls();
-}
-void MainWindow::pitchSliderValueChanged(int) {
-    editControls();
 }
 
 void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex,

@@ -3,48 +3,54 @@
 #include <QObject>
 #include <QString>
 #include <QThread>
+#include <QTimer>
 
 #include "config_io.h"
-#include "home_settings.h"
+#include "gui_state.h"
 
 namespace smart_home::gui {
 
 // UI-thread state; only immutable snapshots cross to the I/O worker.
-class GuiSession : public QObject {
+class GuiApp : public QObject {
     Q_OBJECT
   public:
-    explicit GuiSession(std::string path, QObject *parent = nullptr);
-    ~GuiSession() override;
+    explicit GuiApp(std::string path, QObject *parent = nullptr);
+    ~GuiApp() override;
     const HomeSettings &settings() const {
-        return m_pending;
+        return m_state.pending;
     }
     bool loaded() const {
-        return m_loaded;
+        return m_state.loaded;
     }
     bool busy() const {
-        return m_busy;
+        return m_state.busy;
     }
     bool editable() const {
-        return m_loaded && !m_loading;
+        return m_state.loaded && !m_state.loading;
     }
     bool dirty() const;
     QString status() const;
-    void edit(const HomeSettings &settings);
+    const GuiState &state() const {
+        return m_state;
+    }
+    void setLight(Light light, bool on);
+    void setAcOn(bool on);
+    void stepAcMode(int direction);
+    void setSpeaker(SpeakerControl control, int value);
     // Caller confirms discarding pending edits before requesting reload.
     void reload();
     void save();
 
   signals:
     void changed();
+    void tick();
 
   private:
     std::string m_path;
-    HomeSettings m_pending;
-    HomeSettings m_saved;
+    GuiState m_state;
     app::ConfigSnapshot m_accepted;
-    bool m_loaded = false;
-    bool m_busy = false;
-    bool m_loading = false;
+    QTimer m_timer;
+    void edit(const HomeSettings &settings);
     QString m_error;
     QThread m_thread;
     QObject *m_worker;
