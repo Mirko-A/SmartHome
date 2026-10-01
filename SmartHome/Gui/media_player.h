@@ -30,7 +30,15 @@ class MediaPlayer : public QWidget {
 
     void addToPlaylist(const QList<QUrl> urls);
 
+  signals:
+    void availabilityChanged(bool available);
+    void statusTextChanged(const QString &text);
+    void busyChanged(bool busy);
+
   private slots:
+    void play();
+    void stop();
+    void refreshAvailability();
     void open();
     void remove();
     void durationChanged(qint64 duration);
@@ -51,7 +59,8 @@ class MediaPlayer : public QWidget {
   private:
     void setTrackInfo(const QString &info);
     void setStatusInfo(const QString &info);
-    void handleCursor(QMediaPlayer::MediaStatus status);
+    void renderStatus();
+    void clearError();
     void updateDurationInfo(qint64 currentInfo);
 
   public:
@@ -75,6 +84,8 @@ class MediaPlayer : public QWidget {
 
   private:
     bool m_uiInitialized = false;
+    bool m_serviceError = false;
+    QString m_errorInfo;
 };
 
 #endif // MEDIAPLAYER_H
