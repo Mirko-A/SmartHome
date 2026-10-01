@@ -7,7 +7,6 @@
 
 #include "analytics_model.h"
 #include "gui_session.h"
-#include "media_player.h"
 
 class QAction;
 class QLabel;
@@ -90,9 +89,6 @@ class MainWindow : public QMainWindow {
     void updateSpeakersUI();
     void updateHomeWidgets();
 
-    void loadMediaPlayerWidgets();
-    void loadMediaPlayerControlWidgets();
-
     void initAnalyticsModel();
 
     void updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex, AnalyticsPageState newState);
@@ -109,7 +105,6 @@ class MainWindow : public QMainWindow {
     QAction *m_saveAction;
     QAction *m_reloadAction;
     QLabel *m_configStatus;
-    MediaPlayer *mediaPlayer;
     std::unique_ptr<AnalyticsModel> analyticsModel;
 
     QTimer *updateTimer;

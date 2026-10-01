@@ -36,7 +36,6 @@ const QVector<QVector<QString>> ANALYTICS_PAGE_PATHS = {
     },
 };
 
-constexpr int INITIAL_PLAYER_VOLUME = 50;
 // TODO: Set to a lower value for easier testing
 // constexpr int ONE_SEC_IN_TICKS = 20;
 constexpr int ONE_SEC_IN_TICKS = 2;
@@ -94,10 +93,6 @@ MainWindow::MainWindow(std::string configPath, QWidget *parent)
     refreshSession();
     m_session->reload();
 
-    mediaPlayer = new MediaPlayer;
-    mediaPlayer->m_player->setVolume(INITIAL_PLAYER_VOLUME);
-    loadMediaPlayerWidgets();
-
     initAnalyticsModel();
     ui->analyticsPages->setCurrentIndex(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS));
 
@@ -109,7 +104,6 @@ MainWindow::MainWindow(std::string configPath, QWidget *parent)
 MainWindow::~MainWindow() {
     updateTimer->stop();
     analyticsModel.reset();
-    delete mediaPlayer;
     delete ui;
 
     delete m_session;
@@ -160,37 +154,6 @@ void MainWindow::updateHomeWidgets() {
         button->setIcon(QIcon(button->isChecked() ? ":/icons/toggle-on-colored.svg"
                                                   : ":/icons/toggle-off-colored.svg"));
     }
-}
-
-void MainWindow::loadMediaPlayerWidgets() {
-    connect(mediaPlayer, &MediaPlayer::availabilityChanged, ui->mediaPlayer, &QWidget::setEnabled);
-    connect(mediaPlayer, &MediaPlayer::statusTextChanged, ui->mediaStatusLabel, &QLabel::setText);
-    connect(mediaPlayer, &MediaPlayer::busyChanged, this, [this](bool busy) {
-        if (busy)
-            ui->mediaPlayer->setCursor(Qt::BusyCursor);
-        else
-            ui->mediaPlayer->unsetCursor();
-    });
-    ui->mediaPlayerVideoWidgetContainer->addWidget(mediaPlayer->m_videoWidget);
-    mediaPlayer->m_playlistView = ui->mediaPlaylistListView;
-    mediaPlayer->m_labelDuration = ui->mediaPlayerDurationLabel;
-    mediaPlayer->m_seekSlider = ui->mediaPlayerSeekSlider;
-
-    loadMediaPlayerControlWidgets();
-
-    mediaPlayer->initUi();
-}
-
-void MainWindow::loadMediaPlayerControlWidgets() {
-    mediaPlayer->m_controls->m_playButton = ui->mediaPlayerPlayBtn;
-    mediaPlayer->m_controls->m_stopButton = ui->mediaPlayerStopBtn;
-    mediaPlayer->m_controls->m_nextButton = ui->mediaPlayerNextBtn;
-    mediaPlayer->m_controls->m_previousButton = ui->mediaPlayerPrevBtn;
-    mediaPlayer->m_controls->m_muteButton = ui->mediaPlayerMuteBtn;
-    mediaPlayer->m_controls->m_volumeSlider = ui->mediaPlayerVolumeSlider;
-
-    mediaPlayer->m_playlistModel->m_openButton = ui->mediaPlaylistOpenBtn;
-    mediaPlayer->m_playlistModel->m_removeButton = ui->mediaPlaylistRemoveBtn;
 }
 
 void MainWindow::initAnalyticsModel() {
