@@ -75,7 +75,7 @@ struct Histograms {
     std::unique_ptr<Histogram> livingRoomLight;
     std::unique_ptr<Histogram> bedroomLight;
     std::unique_ptr<Histogram> kitchenLight;
-    std::unique_ptr<Histogram> ACOn;
+    std::unique_ptr<Histogram> acOn;
 };
 
 struct LineGraphs {

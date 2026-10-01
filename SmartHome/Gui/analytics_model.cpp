@@ -1,5 +1,7 @@
 #include "analytics_model.h"
 
+#include <qnamespace.h>
+
 #include <QBarCategoryAxis>
 #include <QStringList>
 #include <QValueAxis>
@@ -7,11 +9,17 @@
 #include "home_settings.h"
 
 // TODO: For testing it is reduced to 60
-// #define ONE_HOUR_IN_SEC 3600
+#if 0
+#define ONE_HOUR_IN_SEC 3600
+#else
 #define ONE_HOUR_IN_SEC 60
+#endif
+
 #define X_AXIS_POS 0
 
 static const QColor CHART_BACKGROUND_COLOR = QColor(52, 59, 71);
+
+static const QColor HISTOGRAM_BAR_COLOR = QColor(160, 110, 181);
 
 static constexpr size_t MAX_HISTOGRAM_VALUE = ONE_HOUR_IN_SEC;
 static constexpr size_t MAX_BARSET_COUNT = 24;
@@ -20,12 +28,11 @@ static const QStringList HISTOGRAM_X_AXIS =
     QStringList{"1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",  "10", "11", "12",
                 "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
 
-static const QColor HISTOGRAM_BAR_COLOR = QColor(160, 110, 181);
-
 // TODO: Check if this is too few/many points after ONE_SEC_IN_TICKS
-// is set back to real value (found in mainwindow.cpp)
+// is set back to real value (found in main_window.cpp)
 static constexpr unsigned int MAX_LINE_GRAPH_POINTS_INITIAL = 100;
-static const QColor LINE_GRAPH_COLOR = QColor(160, 110, 181);
+
+static constexpr QColor LINE_GRAPH_COLOR = QColor(160, 110, 181);
 
 Histogram::Histogram(QString name)
     : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)),
@@ -33,6 +40,9 @@ Histogram::Histogram(QString name)
     m_barSet->setColor(HISTOGRAM_BAR_COLOR);
     barSeries->append(m_barSet);
     barSeries->setBarWidth(1);
+
+    // Initialize the first bar.
+    *m_barSet << 0;
 }
 
 void Histogram::update() {
@@ -42,11 +52,7 @@ void Histogram::update() {
     // That's why we update the value counter, to signal
     // that another unit of time has passed, and replace
     // the current bar set with this new value.
-    if (m_barSet->count() == 0) {
-        *m_barSet << ++m_valueCounter;
-    } else {
-        m_barSet->replace(m_barSet->count() - 1, ++m_valueCounter);
-    }
+    m_barSet->replace(m_barSet->count() - 1, ++m_valueCounter);
 }
 
 void Histogram::shift() {
@@ -121,7 +127,7 @@ void AnalyticsModel::initChartsWithHistogram(const AnalyticsCharts &charts) {
     m_analyticsData.histograms.kitchenLight =
         createChartWithHistogram(*charts.kitchenLight, "Kitchen light on per hour",
                                  HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
-    m_analyticsData.histograms.ACOn = createChartWithHistogram(
+    m_analyticsData.histograms.acOn = createChartWithHistogram(
         *charts.ACOn, "AC on per hour", HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
 }
 
@@ -143,16 +149,16 @@ std::unique_ptr<Histogram> AnalyticsModel::createChartWithHistogram(QtCharts::QC
                                                                     const QStringList &rangeX,
                                                                     QPair<size_t, size_t> rangeY) {
     chart.setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
-    chart.setTitleBrush(QBrush(QColor("white")));
+    chart.setTitleBrush(QBrush(Qt::white));
     auto histogram = std::make_unique<Histogram>(title);
 
     chart.setTitle(title);
     auto axisX = new QtCharts::QBarCategoryAxis;
     auto axisY = new QtCharts::QValueAxis;
     axisX->append(rangeX);
-    axisX->setLabelsColor(QColor("white"));
+    axisX->setLabelsColor(Qt::white);
     axisY->setRange(rangeY.first, rangeY.second);
-    axisY->setLabelsColor(QColor("white"));
+    axisY->setLabelsColor(Qt::white);
     chart.addAxis(axisX, Qt::AlignBottom);
     chart.addAxis(axisY, Qt::AlignLeft);
     chart.addSeries(histogram->barSeries);
@@ -169,16 +175,16 @@ std::unique_ptr<LineGraph> AnalyticsModel::createChartWithLineGraph(QtCharts::QC
                                                                     QPair<int, int> rangeX,
                                                                     QPair<int, int> rangeY) {
     chart.setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
-    chart.setTitleBrush(QBrush(QColor("white")));
+    chart.setTitleBrush(QBrush(Qt::white));
     auto graph = std::make_unique<LineGraph>(title, rangeX.second);
 
     chart.setTitle(title);
     auto axisX = new QtCharts::QValueAxis;
     auto axisY = new QtCharts::QValueAxis;
     axisX->setRange(rangeX.first, rangeX.second);
-    axisX->setLabelsColor(QColor("white"));
+    axisX->setLabelsColor(Qt::white);
     axisY->setRange(rangeY.first, rangeY.second);
-    axisY->setLabelsColor(QColor("white"));
+    axisY->setLabelsColor(Qt::white);
     chart.addAxis(axisX, Qt::AlignBottom);
     chart.addAxis(axisY, Qt::AlignLeft);
     chart.addSeries(graph->lineSeries);
@@ -194,7 +200,7 @@ void AnalyticsModel::shiftHistograms() {
     m_analyticsData.histograms.livingRoomLight->shift();
     m_analyticsData.histograms.bedroomLight->shift();
     m_analyticsData.histograms.kitchenLight->shift();
-    m_analyticsData.histograms.ACOn->shift();
+    m_analyticsData.histograms.acOn->shift();
 }
 
 void AnalyticsModel::updateHistograms(const HomeSettings &settings) {
@@ -208,7 +214,7 @@ void AnalyticsModel::updateHistograms(const HomeSettings &settings) {
         m_analyticsData.histograms.kitchenLight->update();
     }
     if (settings.ac().on) {
-        m_analyticsData.histograms.ACOn->update();
+        m_analyticsData.histograms.acOn->update();
     }
 }
 
