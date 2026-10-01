@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QElapsedTimer>
 #include <QObject>
 #include <QString>
 #include <QThread>
@@ -7,6 +8,7 @@
 
 #include "config_io.h"
 #include "gui_state.h"
+#include "Pages/Analytics/analytics_model.h"
 
 namespace smart_home::gui {
 
@@ -33,6 +35,9 @@ class GuiApp : public QObject {
     const GuiState &state() const {
         return m_state;
     }
+    const AnalyticsModel &analytics() const {
+        return m_analytics;
+    }
     void setLight(Light light, bool on);
     void setAcOn(bool on);
     void stepAcMode(int direction);
@@ -49,8 +54,11 @@ class GuiApp : public QObject {
     std::string m_path;
     GuiState m_state;
     app::ConfigSnapshot m_accepted;
+    AnalyticsModel m_analytics;
     QTimer m_timer;
+    QElapsedTimer m_clock;
     void edit(const HomeSettings &settings);
+    void sampleAnalytics();
     QString m_error;
     QThread m_thread;
     QObject *m_worker;
