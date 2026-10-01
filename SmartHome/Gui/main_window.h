@@ -110,7 +110,7 @@ class MainWindow : public QMainWindow {
 
     HomeSettings *homeSettings;
     MediaPlayer *mediaPlayer;
-    AnalyticsModel *analyticsModel;
+    std::unique_ptr<AnalyticsModel> analyticsModel;
 
     QTimer *updateTimer;
 };
