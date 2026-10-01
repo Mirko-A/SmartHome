@@ -160,8 +160,8 @@
                           <string/>
                          </property>
                          <property name="icon">
-                          <iconset>
-                           <normaloff>../resource/icons/toggle-off-colored.svg</normaloff>../resource/icons/toggle-off-colored.svg</iconset>
+                          <iconset resource="../icons_resource.qrc">
+                           <normaloff>:/icons/toggle-off-colored.svg</normaloff>:/icons/toggle-off-colored.svg</iconset>
                          </property>
                          <property name="iconSize">
                           <size>
@@ -201,8 +201,8 @@
                           <string/>
                          </property>
                          <property name="icon">
-                          <iconset>
-                           <normaloff>../resource/icons/toggle-off-colored.svg</normaloff>../resource/icons/toggle-off-colored.svg</iconset>
+                          <iconset resource="../icons_resource.qrc">
+                           <normaloff>:/icons/toggle-off-colored.svg</normaloff>:/icons/toggle-off-colored.svg</iconset>
                          </property>
                          <property name="iconSize">
                           <size>
@@ -242,8 +242,8 @@
                           <string/>
                          </property>
                          <property name="icon">
-                          <iconset>
-                           <normaloff>../resource/icons/toggle-off-colored.svg</normaloff>../resource/icons/toggle-off-colored.svg</iconset>
+                          <iconset resource="../icons_resource.qrc">
+                           <normaloff>:/icons/toggle-off-colored.svg</normaloff>:/icons/toggle-off-colored.svg</iconset>
                          </property>
                          <property name="iconSize">
                           <size>
@@ -630,8 +630,8 @@
                           <string/>
                          </property>
                          <property name="icon">
-                          <iconset>
-                           <normaloff>../resource/icons/toggle-off-colored.svg</normaloff>../resource/icons/toggle-off-colored.svg</iconset>
+                          <iconset resource="../icons_resource.qrc">
+                           <normaloff>:/icons/toggle-off-colored.svg</normaloff>:/icons/toggle-off-colored.svg</iconset>
                          </property>
                          <property name="iconSize">
                           <size>
@@ -734,8 +734,8 @@
                                 <string/>
                                </property>
                                <property name="icon">
-                                <iconset>
-                                 <normaloff>../resource/icons/chevron-up.svg</normaloff>../resource/icons/chevron-up.svg</iconset>
+                                <iconset resource="../icons_resource.qrc">
+                                 <normaloff>:/icons/chevron-up.svg</normaloff>:/icons/chevron-up.svg</iconset>
                                </property>
                                <property name="iconSize">
                                 <size>
@@ -754,8 +754,8 @@
                                 <string/>
                                </property>
                                <property name="icon">
-                                <iconset>
-                                 <normaloff>../resource/icons/chevron-down.svg</normaloff>../resource/icons/chevron-down.svg</iconset>
+                                <iconset resource="../icons_resource.qrc">
+                                 <normaloff>:/icons/chevron-down.svg</normaloff>:/icons/chevron-down.svg</iconset>
                                </property>
                                <property name="iconSize">
                                 <size>
@@ -861,8 +861,8 @@
                                 <string/>
                                </property>
                                <property name="icon">
-                                <iconset>
-                                 <normaloff>../resource/icons/chevron-up.svg</normaloff>../resource/icons/chevron-up.svg</iconset>
+                                <iconset resource="../icons_resource.qrc">
+                                 <normaloff>:/icons/chevron-up.svg</normaloff>:/icons/chevron-up.svg</iconset>
                                </property>
                                <property name="iconSize">
                                 <size>
@@ -881,8 +881,8 @@
                                 <string/>
                                </property>
                                <property name="icon">
-                                <iconset>
-                                 <normaloff>../resource/icons/chevron-down.svg</normaloff>../resource/icons/chevron-down.svg</iconset>
+                                <iconset resource="../icons_resource.qrc">
+                                 <normaloff>:/icons/chevron-down.svg</normaloff>:/icons/chevron-down.svg</iconset>
                                </property>
                                <property name="iconSize">
                                 <size>
@@ -1277,8 +1277,8 @@ QPushButton:pressed {
                        <string/>
                       </property>
                       <property name="icon">
-                       <iconset>
-                        <normaloff>../resource/icons/file-plus.svg</normaloff>../resource/icons/file-plus.svg</iconset>
+                       <iconset resource="../icons_resource.qrc">
+                        <normaloff>:/icons/file-plus.svg</normaloff>:/icons/file-plus.svg</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -1303,8 +1303,8 @@ QPushButton:pressed {
                        <string/>
                       </property>
                       <property name="icon">
-                       <iconset>
-                        <normaloff>../resource/icons/trash-2.svg</normaloff>../resource/icons/trash-2.svg</iconset>
+                       <iconset resource="../icons_resource.qrc">
+                        <normaloff>:/icons/trash-2.svg</normaloff>:/icons/trash-2.svg</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -1437,8 +1437,8 @@ QPushButton:pressed {
                              <string/>
                             </property>
                             <property name="icon">
-                             <iconset>
-                              <normaloff>../resource/icons/play.svg</normaloff>../resource/icons/play.svg</iconset>
+                             <iconset resource="../icons_resource.qrc">
+                              <normaloff>:/icons/play.svg</normaloff>:/icons/play.svg</iconset>
                             </property>
                             <property name="iconSize">
                              <size>
@@ -1457,8 +1457,8 @@ QPushButton:pressed {
                              <string/>
                             </property>
                             <property name="icon">
-                             <iconset>
-                              <normaloff>../resource/icons/rewind.svg</normaloff>../resource/icons/rewind.svg</iconset>
+                             <iconset resource="../icons_resource.qrc">
+                              <normaloff>:/icons/rewind.svg</normaloff>:/icons/rewind.svg</iconset>
                             </property>
                             <property name="iconSize">
                              <size>
@@ -1477,8 +1477,8 @@ QPushButton:pressed {
                              <string/>
                             </property>
                             <property name="icon">
-                             <iconset>
-                              <normaloff>../resource/icons/square.svg</normaloff>../resource/icons/square.svg</iconset>
+                             <iconset resource="../icons_resource.qrc">
+                              <normaloff>:/icons/square.svg</normaloff>:/icons/square.svg</iconset>
                             </property>
                             <property name="iconSize">
                              <size>
@@ -1497,8 +1497,8 @@ QPushButton:pressed {
                              <string/>
                             </property>
                             <property name="icon">
-                             <iconset>
-                              <normaloff>../resource/icons/fast-forward.svg</normaloff>../resource/icons/fast-forward.svg</iconset>
+                             <iconset resource="../icons_resource.qrc">
+                              <normaloff>:/icons/fast-forward.svg</normaloff>:/icons/fast-forward.svg</iconset>
                             </property>
                             <property name="iconSize">
                              <size>
@@ -1533,8 +1533,8 @@ QPushButton:pressed {
                              <string/>
                             </property>
                             <property name="icon">
-                             <iconset>
-                              <normaloff>../resource/icons/volume-2.svg</normaloff>../resource/icons/volume-2.svg</iconset>
+                             <iconset resource="../icons_resource.qrc">
+                              <normaloff>:/icons/volume-2.svg</normaloff>:/icons/volume-2.svg</iconset>
                             </property>
                             <property name="iconSize">
                              <size>
@@ -1689,8 +1689,8 @@ QPushButton:pressed
                        <string/>
                       </property>
                       <property name="icon">
-                       <iconset>
-                        <normaloff>../resource/icons/analytics-lights-on.svg</normaloff>../resource/icons/analytics-lights-on.svg</iconset>
+                       <iconset resource="../icons_resource.qrc">
+                        <normaloff>:/icons/analytics-lights-on.svg</normaloff>:/icons/analytics-lights-on.svg</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -1712,8 +1712,8 @@ QPushButton:pressed
                        <string/>
                       </property>
                       <property name="icon">
-                       <iconset>
-                        <normaloff>../resource/icons/analytics-ac-off.svg</normaloff>../resource/icons/analytics-ac-off.svg</iconset>
+                       <iconset resource="../icons_resource.qrc">
+                        <normaloff>:/icons/analytics-ac-off.svg</normaloff>:/icons/analytics-ac-off.svg</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -1735,8 +1735,8 @@ QPushButton:pressed
                        <string/>
                       </property>
                       <property name="icon">
-                       <iconset>
-                        <normaloff>../resource/icons/analytics-sensors-off.svg</normaloff>../resource/icons/analytics-sensors-off.svg</iconset>
+                       <iconset resource="../icons_resource.qrc">
+                        <normaloff>:/icons/analytics-sensors-off.svg</normaloff>:/icons/analytics-sensors-off.svg</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -2188,8 +2188,8 @@ QPushButton:pressed
              <string/>
             </property>
             <property name="icon">
-             <iconset>
-              <normaloff>../resource/icons/three-dots-0-purple.svg</normaloff>../resource/icons/three-dots-0-purple.svg</iconset>
+             <iconset resource="../icons_resource.qrc">
+              <normaloff>:/icons/three-dots-0-purple.svg</normaloff>:/icons/three-dots-0-purple.svg</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -2226,8 +2226,8 @@ QPushButton:pressed {
                 <string/>
                </property>
                <property name="icon">
-                <iconset>
-                 <normaloff>../resource/icons/home.svg</normaloff>../resource/icons/home.svg</iconset>
+                <iconset resource="../icons_resource.qrc">
+                 <normaloff>:/icons/home.svg</normaloff>:/icons/home.svg</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -2249,8 +2249,8 @@ QPushButton:pressed {
                 <string/>
                </property>
                <property name="icon">
-                <iconset>
-                 <normaloff>../resource/icons/headphones.svg</normaloff>../resource/icons/headphones.svg</iconset>
+                <iconset resource="../icons_resource.qrc">
+                 <normaloff>:/icons/headphones.svg</normaloff>:/icons/headphones.svg</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -2269,8 +2269,8 @@ QPushButton:pressed {
                 <string/>
                </property>
                <property name="icon">
-                <iconset>
-                 <normaloff>../resource/icons/database.svg</normaloff>../resource/icons/database.svg</iconset>
+                <iconset resource="../icons_resource.qrc">
+                 <normaloff>:/icons/database.svg</normaloff>:/icons/database.svg</iconset>
                </property>
                <property name="iconSize">
                 <size>
@@ -2322,6 +2322,8 @@ QPushButton:pressed {
    <header>QtCharts</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../icons_resource.qrc"/>
+ </resources>
  <connections/>
 </ui>
