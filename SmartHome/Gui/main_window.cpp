@@ -2,15 +2,18 @@
 
 #include <assert.h>
 
+#include <QCloseEvent>
 #include <QDateTime>
 #include <QFileDialog>
+#include <QLabel>
+#include <QMessageBox>
+#include <QSignalBlocker>
+#include <QStatusBar>
+#include <QToolBar>
 #include <nlohmann/json.hpp>
 
 #include "home_settings.h"
 #include "ui_main_window.h"
-
-#define CFG_JSON_FILE_PATH CFG_JSON_FILE_PATH_QSTR.toStdString().c_str()
-#define INI_JSON_FILE_PATH INI_JSON_FILE_PATH_QSTR.toStdString().c_str()
 
 const QVector<QString> PAGE_ICON_PATHS = {
     ":/icons/three-dots-0-purple.svg",
@@ -38,7 +41,9 @@ constexpr int INITIAL_PLAYER_VOLUME = 50;
 // constexpr int ONE_SEC_IN_TICKS = 20;
 constexpr int ONE_SEC_IN_TICKS = 2;
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(std::string configPath, QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow),
+      m_session(new smart_home::gui::GuiSession(std::move(configPath), this)) {
     ui->setupUi(this);
     connect(ui->devicesBtn, &QAbstractButton::clicked, this, &MainWindow::devicesBtnClicked);
     connect(ui->mediaBtn, &QAbstractButton::clicked, this, &MainWindow::mediaBtnClicked);
@@ -50,17 +55,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->kitchenLightBtn, &QAbstractButton::toggled, this,
             &MainWindow::kitchenLightBtnToggled);
     connect(ui->ACOnBtn, &QAbstractButton::toggled, this, &MainWindow::acOnBtnToggled);
-    connect(ui->ACTemperatureUp, &QAbstractButton::clicked, this,
-            &MainWindow::acTemperatureUpClicked);
-    connect(ui->ACTemperatureDown, &QAbstractButton::clicked, this,
-            &MainWindow::acTemperatureDownClicked);
     connect(ui->ACModeUp, &QAbstractButton::clicked, this, &MainWindow::acModeUpClicked);
     connect(ui->ACModeDown, &QAbstractButton::clicked, this, &MainWindow::acModeDownClicked);
-    connect(ui->volumeSlider, &QSlider::sliderMoved, this, &MainWindow::volumeSliderMoved);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeSliderValueChanged);
-    connect(ui->bassSlider, &QSlider::sliderMoved, this, &MainWindow::bassSliderMoved);
     connect(ui->bassSlider, &QSlider::valueChanged, this, &MainWindow::bassSliderValueChanged);
-    connect(ui->pitchSlider, &QSlider::sliderMoved, this, &MainWindow::pitchSliderMoved);
     connect(ui->pitchSlider, &QSlider::valueChanged, this, &MainWindow::pitchSliderValueChanged);
     connect(ui->analyticsPageLightsBtn, &QAbstractButton::clicked, this,
             &MainWindow::analyticsPageLightsBtnClicked);
@@ -72,8 +70,29 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->pages->setCurrentIndex(
         static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
 
-    homeSettings = new HomeSettings;
-    loadHomeCfgWidgets();
+    auto *toolbar = addToolBar("Settings");
+    toolbar->setObjectName("settingsToolbar");
+    toolbar->setMovable(false);
+    m_saveAction = toolbar->addAction("Save settings");
+    m_saveAction->setShortcut(QKeySequence::Save);
+    m_reloadAction = toolbar->addAction("Reload settings");
+    m_configStatus = new QLabel(this);
+    m_configStatus->setWordWrap(true);
+    m_configStatus->setTextFormat(Qt::PlainText);
+    statusBar()->addWidget(m_configStatus, 1);
+    connect(m_saveAction, &QAction::triggered, m_session, &smart_home::gui::GuiSession::save);
+    connect(m_reloadAction, &QAction::triggered, this, &MainWindow::reloadSettings);
+    connect(m_session, &smart_home::gui::GuiSession::changed, this, &MainWindow::refreshSession);
+    // There is no AC target temperature in the settings model.
+    ui->ACTemperatureUp->setEnabled(false);
+    ui->ACTemperatureDown->setEnabled(false);
+    ui->ACTemperatureUp->setToolTip("Target temperature is unsupported");
+    ui->ACTemperatureDown->setToolTip("Target temperature is unsupported");
+    ui->volumeSlider->setRange(0, 100);
+    ui->bassSlider->setRange(0, 100);
+    ui->pitchSlider->setRange(0, 100);
+    refreshSession();
+    m_session->reload();
 
     mediaPlayer = new MediaPlayer;
     mediaPlayer->m_player->setVolume(INITIAL_PLAYER_VOLUME);
@@ -93,42 +112,54 @@ MainWindow::~MainWindow() {
     delete mediaPlayer;
     delete ui;
 
-    delete homeSettings;
+    delete m_session;
 
     delete updateTimer;
 }
 
 void MainWindow::updateLightsUI() {
-    ui->livingRoomLightBtn->setChecked(homeSettings->lights().livingRoomLightOn);
-    ui->bedroomLightBtn->setChecked(homeSettings->lights().bedroomLightOn);
-    ui->kitchenLightBtn->setChecked(homeSettings->lights().kitchenLightOn);
+    ui->livingRoomLightBtn->setChecked(m_session->settings().lights().livingRoomLightOn);
+    ui->bedroomLightBtn->setChecked(m_session->settings().lights().bedroomLightOn);
+    ui->kitchenLightBtn->setChecked(m_session->settings().lights().kitchenLightOn);
 }
 void MainWindow::updateSensorsUI() {
-    ui->temperatureSensorValueLabel->setText(QString::number(homeSettings->sensors().temperature));
-    ui->humiditySensorValueLabel->setText(QString::number(homeSettings->sensors().humidity));
-    ui->brightnessSensorValueLabel->setText(QString::number(homeSettings->sensors().brightness));
+    ui->temperatureSensorValueLabel->setText(
+        QString::number(m_session->settings().sensors().temperature));
+    ui->humiditySensorValueLabel->setText(
+        QString::number(m_session->settings().sensors().humidity));
+    ui->brightnessSensorValueLabel->setText(
+        QString::number(m_session->settings().sensors().brightness));
 }
 void MainWindow::updateACUI() {
-    ui->ACOnBtn->setChecked(homeSettings->ac().on);
+    ui->ACOnBtn->setChecked(m_session->settings().ac().on);
     ui->ACModeValueLabel->setText(
-        QString::fromStdString(Ac::modeAsString(homeSettings->ac().mode)));
+        QString::fromStdString(Ac::modeAsString(m_session->settings().ac().mode)));
 }
 void MainWindow::updateSpeakersUI() {
-    ui->volumeSlider->setValue(homeSettings->speakers().volume);
-    ui->volumeSliderValueLabel->setText(QString::number(homeSettings->speakers().volume));
+    ui->volumeSlider->setValue(m_session->settings().speakers().volume);
+    ui->volumeSliderValueLabel->setText(QString::number(m_session->settings().speakers().volume));
 
-    ui->bassSlider->setValue(homeSettings->speakers().bass);
-    ui->bassSliderValueLabel->setText(QString::number(homeSettings->speakers().bass));
+    ui->bassSlider->setValue(m_session->settings().speakers().bass);
+    ui->bassSliderValueLabel->setText(QString::number(m_session->settings().speakers().bass));
 
-    ui->pitchSlider->setValue(homeSettings->speakers().pitch);
-    ui->pitchSliderValueLabel->setText(QString::number(homeSettings->speakers().pitch));
+    ui->pitchSlider->setValue(m_session->settings().speakers().pitch);
+    ui->pitchSliderValueLabel->setText(QString::number(m_session->settings().speakers().pitch));
 }
 
 void MainWindow::updateHomeWidgets() {
+    const QSignalBlocker living(ui->livingRoomLightBtn), bedroom(ui->bedroomLightBtn),
+        kitchen(ui->kitchenLightBtn), ac(ui->ACOnBtn), volume(ui->volumeSlider),
+        bass(ui->bassSlider), pitch(ui->pitchSlider);
+
     updateLightsUI();
     updateSensorsUI();
     updateACUI();
     updateSpeakersUI();
+    for (auto *button :
+         {ui->livingRoomLightBtn, ui->bedroomLightBtn, ui->kitchenLightBtn, ui->ACOnBtn}) {
+        button->setIcon(QIcon(button->isChecked() ? ":/icons/toggle-on-colored.svg"
+                                                  : ":/icons/toggle-off-colored.svg"));
+    }
 }
 
 void MainWindow::loadMediaPlayerWidgets() {
@@ -176,61 +207,79 @@ void MainWindow::initAnalyticsModel() {
 
 void MainWindow::updateUI() {
     updateDateTimeWidget();
-
-    // Config has been updated by 3rd party (python script)
-    reloadHomeWidgetsIfDirty();
 }
 
 void MainWindow::onUpdate() {
     static size_t tickCounter = 0;
 
-    if ((tickCounter % ONE_SEC_IN_TICKS) == 0)
-        analyticsModel->updateAnalyticsData(*homeSettings);
+    if (m_session->loaded() && (tickCounter % ONE_SEC_IN_TICKS) == 0)
+        analyticsModel->updateAnalyticsData(m_session->settings());
 
-    // FIXME: This doesn't exist anymore.
-    // homeSettings->onUpdate();
     updateUI();
-
-    // TODO: JSON file handling
-    saveHomeSettings();
 
     tickCounter++;
 }
 
-void MainWindow::saveHomeSettings() {
-    // FIXME:
-    // std::ofstream o(CFG_JSON_FILE_PATH);
-    // o << std::setw(4) << homeSettings->serializeJson() << std::endl;
+void MainWindow::refreshSession() {
+    m_configStatus->setText(m_session->status());
+    m_saveAction->setEnabled(m_session->loaded() && m_session->dirty() && !m_session->busy());
+    m_reloadAction->setEnabled(!m_session->busy());
+    const bool editable = m_session->editable();
+    for (QWidget *widget : std::initializer_list<QWidget *>{
+             ui->livingRoomLightBtn, ui->bedroomLightBtn, ui->kitchenLightBtn, ui->ACOnBtn,
+             ui->ACModeUp, ui->ACModeDown}) {
+        widget->setEnabled(editable);
+    }
+    ui->volumeSlider->setEnabled(editable);
+    ui->bassSlider->setEnabled(editable);
+    ui->pitchSlider->setEnabled(editable);
+    if (m_session->loaded()) {
+        updateHomeWidgets();
+    } else {
+        ui->temperatureSensorValueLabel->setText("—");
+        ui->humiditySensorValueLabel->setText("—");
+        ui->brightnessSensorValueLabel->setText("—");
+    }
 }
 
-nlohmann::json MainWindow::loadHomeSettings() {
-    // FIXME:
-    // std::ifstream i;
-    // i.open(CFG_JSON_FILE_PATH);
-    // if (!i.good()) {
-    //     i.open(INI_JSON_FILE_PATH);
-    // }
-    //
-    nlohmann::json json;
-    // i >> json;
-    return json;
+void MainWindow::editControls() {
+    if (!m_session->editable())
+        return;
+    auto settings = m_session->settings();
+    settings.setLights(ui->livingRoomLightBtn->isChecked(), ui->bedroomLightBtn->isChecked(),
+                       ui->kitchenLightBtn->isChecked());
+    settings.setAc(ui->ACOnBtn->isChecked(), settings.ac().mode);
+    if (settings.setSpeakers(ui->volumeSlider->value(), ui->bassSlider->value(),
+                             ui->pitchSlider->value())) {
+        m_session->edit(settings);
+    }
 }
 
-void MainWindow::loadHomeCfgWidgets() {
-    // FIXME:
-    // homeSettings->deserializeJson(loadHomeSettings());
-    // updateHomeWidgets();
+void MainWindow::reloadSettings() {
+    if (m_session->dirty() &&
+        QMessageBox::question(
+            this, "Reload settings", "Discard pending edits if the configuration reload succeeds?",
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+        return;
+    m_session->reload();
 }
 
-void MainWindow::reloadHomeWidgetsIfDirty() {
-    nlohmann::json json = loadHomeSettings();
-    // homeSettings->loadDirtyFlag(json);
-    // FIXME:
-    // if (homeSettings->isDirty) {
-    //     homeSettings->deserializeJson(json);
-    //     updateHomeWidgets();
-    //     homeSettings->isDirty = false;
-    // }
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if (m_session->busy()) {
+        statusBar()->showMessage("Wait for the configuration operation to finish before closing.",
+                                 4000);
+        event->ignore();
+        return;
+    }
+    if (m_session->dirty() &&
+        QMessageBox::question(
+            this, "Unsaved settings",
+            "Discard pending edits and close? Use Save settings first to keep them.",
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
+        event->ignore();
+        return;
+    }
+    event->accept();
 }
 
 void MainWindow::updateCurrentPage(PageIndex index) {
@@ -256,114 +305,45 @@ void MainWindow::analyticsBtnClicked() {
     updateCurrentPage(PageIndex::ANALYTICS);
 }
 
-void MainWindow::livingRoomLightBtnToggled(bool checked) {
-    // TODO: handle actual light
-    // homeSettings->lights().livingRoomLightOn = checked;
-
-    if (checked) {
-        ui->livingRoomLightBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
-    } else {
-        ui->livingRoomLightBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
-    }
+void MainWindow::livingRoomLightBtnToggled(bool) {
+    editControls();
 }
-
-void MainWindow::bedroomLightBtnToggled(bool checked) {
-    // TODO: handle actual light
-    // homeSettings->lights.bedroomLightOn = checked;
-
-    if (checked) {
-        ui->bedroomLightBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
-    } else {
-        ui->bedroomLightBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
-    }
+void MainWindow::bedroomLightBtnToggled(bool) {
+    editControls();
 }
-
-void MainWindow::kitchenLightBtnToggled(bool checked) {
-    // TODO: handle actual light
-    // homeSettings->lights.kitchenLightOn = checked;
-
-    if (checked) {
-        ui->kitchenLightBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
-    } else {
-        ui->kitchenLightBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
-    }
+void MainWindow::kitchenLightBtnToggled(bool) {
+    editControls();
 }
-
-void MainWindow::acOnBtnToggled(bool checked) {
-    // TODO: handle actual light
-    // homeSettings->AC.on = checked;
-
-    if (checked) {
-        ui->ACOnBtn->setIcon(QIcon(":/icons/toggle-on-colored.svg"));
-    } else {
-        ui->ACOnBtn->setIcon(QIcon(":/icons/toggle-off-colored.svg"));
-    }
-}
-
-void MainWindow::acTemperatureUpClicked() {
-    // FIXME: AC has no temp anymore
-}
-
-void MainWindow::acTemperatureDownClicked() {
-    // FIXME: AC has no temp anymore
+void MainWindow::acOnBtnToggled(bool) {
+    editControls();
 }
 
 void MainWindow::acModeUpClicked() {
-    // FIXME:
-    // Ac::Mode currentMode = homeSettings->ac().mode;
-    // if (currentMode != 0) {
-    //     currentMode++;
-    // }
-
-    // homeSettings->AC.mode = static_cast<ACMode>(currentMode);
-    // ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeSettings->AC.mode)));
+    auto settings = m_session->settings();
+    const int mode = static_cast<int>(settings.ac().mode);
+    if (mode < static_cast<int>(Ac::Mode::TURBO)) {
+        settings.setAc(settings.ac().on, static_cast<Ac::Mode>(mode + 1));
+        m_session->edit(settings);
+    }
 }
 
 void MainWindow::acModeDownClicked() {
-    // FIXME:
-    // uint8_t currentMode = static_cast<uint8_t>(homeSettings->AC.mode);
-    // if (currentMode > 0) {
-    //     currentMode--;
-    // }
-    //
-    // homeSettings->AC.mode = static_cast<ACMode>(currentMode);
-    // ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeSettings->AC.mode)));
+    auto settings = m_session->settings();
+    const int mode = static_cast<int>(settings.ac().mode);
+    if (mode > static_cast<int>(Ac::Mode::NORMAL)) {
+        settings.setAc(settings.ac().on, static_cast<Ac::Mode>(mode - 1));
+        m_session->edit(settings);
+    }
 }
 
-void MainWindow::volumeSliderMoved(int position) {
-    // FIXME:
-    // homeSettings->speakers.volume = position;
-    // ui->volumeSliderValueLabel->setText(QString::number(position));
+void MainWindow::volumeSliderValueChanged(int) {
+    editControls();
 }
-
-void MainWindow::volumeSliderValueChanged(int value) {
-    // FIXME:
-    // homeSettings->speakers.volume = value;
-    // ui->volumeSliderValueLabel->setText(QString::number(value));
+void MainWindow::bassSliderValueChanged(int) {
+    editControls();
 }
-
-void MainWindow::bassSliderMoved(int position) {
-    // FIXME:
-    // homeSettings->speakers.bass = position;
-    // ui->bassSliderValueLabel->setText(QString::number(position));
-}
-
-void MainWindow::bassSliderValueChanged(int value) {
-    // FIXME:
-    // homeSettings->speakers.bass = value;
-    // ui->bassSliderValueLabel->setText(QString::number(value));
-}
-
-void MainWindow::pitchSliderMoved(int position) {
-    // FIXME:
-    // homeSettings->speakers.pitch = position;
-    // ui->pitchSliderValueLabel->setText(QString::number(position));
-}
-
-void MainWindow::pitchSliderValueChanged(int value) {
-    // FIXME:
-    // homeSettings->speakers.pitch = value;
-    // ui->pitchSliderValueLabel->setText(QString::number(value));
+void MainWindow::pitchSliderValueChanged(int) {
+    editControls();
 }
 
 void MainWindow::updateAnalyticsPageIcon(AnalyticsPageIndex pageIndex,
