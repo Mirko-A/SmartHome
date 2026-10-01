@@ -1549,6 +1549,12 @@ QPushButton:pressed {
                           </item>
                           <item>
                            <widget class="QSlider" name="mediaPlayerVolumeSlider">
+                            <property name="minimum">
+                             <number>0</number>
+                            </property>
+                            <property name="maximum">
+                             <number>100</number>
+                            </property>
                             <property name="cursor">
                              <cursorShape>PointingHandCursor</cursorShape>
                             </property>

@@ -3,6 +3,7 @@
 #include <QMediaMetaData>
 #include <QMediaPlaylist>
 #include <QMediaService>
+#include <QSignalBlocker>
 #include <QVideoProbe>
 
 #include "playlist_model.h"
@@ -32,7 +33,7 @@ MediaPlayer::~MediaPlayer() {
     m_player->stop();
 }
 
-void MediaPlayer::initializeUIElements() {
+void MediaPlayer::initUi() {
     if (m_uiInitialized)
         return;
 
@@ -49,14 +50,13 @@ void MediaPlayer::initializeUIElements() {
             SLOT(statusChanged(QMediaPlayer::MediaStatus)));
     connect(m_player, SIGNAL(bufferStatusChanged(int)), this, SLOT(bufferingProgress(int)));
     connect(m_player, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(displayErrorMessage()));
+
     m_playlistView->setModel(m_playlistModel);
     m_playlistView->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
 
     connect(m_playlistView, SIGNAL(activated(QModelIndex)), this, SLOT(jump(QModelIndex)));
 
-    m_seekSlider->setRange(0, m_player->duration() / 1000);
-
-    connect(m_seekSlider, SIGNAL(sliderMoved(int)), this, SLOT(seek(int)));
+    connect(m_seekSlider, &QSlider::valueChanged, this, &MediaPlayer::seek);
 
     connect(m_controls, SIGNAL(play()), m_player, SLOT(play()));
     connect(m_controls, SIGNAL(pause()), m_player, SLOT(pause()));
@@ -147,11 +147,15 @@ void MediaPlayer::addToPlaylist(const QList<QUrl> urls) {
 
 void MediaPlayer::durationChanged(qint64 duration) {
     this->m_duration = duration / 1000;
-    m_seekSlider->setMaximum(duration / 1000);
+    // Prevent range clamping from emitting valueChanged and triggering a seek.
+    const QSignalBlocker blocker(m_seekSlider);
+    m_seekSlider->setRange(0, m_duration);
 }
 
 void MediaPlayer::positionChanged(qint64 progress) {
     if (!m_seekSlider->isSliderDown()) {
+        // Display playback progress without emitting valueChanged and seeking back.
+        const QSignalBlocker blocker(m_seekSlider);
         m_seekSlider->setValue(progress / 1000);
     }
     updateDurationInfo(progress / 1000);
@@ -165,7 +169,6 @@ void MediaPlayer::metaDataChanged() {
 
         if (m_coverLabel) {
             QUrl url = m_player->metaData(QMediaMetaData::CoverArtUrlLarge).value<QUrl>();
-
             m_coverLabel->setPixmap(!url.isEmpty() ? QPixmap(url.toString()) : QPixmap());
         }
     }
@@ -192,7 +195,7 @@ void MediaPlayer::playlistPositionChanged(int currentItem) {
 }
 
 void MediaPlayer::seek(int seconds) {
-    m_player->setPosition(seconds * 1000);
+    m_player->setPosition(qint64(seconds) * 1000);
 }
 
 void MediaPlayer::statusChanged(QMediaPlayer::MediaStatus status) {
