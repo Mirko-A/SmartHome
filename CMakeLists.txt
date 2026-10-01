@@ -57,9 +57,10 @@ add_executable(SmartHome
     SmartHome/Gui/gui_session.cpp
     SmartHome/Gui/analytics_model.cpp
     SmartHome/Gui/main_window.cpp
-    SmartHome/Gui/media_player.cpp
-    SmartHome/Gui/player_controls.cpp
-    SmartHome/Gui/playlist_model.cpp
+    SmartHome/Gui/Pages/Media/media_page.cpp
+    SmartHome/Gui/Pages/Media/media_player.cpp
+    SmartHome/Gui/Pages/Media/player_controls.cpp
+    SmartHome/Gui/Pages/Media/playlist_model.cpp
     # TUI
     SmartHome/Tui/tui.cpp
     SmartHome/Tui/tui_app.cpp

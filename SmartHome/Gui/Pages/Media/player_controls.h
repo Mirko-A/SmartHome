@@ -1,20 +1,23 @@
 #ifndef PLAYER_CONTROLS_H
 #define PLAYER_CONTROLS_H
 
+#include <QFrame>
 #include <QMediaPlayer>
-#include <QWidget>
+#include <memory>
+namespace Ui {
+class PlayerControls;
+}
 
 class QAbstractButton;
 class QAbstractSlider;
 
-class PlayerControls : public QWidget {
+class PlayerControls : public QFrame {
     Q_OBJECT
 
   public:
     PlayerControls(QWidget *parent = nullptr);
 
-    /* Must be called after pointers to UI elements have been assigned */
-    void initializeUIElements();
+    ~PlayerControls() override;
 
     QMediaPlayer::State state() const;
     int volume() const;
@@ -38,20 +41,11 @@ class PlayerControls : public QWidget {
     void playClicked();
     void muteClicked();
 
-  public:
-    QMediaPlayer::State m_playerState;
-    bool m_playerMuted;
-
-    /* Part of player */
-    QAbstractButton *m_playButton;
-    QAbstractButton *m_stopButton;
-    QAbstractButton *m_nextButton;
-    QAbstractButton *m_previousButton;
-    QAbstractButton *m_muteButton;
-    QAbstractSlider *m_volumeSlider;
-
   private:
+    void initializeUIElements();
+    std::unique_ptr<Ui::PlayerControls> m_ui;
+    QMediaPlayer::State m_playerState = QMediaPlayer::StoppedState;
+    bool m_playerMuted = false;
     bool m_uiInitialized = false;
 };
-
-#endif // PLAYER_CONTROLS_H
+#endif
