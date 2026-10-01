@@ -11,12 +11,35 @@ MediaPlayer::MediaPlayer(QWidget *parent)
     : QWidget(parent), m_videoWidget(nullptr), m_controls(nullptr), m_coverLabel(nullptr),
       m_seekSlider(nullptr) {
     m_player = new QMediaPlayer(this);
-    // owned by PlaylistModel
+    // Owned by this player; PlaylistModel borrows it.
     m_playlist = new QMediaPlaylist(this);
     m_player->setPlaylist(m_playlist);
 
     m_videoWidget = new QVideoWidget(this);
     m_player->setVideoOutput(m_videoWidget);
+
+    m_playlistModel = new PlaylistModel(this);
+    m_playlistModel->setPlaylist(m_playlist);
+
+    m_controls = new PlayerControls(this);
+}
+
+MediaPlayer::~MediaPlayer() {
+    // Stop backend callbacks while the borrowed widgets are still alive.
+    disconnect(m_player, nullptr, this, nullptr);
+    disconnect(m_player, nullptr, m_controls, nullptr);
+    disconnect(m_playlist, nullptr, this, nullptr);
+    m_player->stop();
+}
+
+void MediaPlayer::initializeUIElements() {
+    if (m_uiInitialized)
+        return;
+
+    Q_ASSERT(m_playlistView && m_labelDuration && m_seekSlider);
+    Q_ASSERT(m_playlistModel->m_openButton && m_playlistModel->m_removeButton);
+    m_controls->initializeUIElements();
+    m_uiInitialized = true;
 
     connect(m_player, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
     connect(m_player, SIGNAL(positionChanged(qint64)), SLOT(positionChanged(qint64)));
@@ -26,20 +49,6 @@ MediaPlayer::MediaPlayer(QWidget *parent)
             SLOT(statusChanged(QMediaPlayer::MediaStatus)));
     connect(m_player, SIGNAL(bufferStatusChanged(int)), this, SLOT(bufferingProgress(int)));
     connect(m_player, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(displayErrorMessage()));
-
-    m_playlistModel = new PlaylistModel(this);
-    m_playlistModel->setPlaylist(m_playlist);
-
-    m_controls = new PlayerControls(this);
-    m_controls->setState(m_player->state());
-    m_controls->setVolume(m_player->volume());
-    m_controls->setMuted(m_controls->isMuted());
-    m_controls->setEnabled(true);
-}
-
-MediaPlayer::~MediaPlayer() {}
-
-void MediaPlayer::initializeUIElements() {
     m_playlistView->setModel(m_playlistModel);
     m_playlistView->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
 
@@ -66,6 +75,13 @@ void MediaPlayer::initializeUIElements() {
     connect(m_playlistModel->m_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
 
     connect(m_controls, SIGNAL(stop()), m_videoWidget, SLOT(update()));
+
+    // Render a complete initial snapshot after all borrowed widgets are bound.
+    m_controls->setState(m_player->state());
+    m_controls->setVolume(m_player->volume());
+    m_controls->setMuted(m_player->isMuted());
+    durationChanged(m_player->duration());
+    positionChanged(m_player->position());
 
     if (!isPlayerAvailable()) {
         QMessageBox::warning(this, tr("Service not available"),

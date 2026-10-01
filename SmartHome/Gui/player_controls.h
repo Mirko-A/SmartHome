@@ -49,6 +49,9 @@ class PlayerControls : public QWidget {
     QAbstractButton *m_previousButton;
     QAbstractButton *m_muteButton;
     QAbstractSlider *m_volumeSlider;
+
+  private:
+    bool m_uiInitialized = false;
 };
 
 #endif // PLAYER_CONTROLS_H

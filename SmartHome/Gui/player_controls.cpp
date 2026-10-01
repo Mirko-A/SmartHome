@@ -12,7 +12,13 @@ PlayerControls::PlayerControls(QWidget *parent)
       m_previousButton(nullptr), m_muteButton(nullptr), m_volumeSlider(nullptr) {}
 
 void PlayerControls::initializeUIElements() {
-    m_stopButton->setEnabled(false);
+    if (m_uiInitialized)
+        return;
+    Q_ASSERT(m_playButton && m_stopButton && m_nextButton && m_previousButton && m_muteButton &&
+             m_volumeSlider);
+    m_uiInitialized = true;
+    setState(m_playerState);
+    setMuted(m_playerMuted);
 
     connect(m_playButton, SIGNAL(clicked()), this, SLOT(playClicked()));
     connect(m_stopButton, SIGNAL(clicked()), this, SIGNAL(stop()));
@@ -27,23 +33,23 @@ QMediaPlayer::State PlayerControls::state() const {
 }
 
 void PlayerControls::setState(QMediaPlayer::State state) {
-    if (state != m_playerState) {
-        m_playerState = state;
+    m_playerState = state;
+    if (!m_uiInitialized)
+        return;
 
-        switch (state) {
-        case QMediaPlayer::StoppedState:
-            m_stopButton->setEnabled(false);
-            m_playButton->setIcon(QIcon(":/icons/play.svg"));
-            break;
-        case QMediaPlayer::PlayingState:
-            m_stopButton->setEnabled(true);
-            m_playButton->setIcon(QIcon(":/icons/pause.svg"));
-            break;
-        case QMediaPlayer::PausedState:
-            m_stopButton->setEnabled(true);
-            m_playButton->setIcon(QIcon(":/icons/play.svg"));
-            break;
-        }
+    switch (state) {
+    case QMediaPlayer::StoppedState:
+        m_stopButton->setEnabled(false);
+        m_playButton->setIcon(QIcon(":/icons/play.svg"));
+        break;
+    case QMediaPlayer::PlayingState:
+        m_stopButton->setEnabled(true);
+        m_playButton->setIcon(QIcon(":/icons/pause.svg"));
+        break;
+    case QMediaPlayer::PausedState:
+        m_stopButton->setEnabled(true);
+        m_playButton->setIcon(QIcon(":/icons/play.svg"));
+        break;
     }
 }
 
@@ -61,11 +67,9 @@ bool PlayerControls::isMuted() const {
 }
 
 void PlayerControls::setMuted(bool muted) {
-    if (m_playerMuted != muted) {
-        m_playerMuted = muted;
-
+    m_playerMuted = muted;
+    if (m_uiInitialized)
         m_muteButton->setIcon(QIcon(muted ? ":/icons/volume-x.svg" : ":/icons/volume-2.svg"));
-    }
 }
 
 void PlayerControls::playClicked() {

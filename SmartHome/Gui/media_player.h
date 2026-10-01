@@ -59,19 +59,22 @@ class MediaPlayer : public QWidget {
 
     QMediaPlaylist *m_playlist;
     PlaylistModel *m_playlistModel;
-    QListView *m_playlistView;
+    QListView *m_playlistView = nullptr;
 
     QVideoWidget *m_videoWidget;
 
     PlayerControls *m_controls;
 
     QLabel *m_coverLabel;
-    QLabel *m_labelDuration;
+    QLabel *m_labelDuration = nullptr;
     QSlider *m_seekSlider;
 
     QString m_trackInfo;
     QString m_statusInfo;
-    qint64 m_duration;
+    qint64 m_duration = 0;
+
+  private:
+    bool m_uiInitialized = false;
 };
 
 #endif // MEDIAPLAYER_H

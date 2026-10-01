@@ -61,10 +61,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {
     updateTimer->stop();
     analyticsModel.reset();
+    delete mediaPlayer;
     delete ui;
 
     delete homeSettings;
-    delete mediaPlayer;
 
     delete updateTimer;
 }
@@ -111,7 +111,6 @@ void MainWindow::loadMediaPlayerWidgets() {
     loadMediaPlayerControlWidgets();
 
     mediaPlayer->initializeUIElements();
-    mediaPlayer->m_controls->initializeUIElements();
 }
 
 void MainWindow::loadMediaPlayerControlWidgets() {
