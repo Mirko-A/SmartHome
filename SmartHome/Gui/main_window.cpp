@@ -40,6 +40,35 @@ constexpr int ONE_SEC_IN_TICKS = 2;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
+    connect(ui->devicesBtn, &QAbstractButton::clicked, this, &MainWindow::devicesBtnClicked);
+    connect(ui->mediaBtn, &QAbstractButton::clicked, this, &MainWindow::mediaBtnClicked);
+    connect(ui->analyticsBtn, &QAbstractButton::clicked, this, &MainWindow::analyticsBtnClicked);
+    connect(ui->livingRoomLightBtn, &QAbstractButton::toggled, this,
+            &MainWindow::livingRoomLightBtnToggled);
+    connect(ui->bedroomLightBtn, &QAbstractButton::toggled, this,
+            &MainWindow::bedroomLightBtnToggled);
+    connect(ui->kitchenLightBtn, &QAbstractButton::toggled, this,
+            &MainWindow::kitchenLightBtnToggled);
+    connect(ui->ACOnBtn, &QAbstractButton::toggled, this, &MainWindow::acOnBtnToggled);
+    connect(ui->ACTemperatureUp, &QAbstractButton::clicked, this,
+            &MainWindow::acTemperatureUpClicked);
+    connect(ui->ACTemperatureDown, &QAbstractButton::clicked, this,
+            &MainWindow::acTemperatureDownClicked);
+    connect(ui->ACModeUp, &QAbstractButton::clicked, this, &MainWindow::acModeUpClicked);
+    connect(ui->ACModeDown, &QAbstractButton::clicked, this, &MainWindow::acModeDownClicked);
+    connect(ui->volumeSlider, &QSlider::sliderMoved, this, &MainWindow::volumeSliderMoved);
+    connect(ui->volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeSliderValueChanged);
+    connect(ui->bassSlider, &QSlider::sliderMoved, this, &MainWindow::bassSliderMoved);
+    connect(ui->bassSlider, &QSlider::valueChanged, this, &MainWindow::bassSliderValueChanged);
+    connect(ui->pitchSlider, &QSlider::sliderMoved, this, &MainWindow::pitchSliderMoved);
+    connect(ui->pitchSlider, &QSlider::valueChanged, this, &MainWindow::pitchSliderValueChanged);
+    connect(ui->analyticsPageLightsBtn, &QAbstractButton::clicked, this,
+            &MainWindow::analyticsPageLightsBtnClicked);
+    connect(ui->analyticsPageACBtn, &QAbstractButton::clicked, this,
+            &MainWindow::analyticsPageACBtnClicked);
+    connect(ui->analyticsPageSensorsBtn, &QAbstractButton::clicked, this,
+            &MainWindow::analyticsPageSensorsBtnClicked);
+
     ui->pages->setCurrentIndex(
         static_cast<int>(PageIndex::HOME)); // Set the initial tab to HOME tab
 
@@ -54,7 +83,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->analyticsPages->setCurrentIndex(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS));
 
     updateTimer = new QTimer(this);
-    connect(updateTimer, SIGNAL(timeout()), this, SLOT(onUpdate()));
+    connect(updateTimer, &QTimer::timeout, this, &MainWindow::onUpdate);
     updateTimer->start(50);
 }
 
@@ -207,19 +236,19 @@ void MainWindow::updateDateTimeWidget() {
     ui->dateTimeLabel->setText(currentDateTime.toString());
 }
 
-void MainWindow::on_devicesBtn_clicked() {
+void MainWindow::devicesBtnClicked() {
     updateCurrentPage(PageIndex::HOME);
 }
 
-void MainWindow::on_mediaBtn_clicked() {
+void MainWindow::mediaBtnClicked() {
     updateCurrentPage(PageIndex::MEDIA);
 }
 
-void MainWindow::on_analyticsBtn_clicked() {
+void MainWindow::analyticsBtnClicked() {
     updateCurrentPage(PageIndex::ANALYTICS);
 }
 
-void MainWindow::on_livingRoomLightBtn_toggled(bool checked) {
+void MainWindow::livingRoomLightBtnToggled(bool checked) {
     // TODO: handle actual light
     // homeSettings->lights().livingRoomLightOn = checked;
 
@@ -230,7 +259,7 @@ void MainWindow::on_livingRoomLightBtn_toggled(bool checked) {
     }
 }
 
-void MainWindow::on_bedroomLightBtn_toggled(bool checked) {
+void MainWindow::bedroomLightBtnToggled(bool checked) {
     // TODO: handle actual light
     // homeSettings->lights.bedroomLightOn = checked;
 
@@ -241,7 +270,7 @@ void MainWindow::on_bedroomLightBtn_toggled(bool checked) {
     }
 }
 
-void MainWindow::on_kitchenLightBtn_toggled(bool checked) {
+void MainWindow::kitchenLightBtnToggled(bool checked) {
     // TODO: handle actual light
     // homeSettings->lights.kitchenLightOn = checked;
 
@@ -252,7 +281,7 @@ void MainWindow::on_kitchenLightBtn_toggled(bool checked) {
     }
 }
 
-void MainWindow::on_ACOnBtn_toggled(bool checked) {
+void MainWindow::acOnBtnToggled(bool checked) {
     // TODO: handle actual light
     // homeSettings->AC.on = checked;
 
@@ -263,15 +292,15 @@ void MainWindow::on_ACOnBtn_toggled(bool checked) {
     }
 }
 
-void MainWindow::on_ACTemperatureUp_clicked() {
+void MainWindow::acTemperatureUpClicked() {
     // FIXME: AC has no temp anymore
 }
 
-void MainWindow::on_ACTemperatureDown_clicked() {
+void MainWindow::acTemperatureDownClicked() {
     // FIXME: AC has no temp anymore
 }
 
-void MainWindow::on_ACModeUp_clicked() {
+void MainWindow::acModeUpClicked() {
     // FIXME:
     // Ac::Mode currentMode = homeSettings->ac().mode;
     // if (currentMode != 0) {
@@ -282,7 +311,7 @@ void MainWindow::on_ACModeUp_clicked() {
     // ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeSettings->AC.mode)));
 }
 
-void MainWindow::on_ACModeDown_clicked() {
+void MainWindow::acModeDownClicked() {
     // FIXME:
     // uint8_t currentMode = static_cast<uint8_t>(homeSettings->AC.mode);
     // if (currentMode > 0) {
@@ -293,37 +322,37 @@ void MainWindow::on_ACModeDown_clicked() {
     // ui->ACModeValueLabel->setText(QString::fromStdString(ACModeToString(homeSettings->AC.mode)));
 }
 
-void MainWindow::on_volumeSlider_sliderMoved(int position) {
+void MainWindow::volumeSliderMoved(int position) {
     // FIXME:
     // homeSettings->speakers.volume = position;
     // ui->volumeSliderValueLabel->setText(QString::number(position));
 }
 
-void MainWindow::on_volumeSlider_valueChanged(int value) {
+void MainWindow::volumeSliderValueChanged(int value) {
     // FIXME:
     // homeSettings->speakers.volume = value;
     // ui->volumeSliderValueLabel->setText(QString::number(value));
 }
 
-void MainWindow::on_bassSlider_sliderMoved(int position) {
+void MainWindow::bassSliderMoved(int position) {
     // FIXME:
     // homeSettings->speakers.bass = position;
     // ui->bassSliderValueLabel->setText(QString::number(position));
 }
 
-void MainWindow::on_bassSlider_valueChanged(int value) {
+void MainWindow::bassSliderValueChanged(int value) {
     // FIXME:
     // homeSettings->speakers.bass = value;
     // ui->bassSliderValueLabel->setText(QString::number(value));
 }
 
-void MainWindow::on_pitchSlider_sliderMoved(int position) {
+void MainWindow::pitchSliderMoved(int position) {
     // FIXME:
     // homeSettings->speakers.pitch = position;
     // ui->pitchSliderValueLabel->setText(QString::number(position));
 }
 
-void MainWindow::on_pitchSlider_valueChanged(int value) {
+void MainWindow::pitchSliderValueChanged(int value) {
     // FIXME:
     // homeSettings->speakers.pitch = value;
     // ui->pitchSliderValueLabel->setText(QString::number(value));
@@ -370,14 +399,14 @@ void MainWindow::swapSelectedAnalyticsPage(AnalyticsPageIndex newPageIndex) {
     }
 }
 
-void MainWindow::on_analyticsPageLightsBtn_clicked() {
+void MainWindow::analyticsPageLightsBtnClicked() {
     swapSelectedAnalyticsPage(AnalyticsPageIndex::LIGHT_ANALYTICS);
 }
 
-void MainWindow::on_analyticsPageACBtn_clicked() {
+void MainWindow::analyticsPageACBtnClicked() {
     swapSelectedAnalyticsPage(AnalyticsPageIndex::AC_ANALYTICS);
 }
 
-void MainWindow::on_analyticsPageSensorsBtn_clicked() {
+void MainWindow::analyticsPageSensorsBtnClicked() {
     swapSelectedAnalyticsPage(AnalyticsPageIndex::SENSORS_ANALYTICS);
 }

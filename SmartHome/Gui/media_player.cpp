@@ -42,39 +42,42 @@ void MediaPlayer::initUi() {
     m_controls->initializeUIElements();
     m_uiInitialized = true;
 
-    connect(m_player, SIGNAL(durationChanged(qint64)), SLOT(durationChanged(qint64)));
-    connect(m_player, SIGNAL(positionChanged(qint64)), SLOT(positionChanged(qint64)));
-    connect(m_player, SIGNAL(metaDataChanged()), SLOT(metaDataChanged()));
-    connect(m_playlist, SIGNAL(currentIndexChanged(int)), SLOT(playlistPositionChanged(int)));
-    connect(m_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this,
-            SLOT(statusChanged(QMediaPlayer::MediaStatus)));
-    connect(m_player, SIGNAL(bufferStatusChanged(int)), this, SLOT(bufferingProgress(int)));
-    connect(m_player, SIGNAL(error(QMediaPlayer::Error)), this, SLOT(displayErrorMessage()));
+    connect(m_player, &QMediaPlayer::durationChanged, this, &MediaPlayer::durationChanged);
+    connect(m_player, &QMediaPlayer::positionChanged, this, &MediaPlayer::positionChanged);
+    connect(m_player, static_cast<void (QMediaObject::*)()>(&QMediaObject::metaDataChanged), this,
+            &MediaPlayer::metaDataChanged);
+    connect(m_playlist, &QMediaPlaylist::currentIndexChanged, this,
+            &MediaPlayer::playlistPositionChanged);
+    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &MediaPlayer::statusChanged);
+    connect(m_player, &QMediaPlayer::bufferStatusChanged, this, &MediaPlayer::bufferingProgress);
+    connect(m_player,
+            static_cast<void (QMediaPlayer::*)(QMediaPlayer::Error)>(&QMediaPlayer::error), this,
+            &MediaPlayer::displayErrorMessage);
 
     m_playlistView->setModel(m_playlistModel);
     m_playlistView->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
 
-    connect(m_playlistView, SIGNAL(activated(QModelIndex)), this, SLOT(jump(QModelIndex)));
+    connect(m_playlistView, &QListView::activated, this, &MediaPlayer::jump);
 
     connect(m_seekSlider, &QSlider::valueChanged, this, &MediaPlayer::seek);
 
-    connect(m_controls, SIGNAL(play()), m_player, SLOT(play()));
-    connect(m_controls, SIGNAL(pause()), m_player, SLOT(pause()));
-    connect(m_controls, SIGNAL(stop()), m_player, SLOT(stop()));
-    connect(m_controls, SIGNAL(next()), m_playlist, SLOT(next()));
-    connect(m_controls, SIGNAL(previous()), this, SLOT(previousClicked()));
-    connect(m_controls, SIGNAL(changeVolume(int)), m_player, SLOT(setVolume(int)));
-    connect(m_controls, SIGNAL(changeMuting(bool)), m_player, SLOT(setMuted(bool)));
+    connect(m_controls, &PlayerControls::play, m_player, &QMediaPlayer::play);
+    connect(m_controls, &PlayerControls::pause, m_player, &QMediaPlayer::pause);
+    connect(m_controls, &PlayerControls::stop, m_player, &QMediaPlayer::stop);
+    connect(m_controls, &PlayerControls::next, m_playlist, &QMediaPlaylist::next);
+    connect(m_controls, &PlayerControls::previous, this, &MediaPlayer::previousClicked);
+    connect(m_controls, &PlayerControls::changeVolume, m_player, &QMediaPlayer::setVolume);
+    connect(m_controls, &PlayerControls::changeMuting, m_player, &QMediaPlayer::setMuted);
 
-    connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)), m_controls,
-            SLOT(setState(QMediaPlayer::State)));
-    connect(m_player, SIGNAL(volumeChanged(int)), m_controls, SLOT(setVolume(int)));
-    connect(m_player, SIGNAL(mutedChanged(bool)), m_controls, SLOT(setMuted(bool)));
+    connect(m_player, &QMediaPlayer::stateChanged, m_controls, &PlayerControls::setState);
+    connect(m_player, &QMediaPlayer::volumeChanged, m_controls, &PlayerControls::setVolume);
+    connect(m_player, &QMediaPlayer::mutedChanged, m_controls, &PlayerControls::setMuted);
 
-    connect(m_playlistModel->m_openButton, SIGNAL(clicked()), this, SLOT(open()));
-    connect(m_playlistModel->m_removeButton, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(m_playlistModel->m_openButton, &QAbstractButton::clicked, this, &MediaPlayer::open);
+    connect(m_playlistModel->m_removeButton, &QAbstractButton::clicked, this, &MediaPlayer::remove);
 
-    connect(m_controls, SIGNAL(stop()), m_videoWidget, SLOT(update()));
+    connect(m_controls, &PlayerControls::stop, m_videoWidget,
+            static_cast<void (QWidget::*)()>(&QWidget::update));
 
     // Render a complete initial snapshot after all borrowed widgets are bound.
     m_controls->setState(m_player->state());
@@ -137,7 +140,7 @@ static bool isPlaylist(const QUrl &url) // Check for ".m3u" playlists.
 }
 
 void MediaPlayer::addToPlaylist(const QList<QUrl> urls) {
-    foreach (const QUrl &url, urls) {
+    for (const QUrl &url : urls) {
         if (isPlaylist(url))
             m_playlist->load(url);
         else
