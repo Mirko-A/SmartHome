@@ -54,7 +54,12 @@ add_executable(SmartHome
     SmartHome/main.cpp
     # GUI
     SmartHome/Gui/gui.cpp
-    SmartHome/Gui/gui_session.cpp
+    SmartHome/Gui/gui_app.cpp
+    SmartHome/Gui/Pages/Devices/Components/ac_panel.cpp
+    SmartHome/Gui/Pages/Devices/Components/lights_panel.cpp
+    SmartHome/Gui/Pages/Devices/Components/sensors_panel.cpp
+    SmartHome/Gui/Pages/Devices/Components/speakers_panel.cpp
+    SmartHome/Gui/Pages/Devices/devices_page.cpp
     SmartHome/Gui/analytics_model.cpp
     SmartHome/Gui/main_window.cpp
     SmartHome/Gui/Pages/Media/media_page.cpp

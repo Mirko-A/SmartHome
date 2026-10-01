@@ -6,7 +6,7 @@
 #include <QTimer>
 
 #include "analytics_model.h"
-#include "gui_session.h"
+#include "gui_app.h"
 
 class QAction;
 class QLabel;
@@ -39,7 +39,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
   public:
-    explicit MainWindow(std::string configPath, QWidget *parent = nullptr);
+    explicit MainWindow(smart_home::gui::GuiApp &app, QWidget *parent = nullptr);
     ~MainWindow() override;
 
   private slots:
@@ -49,24 +49,6 @@ class MainWindow : public QMainWindow {
     void devicesBtnClicked();
     void mediaBtnClicked();
     void analyticsBtnClicked();
-
-    /* Lights button callbacks */
-    void livingRoomLightBtnToggled(bool checked);
-    void bedroomLightBtnToggled(bool checked);
-    void kitchenLightBtnToggled(bool checked);
-
-    /* AC button callbacks */
-    void acOnBtnToggled(bool checked);
-
-    void acModeUpClicked();
-    void acModeDownClicked();
-
-    /* Speaker slider callbacks */
-    void volumeSliderValueChanged(int value);
-
-    void bassSliderValueChanged(int value);
-
-    void pitchSliderValueChanged(int value);
 
     void analyticsPageLightsBtnClicked();
 
@@ -79,15 +61,8 @@ class MainWindow : public QMainWindow {
     void updateDateTimeWidget();
 
     void refreshSession();
-    void editControls();
     void reloadSettings();
     void closeEvent(QCloseEvent *event) override;
-
-    void updateLightsUI();
-    void updateSensorsUI();
-    void updateACUI();
-    void updateSpeakersUI();
-    void updateHomeWidgets();
 
     void initAnalyticsModel();
 
@@ -101,12 +76,10 @@ class MainWindow : public QMainWindow {
   private:
     Ui::MainWindow *ui;
 
-    smart_home::gui::GuiSession *m_session;
+    smart_home::gui::GuiApp *m_session;
     QAction *m_saveAction;
     QAction *m_reloadAction;
     QLabel *m_configStatus;
     std::unique_ptr<AnalyticsModel> analyticsModel;
-
-    QTimer *updateTimer;
 };
 #endif // MAINWINDOW_H
