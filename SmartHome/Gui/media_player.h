@@ -20,8 +20,8 @@ class MediaPlayer : public QWidget {
     Q_OBJECT
 
   public:
-    MediaPlayer(QWidget *parent = 0);
-    ~MediaPlayer();
+    MediaPlayer(QWidget *parent = nullptr);
+    ~MediaPlayer() override;
 
     /* Must be called after pointers to UI elements have been assigned */
     void initUi();

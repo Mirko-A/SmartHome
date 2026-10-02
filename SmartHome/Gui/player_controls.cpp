@@ -22,11 +22,11 @@ void PlayerControls::initializeUIElements() {
     setMuted(m_playerMuted);
     m_volumeSlider->setRange(0, 100);
 
-    connect(m_playButton, SIGNAL(clicked()), this, SLOT(playClicked()));
-    connect(m_stopButton, SIGNAL(clicked()), this, SIGNAL(stop()));
-    connect(m_nextButton, SIGNAL(clicked()), this, SIGNAL(next()));
-    connect(m_previousButton, SIGNAL(clicked()), this, SIGNAL(previous()));
-    connect(m_muteButton, SIGNAL(clicked()), this, SLOT(muteClicked()));
+    connect(m_playButton, &QAbstractButton::clicked, this, &PlayerControls::playClicked);
+    connect(m_stopButton, &QAbstractButton::clicked, this, &PlayerControls::stop);
+    connect(m_nextButton, &QAbstractButton::clicked, this, &PlayerControls::next);
+    connect(m_previousButton, &QAbstractButton::clicked, this, &PlayerControls::previous);
+    connect(m_muteButton, &QAbstractButton::clicked, this, &PlayerControls::muteClicked);
     connect(m_volumeSlider, &QAbstractSlider::valueChanged, this, &PlayerControls::changeVolume);
 }
 

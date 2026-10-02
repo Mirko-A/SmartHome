@@ -37,45 +37,45 @@ class MainWindow : public QMainWindow {
 
   public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
   private slots:
     void onUpdate();
 
     /* Navigation bar button callbacks */
-    void on_devicesBtn_clicked();
-    void on_mediaBtn_clicked();
-    void on_analyticsBtn_clicked();
+    void devicesBtnClicked();
+    void mediaBtnClicked();
+    void analyticsBtnClicked();
 
     /* Lights button callbacks */
-    void on_livingRoomLightBtn_toggled(bool checked);
-    void on_bedroomLightBtn_toggled(bool checked);
-    void on_kitchenLightBtn_toggled(bool checked);
+    void livingRoomLightBtnToggled(bool checked);
+    void bedroomLightBtnToggled(bool checked);
+    void kitchenLightBtnToggled(bool checked);
 
     /* AC button callbacks */
-    void on_ACOnBtn_toggled(bool checked);
+    void acOnBtnToggled(bool checked);
 
-    void on_ACTemperatureUp_clicked();
-    void on_ACTemperatureDown_clicked();
+    void acTemperatureUpClicked();
+    void acTemperatureDownClicked();
 
-    void on_ACModeUp_clicked();
-    void on_ACModeDown_clicked();
+    void acModeUpClicked();
+    void acModeDownClicked();
 
     /* Speaker slider callbacks */
-    void on_volumeSlider_sliderMoved(int position);
-    void on_volumeSlider_valueChanged(int value);
+    void volumeSliderMoved(int position);
+    void volumeSliderValueChanged(int value);
 
-    void on_bassSlider_sliderMoved(int position);
-    void on_bassSlider_valueChanged(int value);
+    void bassSliderMoved(int position);
+    void bassSliderValueChanged(int value);
 
-    void on_pitchSlider_sliderMoved(int position);
-    void on_pitchSlider_valueChanged(int value);
+    void pitchSliderMoved(int position);
+    void pitchSliderValueChanged(int value);
 
-    void on_analyticsPageLightsBtn_clicked();
+    void analyticsPageLightsBtnClicked();
 
-    void on_analyticsPageACBtn_clicked();
+    void analyticsPageACBtnClicked();
 
-    void on_analyticsPageSensorsBtn_clicked();
+    void analyticsPageSensorsBtnClicked();
 
   private:
     void updateCurrentPage(PageIndex index);
