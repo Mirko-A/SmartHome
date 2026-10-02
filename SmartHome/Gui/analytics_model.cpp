@@ -5,38 +5,31 @@
 #include <QBarCategoryAxis>
 #include <QStringList>
 #include <QValueAxis>
+#include <algorithm>
 
 #include "home_settings.h"
-
-// TODO: For testing it is reduced to 60
-#if 0
-#define ONE_HOUR_IN_SEC 3600
-#else
-#define ONE_HOUR_IN_SEC 60
-#endif
-
-#define X_AXIS_POS 0
 
 static const QColor CHART_BACKGROUND_COLOR = QColor(52, 59, 71);
 
 static const QColor HISTOGRAM_BAR_COLOR = QColor(160, 110, 181);
 
-static constexpr size_t MAX_HISTOGRAM_VALUE = ONE_HOUR_IN_SEC;
-static constexpr size_t MAX_BARSET_COUNT = 24;
+static constexpr size_t MAX_HISTOGRAM_VALUE = 60;
+static constexpr int MAX_BARSET_COUNT = 24;
+static constexpr qint64 HOUR_MS = 60 * 60 * 1000;
+static constexpr qreal MINUTE_MS = 60 * 1000;
 
 static const QStringList HISTOGRAM_X_AXIS =
     QStringList{"1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",  "10", "11", "12",
                 "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
 
-// TODO: Check if this is too few/many points after ONE_SEC_IN_TICKS
-// is set back to real value (found in main_window.cpp)
-static constexpr unsigned int MAX_LINE_GRAPH_POINTS_INITIAL = 100;
+static constexpr int MAX_LINE_GRAPH_POINTS = 3600;
+static constexpr qint64 LINE_SAMPLE_INTERVAL_MS = 1000;
+static constexpr qreal LINE_HISTORY_SECONDS = 3600;
 
 static constexpr QColor LINE_GRAPH_COLOR = QColor(160, 110, 181);
 
 Histogram::Histogram(QString name)
-    : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)),
-      m_valueCounter(0) {
+    : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)) {
     m_barSet->setColor(HISTOGRAM_BAR_COLOR);
     barSeries->append(m_barSet);
     barSeries->setBarWidth(1);
@@ -45,117 +38,121 @@ Histogram::Histogram(QString name)
     *m_barSet << 0;
 }
 
-void Histogram::update() {
-    // Histograms are updated periodically and represent
-    // number of units of time spent in a particular state
-    // e.g. Number of seconds a light was turned on.
-    // That's why we update the value counter, to signal
-    // that another unit of time has passed, and replace
-    // the current bar set with this new value.
-    m_barSet->replace(m_barSet->count() - 1, ++m_valueCounter);
+void Histogram::update(bool requestedOn, qint64 elapsedMs) {
+    const qint64 currentHour = elapsedMs / HOUR_MS;
+    // Keep work bounded even after a delay spanning more than the retained history.
+    const int shifts =
+        static_cast<int>(std::min(currentHour - m_currentHour, qint64(MAX_BARSET_COUNT)));
+    for (int i = 0; i < shifts; ++i) {
+        shift();
+    }
+    m_currentHour = currentHour;
+
+    // The previous observed request applies until this observation. These are
+    // session-hour buckets, not measured hardware operation or calendar hours.
+    if (m_lastUpdateMs >= 0 && m_requestedOn) {
+        const qint64 firstHour = currentHour - m_barSet->count() + 1;
+        for (int i = 0; i < m_barSet->count(); ++i) {
+            const qint64 bucketStart = (firstHour + i) * HOUR_MS;
+            const qint64 start = std::max(m_lastUpdateMs, bucketStart);
+            const qint64 end = std::min(elapsedMs, bucketStart + HOUR_MS);
+            if (end > start) {
+                m_barSet->replace(i, m_barSet->at(i) + (end - start) / MINUTE_MS);
+            }
+        }
+    }
+    m_lastUpdateMs = elapsedMs;
+    m_requestedOn = requestedOn;
 }
 
 void Histogram::shift() {
-    // Once in a while (e.g. once per hour) the histogram
-    // needs to be shifted to the left in order to start
-    // counting the amount of time spent in a particular
-    // state for this new period (e.g. for the next hour)
-    m_valueCounter = 0;
-    *m_barSet << 0;
-
-    // Once the maximum desired number of bar sets is reached
-    // we should remove the least recent one to keep the number
-    // of bar sets constant.
-    if (m_barSet->count() > static_cast<int>(MAX_BARSET_COUNT)) {
+    if (m_barSet->count() == MAX_BARSET_COUNT) {
         m_barSet->remove(0);
     }
+    *m_barSet << 0;
 }
 
-LineGraph::LineGraph(QString title, unsigned int initialMaxPointsAllowed)
-    : lineSeries(new QtCharts::QLineSeries()), m_title(title), m_pointCount(0),
-      m_maxPointsAllowed(initialMaxPointsAllowed) {
+LineGraph::LineGraph(QtCharts::QValueAxis &axisX, QtCharts::QValueAxis &axisY)
+    : lineSeries(new QtCharts::QLineSeries()), m_axisX(axisX), m_axisY(axisY) {
     QPen lineGraphPen = lineSeries->pen();
     lineGraphPen.setBrush(QBrush(LINE_GRAPH_COLOR));
     lineGraphPen.setWidth(3);
     lineSeries->setPen(lineGraphPen);
 }
 
-void LineGraph::update(int16_t newValue) {
-    // Line graphs will be updated periodically by adding a new
-    // point once per cycle (e.g. every second).
-    *lineSeries << QPointF(m_pointCount++, newValue);
-    expandLineSeriesIfNeeded();
-}
-
-void LineGraph::update(int newValue) {
-    // Line graphs will be updated periodically by adding a new
-    // point once per cycle (e.g. every second).
-    *lineSeries << QPointF(m_pointCount++, newValue);
-    expandLineSeriesIfNeeded();
-}
-
-void LineGraph::expandLineSeriesIfNeeded() {
-    /* Whole X-axis of the line graph is filled out and needs to be expanded
-     * In case we reached the maximum range, we will freeze it
-     * at [UINT_MAX/10; UINT_MAX] (through the condition after &&). */
-    if (static_cast<size_t>(lineSeries->count()) >= m_maxPointsAllowed &&
-        m_maxPointsAllowed != UINT_MAX) {
-        /* Calculate new maximum for the X-axis:
-         *     case 1: maxLineGraphPoints*10 > UINT_MAX -> overflow would occur if
-         * we multiply by 10 so we just set maxLineGraphPoints to UINT_MAX case 2:
-         * maxLineGraphPoints*10 < UINT_MAX -> no overflow will occur so we can
-         * multiply maxLineGraphPoints by 10 */
-        m_maxPointsAllowed =
-            ((UINT_MAX / 10) < m_maxPointsAllowed) ? UINT_MAX : m_maxPointsAllowed * 10;
-
-        lineSeries->attachedAxes().at(X_AXIS_POS)->setMax(m_maxPointsAllowed);
+void LineGraph::update(int16_t newValue, qint64 elapsedMs) {
+    const qreal elapsedSeconds = elapsedMs / 1000.0;
+    const qreal cutoff = elapsedSeconds - LINE_HISTORY_SECONDS;
+    // Trim before appending so storage never exceeds the cap, even temporarily.
+    int removeCount = std::max(0, lineSeries->count() - MAX_LINE_GRAPH_POINTS + 1);
+    while (removeCount < lineSeries->count() && lineSeries->at(removeCount).x() <= cutoff) {
+        ++removeCount;
     }
+    if (removeCount > 0) {
+        lineSeries->removePoints(0, removeCount);
+    }
+    lineSeries->append(elapsedSeconds, newValue);
+    m_axisX.setRange(std::max(qreal(0), cutoff), std::max(LINE_HISTORY_SECONDS, elapsedSeconds));
+
+    // Scale each sensor independently.
+    qreal minimum = newValue;
+    qreal maximum = newValue;
+    for (int i = 0; i < lineSeries->count(); ++i) {
+        minimum = std::min(minimum, lineSeries->at(i).y());
+        maximum = std::max(maximum, lineSeries->at(i).y());
+    }
+    // A minimum padding also gives flat readings a non-degenerate axis.
+    const qreal padding = std::max(qreal(1), (maximum - minimum) * 0.05);
+    m_axisY.setRange(minimum - padding, maximum + padding);
 }
 
 AnalyticsModel::AnalyticsModel(const AnalyticsCharts &charts) {
     initChartsWithHistogram(charts);
     initChartsWithLineGraph(charts);
+    m_historyClock.start();
 }
 
 void AnalyticsModel::initChartsWithHistogram(const AnalyticsCharts &charts) {
-    m_analyticsData.histograms.livingRoomLight =
-        createChartWithHistogram(*charts.livingRoomLight, "Living room light on per hour",
-                                 HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
-    m_analyticsData.histograms.bedroomLight =
-        createChartWithHistogram(*charts.bedroomLight, "Bedroom light on per hour",
-                                 HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
-    m_analyticsData.histograms.kitchenLight =
-        createChartWithHistogram(*charts.kitchenLight, "Kitchen light on per hour",
-                                 HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
-    m_analyticsData.histograms.acOn = createChartWithHistogram(
-        *charts.ACOn, "AC on per hour", HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
+    m_analyticsData.histograms.livingRoomLight = createChartWithHistogram(
+        *charts.livingRoomLight, "Living room", HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
+    m_analyticsData.histograms.bedroomLight = createChartWithHistogram(
+        *charts.bedroomLight, "Bedroom", HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
+    m_analyticsData.histograms.kitchenLight = createChartWithHistogram(
+        *charts.kitchenLight, "Kitchen", HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
+    m_analyticsData.histograms.acOn =
+        createChartWithHistogram(*charts.ACOn, "AC", HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
 }
 
 void AnalyticsModel::initChartsWithLineGraph(const AnalyticsCharts &charts) {
-    // TODO: Set correct max sensor values.
-    m_analyticsData.lineGraphs.temperatureSensor =
-        createChartWithLineGraph(*charts.temperatureSensor, "Temperature sensor readings",
-                                 {0, MAX_LINE_GRAPH_POINTS_INITIAL}, {0, 100});
+    // TODO: specify units once sensors are wired in.
+    m_analyticsData.lineGraphs.temperatureSensor = createChartWithLineGraph(
+        *charts.temperatureSensor, "Temperature", "Temperature (unit unspecified)");
     m_analyticsData.lineGraphs.humiditySensor =
-        createChartWithLineGraph(*charts.humiditySensor, "Humidity sensor readings",
-                                 {0, MAX_LINE_GRAPH_POINTS_INITIAL}, {0, 100});
-    m_analyticsData.lineGraphs.brightnessSensor =
-        createChartWithLineGraph(*charts.brightnessSensor, "Brightness sensor readings",
-                                 {0, MAX_LINE_GRAPH_POINTS_INITIAL}, {0, 100});
+        createChartWithLineGraph(*charts.humiditySensor, "Humidity", "Humidity (unit unspecified)");
+    m_analyticsData.lineGraphs.brightnessSensor = createChartWithLineGraph(
+        *charts.brightnessSensor, "Brightness", "Brightness (unit unspecified)");
 }
 
 std::unique_ptr<Histogram> AnalyticsModel::createChartWithHistogram(QtCharts::QChart &chart,
                                                                     QString title,
                                                                     const QStringList &rangeX,
                                                                     QPair<size_t, size_t> rangeY) {
-    chart.setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
+    QFont titleFont = chart.titleFont();
+    titleFont.setPointSize(16);
+    chart.setTitleFont(titleFont);
     chart.setTitleBrush(QBrush(Qt::white));
+    chart.setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
+
     auto histogram = std::make_unique<Histogram>(title);
 
     chart.setTitle(title);
     auto axisX = new QtCharts::QBarCategoryAxis;
     auto axisY = new QtCharts::QValueAxis;
     axisX->append(rangeX);
+    axisX->setTitleText("Hourly buckets (oldest to newest)");
+    axisX->setTitleBrush(QBrush(Qt::white));
+    axisY->setTitleText("On-time (min)");
+    axisY->setTitleBrush(QBrush(Qt::white));
     axisX->setLabelsColor(Qt::white);
     axisY->setRange(rangeY.first, rangeY.second);
     axisY->setLabelsColor(Qt::white);
@@ -172,18 +169,21 @@ std::unique_ptr<Histogram> AnalyticsModel::createChartWithHistogram(QtCharts::QC
 
 std::unique_ptr<LineGraph> AnalyticsModel::createChartWithLineGraph(QtCharts::QChart &chart,
                                                                     QString title,
-                                                                    QPair<int, int> rangeX,
-                                                                    QPair<int, int> rangeY) {
+                                                                    QString axisTitle) {
     chart.setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
     chart.setTitleBrush(QBrush(Qt::white));
-    auto graph = std::make_unique<LineGraph>(title, rangeX.second);
 
     chart.setTitle(title);
     auto axisX = new QtCharts::QValueAxis;
     auto axisY = new QtCharts::QValueAxis;
-    axisX->setRange(rangeX.first, rangeX.second);
+    auto graph = std::make_unique<LineGraph>(*axisX, *axisY);
+    axisX->setRange(0, LINE_HISTORY_SECONDS);
+    axisX->setTitleText("Elapsed time (s)");
+    axisX->setTitleBrush(QBrush(Qt::white));
     axisX->setLabelsColor(Qt::white);
-    axisY->setRange(rangeY.first, rangeY.second);
+    axisY->setRange(-1, 1);
+    axisY->setTitleText(axisTitle);
+    axisY->setTitleBrush(QBrush(Qt::white));
     axisY->setLabelsColor(Qt::white);
     chart.addAxis(axisX, Qt::AlignBottom);
     chart.addAxis(axisY, Qt::AlignLeft);
@@ -196,42 +196,29 @@ std::unique_ptr<LineGraph> AnalyticsModel::createChartWithLineGraph(QtCharts::QC
     return graph;
 }
 
-void AnalyticsModel::shiftHistograms() {
-    m_analyticsData.histograms.livingRoomLight->shift();
-    m_analyticsData.histograms.bedroomLight->shift();
-    m_analyticsData.histograms.kitchenLight->shift();
-    m_analyticsData.histograms.acOn->shift();
-}
-
 void AnalyticsModel::updateHistograms(const HomeSettings &settings) {
-    if (settings.lights().livingRoomLightOn) {
-        m_analyticsData.histograms.livingRoomLight->update();
-    }
-    if (settings.lights().bedroomLightOn) {
-        m_analyticsData.histograms.bedroomLight->update();
-    }
-    if (settings.lights().kitchenLightOn) {
-        m_analyticsData.histograms.kitchenLight->update();
-    }
-    if (settings.ac().on) {
-        m_analyticsData.histograms.acOn->update();
-    }
+    const qint64 elapsedMs = m_historyClock.elapsed();
+    const auto lights = settings.lights();
+    m_analyticsData.histograms.livingRoomLight->update(lights.livingRoomLightOn, elapsedMs);
+    m_analyticsData.histograms.bedroomLight->update(lights.bedroomLightOn, elapsedMs);
+    m_analyticsData.histograms.kitchenLight->update(lights.kitchenLightOn, elapsedMs);
+    m_analyticsData.histograms.acOn->update(settings.ac().on, elapsedMs);
 }
 
 void AnalyticsModel::updateLineGraphs(const HomeSettings &settings) {
-    m_analyticsData.lineGraphs.temperatureSensor->update(settings.sensors().temperature);
-    m_analyticsData.lineGraphs.humiditySensor->update(settings.sensors().humidity);
-    m_analyticsData.lineGraphs.brightnessSensor->update(settings.sensors().brightness);
+    // Sample at most once per second; a delayed callback does not invent readings.
+    const qint64 elapsedMs = m_historyClock.elapsed();
+    if (m_lastLineSampleMs >= 0 && elapsedMs - m_lastLineSampleMs < LINE_SAMPLE_INTERVAL_MS) {
+        return;
+    }
+    m_lastLineSampleMs = elapsedMs;
+    const auto readings = settings.sensors();
+    m_analyticsData.lineGraphs.temperatureSensor->update(readings.temperature, elapsedMs);
+    m_analyticsData.lineGraphs.humiditySensor->update(readings.humidity, elapsedMs);
+    m_analyticsData.lineGraphs.brightnessSensor->update(readings.brightness, elapsedMs);
 }
 
 void AnalyticsModel::updateAnalyticsData(const HomeSettings &settings) {
-    if (histogramTickCount == MAX_HISTOGRAM_VALUE) {
-        shiftHistograms();
-        histogramTickCount = 0;
-    }
-
     updateHistograms(settings);
     updateLineGraphs(settings);
-
-    histogramTickCount++;
 }
