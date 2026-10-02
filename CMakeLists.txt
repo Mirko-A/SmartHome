@@ -9,7 +9,7 @@ include(FetchContent)
 
 find_package(Threads REQUIRED)
 find_package(Qt5 REQUIRED
-    COMPONENTS Widgets Multimedia MultimediaWidgets Charts
+    COMPONENTS Widgets Multimedia MultimediaWidgets Charts Svg
 )
 
 FetchContent_Declare(ftxui
@@ -94,4 +94,5 @@ target_link_libraries(SmartHome PRIVATE
     Qt5::Multimedia
     Qt5::MultimediaWidgets
     Qt5::Charts
+    Qt5::Svg
 )
