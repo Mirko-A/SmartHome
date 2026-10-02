@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 
+#ifdef SMARTHOME_BUILD_GUI
 #include "gui.h"
+#endif
 #include "tui.h"
 
 int main(int argc, char *argv[]) {
@@ -19,7 +21,12 @@ int main(int argc, char *argv[]) {
     argc -= 1;
 
     if (mode == "gui") {
+#ifdef SMARTHOME_BUILD_GUI
         return smart_home::gui::main(argc, argv);
+#else
+        std::cerr << "GUI support is disabled. Configure with -DSMARTHOME_BUILD_GUI=ON.\n";
+        return 1;
+#endif
     } else if (mode == "tui") {
         return smart_home::tui::main(argc, argv);
     } else {
