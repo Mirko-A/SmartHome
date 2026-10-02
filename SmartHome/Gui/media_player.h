@@ -24,7 +24,7 @@ class MediaPlayer : public QWidget {
     ~MediaPlayer();
 
     /* Must be called after pointers to UI elements have been assigned */
-    void initializeUIElements();
+    void initUi();
 
     bool isPlayerAvailable() const;
 

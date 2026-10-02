@@ -2,6 +2,7 @@
 
 #include <QBoxLayout>
 #include <QComboBox>
+#include <QSignalBlocker>
 #include <QSlider>
 #include <QStyle>
 #include <QToolButton>
@@ -19,13 +20,14 @@ void PlayerControls::initializeUIElements() {
     m_uiInitialized = true;
     setState(m_playerState);
     setMuted(m_playerMuted);
+    m_volumeSlider->setRange(0, 100);
 
     connect(m_playButton, SIGNAL(clicked()), this, SLOT(playClicked()));
     connect(m_stopButton, SIGNAL(clicked()), this, SIGNAL(stop()));
     connect(m_nextButton, SIGNAL(clicked()), this, SIGNAL(next()));
     connect(m_previousButton, SIGNAL(clicked()), this, SIGNAL(previous()));
     connect(m_muteButton, SIGNAL(clicked()), this, SLOT(muteClicked()));
-    connect(m_volumeSlider, SIGNAL(sliderMoved(int)), this, SIGNAL(changeVolume(int)));
+    connect(m_volumeSlider, &QAbstractSlider::valueChanged, this, &PlayerControls::changeVolume);
 }
 
 QMediaPlayer::State PlayerControls::state() const {
@@ -58,8 +60,11 @@ int PlayerControls::volume() const {
 }
 
 void PlayerControls::setVolume(int volume) {
-    if (m_volumeSlider)
+    if (m_volumeSlider) {
+        // Display player volume without emitting valueChanged and sending it back to the player.
+        const QSignalBlocker blocker(m_volumeSlider);
         m_volumeSlider->setValue(volume);
+    }
 }
 
 bool PlayerControls::isMuted() const {

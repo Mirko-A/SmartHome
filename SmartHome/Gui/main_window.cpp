@@ -47,8 +47,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     loadHomeCfgWidgets();
 
     mediaPlayer = new MediaPlayer;
-    loadMediaPlayerWidgets();
     mediaPlayer->m_player->setVolume(INITIAL_PLAYER_VOLUME);
+    loadMediaPlayerWidgets();
 
     initAnalyticsModel();
     ui->analyticsPages->setCurrentIndex(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS));
@@ -110,7 +110,7 @@ void MainWindow::loadMediaPlayerWidgets() {
 
     loadMediaPlayerControlWidgets();
 
-    mediaPlayer->initializeUIElements();
+    mediaPlayer->initUi();
 }
 
 void MainWindow::loadMediaPlayerControlWidgets() {
