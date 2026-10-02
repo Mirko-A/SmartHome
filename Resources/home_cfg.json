@@ -1,0 +1,22 @@
+{
+    "ac": {
+        "mode": 0,
+        "on": false
+    },
+    "dirty": false,
+    "lights": {
+        "bedroom": false,
+        "kitchen": false,
+        "living_room": false
+    },
+    "sensors": {
+        "brightness": 0,
+        "humidity": 0,
+        "temperature": 0
+    },
+    "speakers": {
+        "bass": 35,
+        "pitch": 50,
+        "volume": 25
+    }
+}
