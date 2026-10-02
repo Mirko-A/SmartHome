@@ -32,7 +32,7 @@ class App : public QObject {
     bool editable() const {
         return m_state.loaded && !m_state.loading;
     }
-    bool dirty() const;
+    bool hasUnsavedChanges() const;
     QString status() const;
     const GuiState &state() const {
         return m_state;

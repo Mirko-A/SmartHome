@@ -1,6 +1,6 @@
 # Description
 
-A smart home application with a GUI and voice commands. Done in with QT, C++ and Python.
+A C++ smart home application with Qt GUI and FTXUI terminal interfaces.
 
 It is divided into three pages:
 

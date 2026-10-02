@@ -13,7 +13,9 @@
 #include <utility>
 
 namespace smart_home::app {
+
 namespace {
+
 ConfigError ioError(const std::string &path, const std::string &operation, int error = errno) {
     return {error == ENOENT ? ConfigErrorKind::MISSING : ConfigErrorKind::IO,
             operation + " (" + path + "): " + std::strerror(error)};
@@ -32,8 +34,9 @@ class Lock {
   public:
     explicit Lock(int fd) : m_fd(fd) {}
     ~Lock() {
-        if (m_fd >= 0)
+        if (m_fd >= 0) {
             ::close(m_fd);
+        }
     }
     Lock(const Lock &) = delete;
     Lock &operator=(const Lock &) = delete;
@@ -60,31 +63,41 @@ std::expected<std::string, ConfigError> readBytes(const std::string &path) {
     const auto closeFile = [](std::FILE *file) { std::fclose(file); };
     std::unique_ptr<std::FILE, decltype(closeFile)> stream(std::fopen(path.c_str(), "rb"),
                                                            closeFile);
-    if (!stream)
+    if (!stream) {
         return std::unexpected(ioError(path, "Cannot open config"));
+    }
+
     std::string contents;
     char buffer[4096];
     while (const auto count = std::fread(buffer, 1, sizeof(buffer), stream.get())) {
         contents.append(buffer, count);
     }
-    if (std::ferror(stream.get()))
+    if (std::ferror(stream.get())) {
         return std::unexpected(ioError(path, "Cannot read config"));
-    if (std::fclose(stream.release()) != 0)
+    }
+    if (std::fclose(stream.release()) != 0) {
         return std::unexpected(ioError(path, "Cannot close config"));
+    }
     return contents;
 }
+
 } // namespace
 
 std::expected<ConfigSnapshot, ConfigError> loadConfig(const std::string &path) {
     auto resolved = canonicalPath(path);
-    if (!resolved)
+    if (!resolved) {
         return std::unexpected(resolved.error());
+    }
+
     auto lock = lockConfig(*resolved, LOCK_SH);
-    if (!lock)
+    if (!lock) {
         return std::unexpected(lock.error());
+    }
+
     auto bytes = readBytes(*resolved);
-    if (!bytes)
+    if (!bytes) {
         return std::unexpected(bytes.error());
+    }
     try {
         return ConfigSnapshot{nlohmann::json::parse(*bytes), std::move(*bytes)};
     } catch (const nlohmann::json::exception &error) {
@@ -96,6 +109,7 @@ std::expected<ConfigSnapshot, ConfigError> loadConfig(const std::string &path) {
 std::expected<ConfigSnapshot, ConfigError> saveConfig(const std::string &path,
                                                       const nlohmann::json &config,
                                                       const std::string &expectedVersion) {
+    auto document = config;
     std::string serialized;
     try {
         serialized = config.dump(4) + "\n";
@@ -104,29 +118,38 @@ std::expected<ConfigSnapshot, ConfigError> saveConfig(const std::string &path,
             ConfigError{ConfigErrorKind::VALIDATION,
                         "Cannot serialize config (" + path + "): " + error.what()});
     }
-    auto resolved = canonicalPath(path);
-    if (!resolved)
-        return std::unexpected(resolved.error());
-    auto lock = lockConfig(*resolved, LOCK_EX);
-    if (!lock)
+
+    auto canonical = canonicalPath(path);
+    if (!canonical) {
+        return std::unexpected(canonical.error());
+    }
+
+    auto lock = lockConfig(*canonical, LOCK_EX);
+    if (!lock) {
         return std::unexpected(lock.error());
-    auto current = readBytes(*resolved);
-    if (!current)
+    }
+
+    auto current = readBytes(*canonical);
+    if (!current) {
         return std::unexpected(current.error());
+    }
     if (*current != expectedVersion) {
         return std::unexpected(
             ConfigError{ConfigErrorKind::CONFLICT,
                         "Config changed externally (" + path +
                             "). Reload before saving; pending edits were retained."});
     }
-    struct stat metadata{};
-    if (::stat(resolved->c_str(), &metadata) != 0)
-        return std::unexpected(ioError(path, "Cannot inspect config"));
 
-    std::string temporaryPath = *resolved + ".tmp.XXXXXX";
+    struct stat metadata{};
+    if (::stat(canonical->c_str(), &metadata) != 0) {
+        return std::unexpected(ioError(path, "Cannot inspect config"));
+    }
+
+    std::string temporaryPath = *canonical + ".tmp.XXXXXX";
     int fd = ::mkstemp(temporaryPath.data());
-    if (fd < 0)
+    if (fd < 0) {
         return std::unexpected(ioError(path, "Cannot create temporary config"));
+    }
     std::FILE *stream = ::fdopen(fd, "wb");
     if (!stream) {
         auto error = ioError(path, "Cannot open config stream");
@@ -145,18 +168,20 @@ std::expected<ConfigSnapshot, ConfigError> saveConfig(const std::string &path,
         const std::string &path;
         bool committed = false;
     } temporary{stream, temporaryPath};
-    if (::fchmod(fd, metadata.st_mode & 0777) != 0)
+    if (::fchmod(fd, metadata.st_mode & 0777) != 0) {
         return std::unexpected(ioError(path, "Cannot preserve config permissions"));
+    }
     if (std::fwrite(serialized.data(), 1, serialized.size(), stream) != serialized.size()) {
         return std::unexpected(ioError(path, "Cannot write config"));
     }
     if (std::fclose(std::exchange(temporary.stream, nullptr)) != 0) {
         return std::unexpected(ioError(path, "Cannot close config"));
     }
-    if (::rename(temporaryPath.c_str(), resolved->c_str()) != 0) {
+    if (::rename(temporaryPath.c_str(), canonical->c_str()) != 0) {
         return std::unexpected(ioError(path, "Cannot replace config"));
     }
     temporary.committed = true;
-    return ConfigSnapshot{config, std::move(serialized)};
+    return ConfigSnapshot{std::move(document), std::move(serialized)};
 }
+
 } // namespace smart_home::app

@@ -7,13 +7,14 @@
 namespace smart_home::app {
 
 enum class ConfigErrorKind { MISSING, IO, PARSE, VALIDATION, CONFLICT };
+
 struct ConfigError {
     ConfigErrorKind kind;
     std::string message;
 };
+
 struct ConfigSnapshot {
     nlohmann::json document;
-    // Exact bytes, not a timestamp: even a same-size edit must invalidate a save.
     std::string version;
 };
 

@@ -3,6 +3,7 @@
 #include <QMetaObject>
 
 namespace smart_home::gui {
+
 App::App(std::string path, QObject *parent)
     : QObject(parent), m_path(std::move(path)), m_worker(new QObject) {
     m_worker->moveToThread(&m_thread);
@@ -23,7 +24,7 @@ App::~App() {
     m_thread.wait();
 }
 
-bool App::dirty() const {
+bool App::hasUnsavedChanges() const {
     return m_state.loaded && m_state.pending.serializeJson() != m_state.saved.serializeJson();
 }
 
@@ -34,8 +35,8 @@ QString App::status() const {
         return m_error;
     if (!m_state.loaded)
         return "No valid configuration loaded. Use Reload to retry.";
-    return dirty() ? "Unsaved settings — device application is unavailable."
-                   : "No unsaved settings — device application is unavailable.";
+    return hasUnsavedChanges() ? "Unsaved settings — device application is unavailable."
+                               : "No unsaved settings — device application is unavailable.";
 }
 
 void App::edit(const HomeSettings &settings) {
@@ -88,7 +89,7 @@ void App::reload() {
 }
 
 void App::save() {
-    if (m_state.busy || !m_state.loaded || !dirty()) {
+    if (m_state.busy || !m_state.loaded || !hasUnsavedChanges()) {
         return;
     }
 
@@ -123,6 +124,7 @@ void App::save() {
         },
         Qt::QueuedConnection);
 }
+
 void App::sampleAnalytics() {
     if (m_state.loaded) {
         m_analytics.update(m_state.pending, m_clock.elapsed());
