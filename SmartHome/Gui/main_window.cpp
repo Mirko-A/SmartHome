@@ -132,6 +132,14 @@ void MainWindow::updateHomeWidgets() {
 }
 
 void MainWindow::loadMediaPlayerWidgets() {
+    connect(mediaPlayer, &MediaPlayer::availabilityChanged, ui->mediaPlayer, &QWidget::setEnabled);
+    connect(mediaPlayer, &MediaPlayer::statusTextChanged, ui->mediaStatusLabel, &QLabel::setText);
+    connect(mediaPlayer, &MediaPlayer::busyChanged, this, [this](bool busy) {
+        if (busy)
+            ui->mediaPlayer->setCursor(Qt::BusyCursor);
+        else
+            ui->mediaPlayer->unsetCursor();
+    });
     ui->mediaPlayerVideoWidgetContainer->addWidget(mediaPlayer->m_videoWidget);
     mediaPlayer->m_playlistView = ui->mediaPlaylistListView;
     mediaPlayer->m_labelDuration = ui->mediaPlayerDurationLabel;

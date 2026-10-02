@@ -53,6 +53,24 @@ void MediaPlayer::initUi() {
     connect(m_player,
             static_cast<void (QMediaPlayer::*)(QMediaPlayer::Error)>(&QMediaPlayer::error), this,
             &MediaPlayer::displayErrorMessage);
+    connect(m_player, static_cast<void (QMediaObject::*)(bool)>(&QMediaObject::availabilityChanged),
+            this, &MediaPlayer::refreshAvailability);
+    connect(m_player, &QMediaPlayer::currentMediaChanged, this, [this] {
+        clearError();
+        // Metadata from the previous track must not survive a media change.
+        const QUrl url = m_player->currentMedia().request().url();
+        setTrackInfo(url.fileName());
+        if (m_coverLabel)
+            m_coverLabel->clear();
+        statusChanged(m_player->mediaStatus());
+    });
+    connect(m_playlist, &QMediaPlaylist::loadFailed, this, [this] {
+        m_serviceError = false;
+        m_errorInfo = m_playlist->errorString();
+        if (m_errorInfo.isEmpty())
+            m_errorInfo = tr("Unable to load playlist.");
+        renderStatus();
+    });
 
     m_playlistView->setModel(m_playlistModel);
     m_playlistView->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
@@ -61,9 +79,9 @@ void MediaPlayer::initUi() {
 
     connect(m_seekSlider, &QSlider::valueChanged, this, &MediaPlayer::seek);
 
-    connect(m_controls, &PlayerControls::play, m_player, &QMediaPlayer::play);
+    connect(m_controls, &PlayerControls::play, this, &MediaPlayer::play);
     connect(m_controls, &PlayerControls::pause, m_player, &QMediaPlayer::pause);
-    connect(m_controls, &PlayerControls::stop, m_player, &QMediaPlayer::stop);
+    connect(m_controls, &PlayerControls::stop, this, &MediaPlayer::stop);
     connect(m_controls, &PlayerControls::next, m_playlist, &QMediaPlaylist::next);
     connect(m_controls, &PlayerControls::previous, this, &MediaPlayer::previousClicked);
     connect(m_controls, &PlayerControls::changeVolume, m_player, &QMediaPlayer::setVolume);
@@ -86,23 +104,50 @@ void MediaPlayer::initUi() {
     durationChanged(m_player->duration());
     positionChanged(m_player->position());
 
-    if (!isPlayerAvailable()) {
-        QMessageBox::warning(this, tr("Service not available"),
-                             tr("The QMediaPlayer object does not have a valid service.\n"
-                                "Please check the media service plugins are installed."));
-
-        m_controls->setEnabled(false);
-        m_playlistView->setEnabled(false);
-    }
-
     metaDataChanged();
+    statusChanged(m_player->mediaStatus());
+    if (m_player->error() != QMediaPlayer::NoError)
+        displayErrorMessage();
+    refreshAvailability();
 }
 
 bool MediaPlayer::isPlayerAvailable() const {
     return m_player->isAvailable();
 }
 
+void MediaPlayer::refreshAvailability() {
+    if (isPlayerAvailable() && m_serviceError)
+        clearError();
+    emit availabilityChanged(isPlayerAvailable());
+    renderStatus();
+}
+
+void MediaPlayer::play() {
+    if (!isPlayerAvailable())
+        return;
+    clearError();
+    setStatusInfo(QString());
+    m_player->play();
+    if (m_player->mediaStatus() == QMediaPlayer::InvalidMedia ||
+        m_player->error() != QMediaPlayer::NoError)
+        displayErrorMessage();
+}
+
+void MediaPlayer::stop() {
+    if (!isPlayerAvailable())
+        return;
+    clearError();
+    setStatusInfo(QString());
+    m_seekSlider->setValue(0);
+    m_player->stop();
+    if (m_player->mediaStatus() == QMediaPlayer::InvalidMedia ||
+        m_player->error() != QMediaPlayer::NoError)
+        displayErrorMessage();
+}
+
 void MediaPlayer::open() {
+    if (!isPlayerAvailable())
+        return;
     QFileDialog fileDialog(this);
 
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -123,9 +168,15 @@ void MediaPlayer::open() {
 }
 
 void MediaPlayer::remove() {
+    if (!isPlayerAvailable())
+        return;
     int indexToRemove = m_playlistView->currentIndex().row();
-    if (m_playlist->currentIndex() == indexToRemove)
+    if (indexToRemove < 0 || indexToRemove >= m_playlist->mediaCount())
+        return;
+    if (m_playlist->currentIndex() == indexToRemove) {
+        m_seekSlider->setValue(0);
         m_player->stop();
+    }
 
     m_playlist->removeMedia(indexToRemove);
 }
@@ -140,6 +191,10 @@ static bool isPlaylist(const QUrl &url) // Check for ".m3u" playlists.
 }
 
 void MediaPlayer::addToPlaylist(const QList<QUrl> urls) {
+    if (!isPlayerAvailable() || urls.isEmpty())
+        return;
+    clearError();
+    setStatusInfo(QString());
     for (const QUrl &url : urls) {
         if (isPlaylist(url))
             m_playlist->load(url);
@@ -165,15 +220,19 @@ void MediaPlayer::positionChanged(qint64 progress) {
 }
 
 void MediaPlayer::metaDataChanged() {
+    QStringList trackParts;
     if (m_player->isMetaDataAvailable()) {
-        setTrackInfo(QString("%1 - %2")
-                         .arg(m_player->metaData(QMediaMetaData::AlbumArtist).toString())
-                         .arg(m_player->metaData(QMediaMetaData::Title).toString()));
-
-        if (m_coverLabel) {
-            QUrl url = m_player->metaData(QMediaMetaData::CoverArtUrlLarge).value<QUrl>();
-            m_coverLabel->setPixmap(!url.isEmpty() ? QPixmap(url.toString()) : QPixmap());
+        for (const auto &key : {QMediaMetaData::AlbumArtist, QMediaMetaData::Title}) {
+            const QString part = m_player->metaData(key).toString().trimmed();
+            if (!part.isEmpty())
+                trackParts.append(part);
         }
+    }
+    const QUrl url = m_player->currentMedia().request().url();
+    setTrackInfo(trackParts.isEmpty() ? url.fileName() : trackParts.join(" - "));
+    if (m_coverLabel) {
+        const QUrl cover = m_player->metaData(QMediaMetaData::CoverArtUrlLarge).value<QUrl>();
+        m_coverLabel->setPixmap(cover.isLocalFile() ? QPixmap(cover.toLocalFile()) : QPixmap());
     }
 }
 
@@ -187,9 +246,9 @@ void MediaPlayer::previousClicked() {
 }
 
 void MediaPlayer::jump(const QModelIndex &index) {
-    if (index.isValid()) {
+    if (isPlayerAvailable() && index.isValid()) {
         m_playlist->setCurrentIndex(index.row());
-        m_player->play();
+        play();
     }
 }
 
@@ -202,25 +261,32 @@ void MediaPlayer::seek(int seconds) {
 }
 
 void MediaPlayer::statusChanged(QMediaPlayer::MediaStatus status) {
-    handleCursor(status);
-
     // handle status message
     switch (status) {
     case QMediaPlayer::UnknownMediaStatus:
-    case QMediaPlayer::NoMedia:
-    case QMediaPlayer::LoadedMedia:
-    case QMediaPlayer::BufferingMedia:
-    case QMediaPlayer::BufferedMedia:
         setStatusInfo(QString());
         break;
+    case QMediaPlayer::NoMedia:
+        setTrackInfo(QString());
+        setStatusInfo(tr("No media selected"));
+        break;
+    case QMediaPlayer::LoadedMedia:
+    case QMediaPlayer::BufferedMedia:
+        clearError();
+        setStatusInfo(QString());
+        break;
+    case QMediaPlayer::BufferingMedia:
+        bufferingProgress(m_player->bufferStatus());
+        break;
     case QMediaPlayer::LoadingMedia:
+        clearError();
         setStatusInfo(tr("Loading..."));
         break;
     case QMediaPlayer::StalledMedia:
         setStatusInfo(tr("Media Stalled"));
         break;
     case QMediaPlayer::EndOfMedia:
-        QApplication::alert(this);
+        setStatusInfo(tr("Playback finished"));
         break;
     case QMediaPlayer::InvalidMedia:
         displayErrorMessage();
@@ -228,38 +294,53 @@ void MediaPlayer::statusChanged(QMediaPlayer::MediaStatus status) {
     }
 }
 
-void MediaPlayer::handleCursor(QMediaPlayer::MediaStatus status) {
-#ifndef QT_NO_CURSOR
-    if (status == QMediaPlayer::LoadingMedia || status == QMediaPlayer::BufferingMedia ||
-        status == QMediaPlayer::StalledMedia)
-        setCursor(QCursor(Qt::BusyCursor));
-    else
-        unsetCursor();
-#endif
-}
-
 void MediaPlayer::bufferingProgress(int progress) {
-    setStatusInfo(tr("Buffering %4%").arg(progress));
+    if (m_player->mediaStatus() == QMediaPlayer::BufferingMedia)
+        setStatusInfo(tr("Buffering %1%").arg(progress));
 }
 
 void MediaPlayer::setTrackInfo(const QString &info) {
     m_trackInfo = info;
-    if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
-    else
-        setWindowTitle(m_trackInfo);
+    renderStatus();
 }
 
 void MediaPlayer::setStatusInfo(const QString &info) {
     m_statusInfo = info;
-    if (!m_statusInfo.isEmpty())
-        setWindowTitle(QString("%1 | %2").arg(m_trackInfo).arg(m_statusInfo));
-    else
-        setWindowTitle(m_trackInfo);
+    renderStatus();
 }
 
 void MediaPlayer::displayErrorMessage() {
-    setStatusInfo(m_player->errorString());
+    m_serviceError = m_player->error() == QMediaPlayer::ServiceMissingError;
+    m_errorInfo = m_player->errorString();
+    if (m_errorInfo.isEmpty())
+        m_errorInfo = tr("Unable to play this media.");
+    renderStatus();
+}
+
+void MediaPlayer::clearError() {
+    m_errorInfo.clear();
+    m_serviceError = false;
+}
+
+void MediaPlayer::renderStatus() {
+    const bool available = isPlayerAvailable();
+    QString status = m_errorInfo.isEmpty() ? m_statusInfo : m_errorInfo;
+    if (!available)
+        status =
+            tr("Media service unavailable. Check that the media service plugins are installed.");
+
+    QStringList parts;
+    if (!m_trackInfo.isEmpty())
+        parts.append(m_trackInfo);
+    if (!status.isEmpty())
+        parts.append(status);
+    emit statusTextChanged(parts.isEmpty() ? tr("No media selected") : parts.join(" | "));
+
+    const auto mediaStatus = m_player->mediaStatus();
+    emit busyChanged(available && m_errorInfo.isEmpty() &&
+                     (mediaStatus == QMediaPlayer::LoadingMedia ||
+                      mediaStatus == QMediaPlayer::BufferingMedia ||
+                      mediaStatus == QMediaPlayer::StalledMedia));
 }
 
 void MediaPlayer::updateDurationInfo(qint64 currentInfo) {

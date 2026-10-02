@@ -20,11 +20,6 @@ class PlayerControls : public QWidget {
     int volume() const;
     bool isMuted() const;
 
-  public slots:
-    void setState(QMediaPlayer::State state);
-    void setVolume(int volume);
-    void setMuted(bool muted);
-
   signals:
     void play();
     void pause();
@@ -33,6 +28,11 @@ class PlayerControls : public QWidget {
     void previous();
     void changeVolume(int volume);
     void changeMuting(bool muting);
+
+  public slots:
+    void setState(QMediaPlayer::State state);
+    void setVolume(int volume);
+    void setMuted(bool muted);
 
   private slots:
     void playClicked();
