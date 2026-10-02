@@ -28,6 +28,28 @@
 
 QMainWindow#MainWindow, QMessageBox {
 	background-color: #1f232a;
+}
+
+QToolBar#settingsToolbar, QMessageBox QPushButton {
+	background-color: #191c22;
+}
+
+QMessageBox QPushButton {
+	border: 1px solid transparent;
+	border-radius: 4px;
+	padding: 6px 14px;
+}
+
+QMessageBox QPushButton:hover, QToolBar#settingsToolbar QToolButton:hover {
+	background-color: #2c313c;
+}
+
+QMessageBox QPushButton:pressed, QToolBar#settingsToolbar QToolButton:pressed {
+	background-color: #14171c;
+}
+
+QMessageBox QPushButton:focus {
+	border-color: #77718f;
 }</string>
   </property>
   <widget class="QWidget" name="root">
