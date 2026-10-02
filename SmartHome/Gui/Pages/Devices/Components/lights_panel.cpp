@@ -6,6 +6,8 @@
 LightsPanel::LightsPanel(QWidget *parent)
     : QWidget(parent), m_ui(std::make_unique<Ui::LightsPanel>()) {
     m_ui->setupUi(this);
+    // Custom QWidget subclasses need this to paint their stylesheet background.
+    setAttribute(Qt::WA_StyledBackground, true);
     connect(m_ui->livingRoomLightBtn, &QPushButton::toggled, this,
             [this](bool on) { emit lightRequested(smart_home::gui::Light::LIVING_ROOM, on); });
     connect(m_ui->bedroomLightBtn, &QPushButton::toggled, this,

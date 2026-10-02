@@ -5,6 +5,8 @@
 #include "ui_ac_panel.h"
 AcPanel::AcPanel(QWidget *parent) : QWidget(parent), m_ui(std::make_unique<Ui::AcPanel>()) {
     m_ui->setupUi(this);
+    // Custom QWidget subclasses need this to paint their stylesheet background.
+    setAttribute(Qt::WA_StyledBackground, true);
     m_ui->ACTemperatureUp->setEnabled(false);
     m_ui->ACTemperatureDown->setEnabled(false);
     m_ui->ACTemperatureUp->setToolTip("Target temperature is unsupported");

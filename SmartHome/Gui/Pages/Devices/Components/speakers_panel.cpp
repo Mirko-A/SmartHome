@@ -6,6 +6,8 @@
 SpeakersPanel::SpeakersPanel(QWidget *parent)
     : QWidget(parent), m_ui(std::make_unique<Ui::SpeakersPanel>()) {
     m_ui->setupUi(this);
+    // Custom QWidget subclasses need this to paint their stylesheet background.
+    setAttribute(Qt::WA_StyledBackground, true);
     m_ui->volumeSlider->setRange(0, 100);
     connect(m_ui->volumeSlider, &QSlider::valueChanged, this, [this](int value) {
         emit valueRequested(smart_home::gui::SpeakerControl::VOLUME, value);
