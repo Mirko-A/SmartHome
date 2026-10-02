@@ -50,7 +50,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     loadMediaPlayerWidgets();
     mediaPlayer->m_player->setVolume(INITIAL_PLAYER_VOLUME);
 
-    analyticsModel = new AnalyticsModel();
     initAnalyticsModel();
     ui->analyticsPages->setCurrentIndex(static_cast<int>(AnalyticsPageIndex::LIGHT_ANALYTICS));
 
@@ -60,10 +59,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {
+    updateTimer->stop();
+    analyticsModel.reset();
+    delete mediaPlayer;
     delete ui;
 
     delete homeSettings;
-    delete mediaPlayer;
 
     delete updateTimer;
 }
@@ -110,7 +111,6 @@ void MainWindow::loadMediaPlayerWidgets() {
     loadMediaPlayerControlWidgets();
 
     mediaPlayer->initializeUIElements();
-    mediaPlayer->m_controls->initializeUIElements();
 }
 
 void MainWindow::loadMediaPlayerControlWidgets() {
@@ -126,17 +126,15 @@ void MainWindow::loadMediaPlayerControlWidgets() {
 }
 
 void MainWindow::initAnalyticsModel() {
-    ui->livingRoomLightChartView->setChart(analyticsModel->m_livingRoomLightChart);
-    ui->bedroomLightChartView->setChart(analyticsModel->m_bedroomLightChart);
-    ui->kitchenLightChartView->setChart(analyticsModel->m_kitchenLightChart);
-
-    ui->ACOnChartView->setChart(analyticsModel->m_ACOnChart);
-    // AC temperature analytics are disabled until the chart is initialized again.
-    // ui->ACTemperatureChartView->setChart(analyticsModel->m_ACTemperatureChart);
-
-    ui->temperatureSensorChartView->setChart(analyticsModel->m_temperatureSensorChart);
-    ui->humiditySensorChartView->setChart(analyticsModel->m_humiditySensorChart);
-    ui->brightnessSensorChartView->setChart(analyticsModel->m_brightnessSensorChart);
+    analyticsModel = std::make_unique<AnalyticsModel>(AnalyticsCharts{
+        ui->livingRoomLightChartView->chart(),
+        ui->bedroomLightChartView->chart(),
+        ui->kitchenLightChartView->chart(),
+        ui->ACOnChartView->chart(),
+        ui->temperatureSensorChartView->chart(),
+        ui->humiditySensorChartView->chart(),
+        ui->brightnessSensorChartView->chart(),
+    });
 }
 
 void MainWindow::updateUI() {

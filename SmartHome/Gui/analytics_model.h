@@ -6,6 +6,7 @@
 #include <QtCharts/QBarSet>
 #include <QtCharts/QChart>
 #include <QtCharts/QLineSeries>
+#include <memory>
 
 #include "home_settings.h"
 
@@ -18,7 +19,6 @@ enum class AnalyticsPage {
 class Histogram {
   public:
     Histogram(QString name);
-    ~Histogram();
 
     void update();
     void shift();
@@ -28,7 +28,7 @@ class Histogram {
     // appended to a chart. From then on, the chart
     // is the owner of these objects.
     QtCharts::QBarSeries *barSeries;
-    // Owned by histogram
+    // Borrowed: owned by barSeries
     QtCharts::QBarSet *m_barSet;
 
   private:
@@ -60,90 +60,60 @@ class LineGraph {
     unsigned int m_maxPointsAllowed;
 };
 
-struct Histograms {
-    Histogram *livingRoomLight;
-    Histogram *bedroomLight;
-    Histogram *kitchenLight;
-    Histogram *ACOn;
+// The supplied charts belong to the views and must outlive the model.
+struct AnalyticsCharts {
+    QtCharts::QChart *livingRoomLight;
+    QtCharts::QChart *bedroomLight;
+    QtCharts::QChart *kitchenLight;
+    QtCharts::QChart *ACOn;
+    QtCharts::QChart *temperatureSensor;
+    QtCharts::QChart *humiditySensor;
+    QtCharts::QChart *brightnessSensor;
+};
 
-    ~Histograms() {
-        delete livingRoomLight;
-        delete bedroomLight;
-        delete kitchenLight;
-        delete ACOn;
-    }
+struct Histograms {
+    std::unique_ptr<Histogram> livingRoomLight;
+    std::unique_ptr<Histogram> bedroomLight;
+    std::unique_ptr<Histogram> kitchenLight;
+    std::unique_ptr<Histogram> acOn;
 };
 
 struct LineGraphs {
-    LineGraph *ACTemperature = nullptr;
-    LineGraph *temperatureSensor;
-    LineGraph *humiditySensor;
-    LineGraph *brightnessSensor;
-
-    ~LineGraphs() {
-        delete ACTemperature;
-        delete temperatureSensor;
-        delete humiditySensor;
-        delete brightnessSensor;
-    }
+    std::unique_ptr<LineGraph> temperatureSensor;
+    std::unique_ptr<LineGraph> humiditySensor;
+    std::unique_ptr<LineGraph> brightnessSensor;
 };
 
 struct AnalyticsData {
-    Histograms *histograms;
-    LineGraphs *lineGraphs;
-
-    AnalyticsData() : histograms(new Histograms), lineGraphs(new LineGraphs) {}
-
-    ~AnalyticsData() {
-        delete histograms;
-        delete lineGraphs;
-    }
+    Histograms histograms;
+    LineGraphs lineGraphs;
 };
 
 class AnalyticsModel {
   public:
-    AnalyticsModel();
-    ~AnalyticsModel();
-
-    void initCharts();
+    explicit AnalyticsModel(const AnalyticsCharts &charts);
 
   public:
     void updateAnalyticsData(const HomeSettings &homeCfg);
 
   private:
-    void initChartsWithHistogram();
-    void initChartsWithLineGraph();
+    void initChartsWithHistogram(const AnalyticsCharts &charts);
+    void initChartsWithLineGraph(const AnalyticsCharts &charts);
 
     void shiftHistograms();
     void updateHistograms(const HomeSettings &homeCfg);
 
     void updateLineGraphs(const HomeSettings &homeCfg);
 
-    void onUpdate();
+    std::unique_ptr<Histogram> createChartWithHistogram(QtCharts::QChart &chart, QString title,
+                                                        const QStringList &rangeX,
+                                                        QPair<size_t, size_t> rangeY);
+    std::unique_ptr<LineGraph> createChartWithLineGraph(QtCharts::QChart &chart, QString title,
+                                                        QPair<int, int> rangeX,
+                                                        QPair<int, int> rangeY);
 
-  private:
-    QPair<QtCharts::QChart *, Histogram *> createChartWithHistogram(QString title,
-                                                                    const QStringList &rangeX,
-                                                                    QPair<size_t, size_t> rangeY);
-    QPair<QtCharts::QChart *, LineGraph *>
-    createChartWithLineGraph(QString title, QPair<int, int> rangeX, QPair<int, int> rangeY);
-
-  public:
-    QtCharts::QChart *m_livingRoomLightChart;
-    QtCharts::QChart *m_bedroomLightChart;
-    QtCharts::QChart *m_kitchenLightChart;
-
-    QtCharts::QChart *m_ACOnChart;
-    QtCharts::QChart *m_ACTemperatureChart = nullptr;
-    QtCharts::QChart *m_ACModeChart = nullptr;
-
-    QtCharts::QChart *m_temperatureSensorChart;
-    QtCharts::QChart *m_humiditySensorChart;
-    QtCharts::QChart *m_brightnessSensorChart;
-
-  private:
-    AnalyticsData *m_analyticsData;
-    size_t histogramTickCount;
+    AnalyticsData m_analyticsData;
+    size_t histogramTickCount = 0;
 };
 
 #endif // ANALYTICS_MODEL_H

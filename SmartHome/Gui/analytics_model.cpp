@@ -1,5 +1,7 @@
 #include "analytics_model.h"
 
+#include <qnamespace.h>
+
 #include <QBarCategoryAxis>
 #include <QStringList>
 #include <QValueAxis>
@@ -7,11 +9,17 @@
 #include "home_settings.h"
 
 // TODO: For testing it is reduced to 60
-// #define ONE_HOUR_IN_SEC 3600
+#if 0
+#define ONE_HOUR_IN_SEC 3600
+#else
 #define ONE_HOUR_IN_SEC 60
+#endif
+
 #define X_AXIS_POS 0
 
 static const QColor CHART_BACKGROUND_COLOR = QColor(52, 59, 71);
+
+static const QColor HISTOGRAM_BAR_COLOR = QColor(160, 110, 181);
 
 static constexpr size_t MAX_HISTOGRAM_VALUE = ONE_HOUR_IN_SEC;
 static constexpr size_t MAX_BARSET_COUNT = 24;
@@ -20,12 +28,11 @@ static const QStringList HISTOGRAM_X_AXIS =
     QStringList{"1",  "2",  "3",  "4",  "5",  "6",  "7",  "8",  "9",  "10", "11", "12",
                 "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24"};
 
-static const QColor HISTOGRAM_BAR_COLOR = QColor(160, 110, 181);
-
 // TODO: Check if this is too few/many points after ONE_SEC_IN_TICKS
-// is set back to real value (found in mainwindow.cpp)
+// is set back to real value (found in main_window.cpp)
 static constexpr unsigned int MAX_LINE_GRAPH_POINTS_INITIAL = 100;
-static const QColor LINE_GRAPH_COLOR = QColor(160, 110, 181);
+
+static constexpr QColor LINE_GRAPH_COLOR = QColor(160, 110, 181);
 
 Histogram::Histogram(QString name)
     : barSeries(new QtCharts::QBarSeries), m_barSet(new QtCharts::QBarSet(name)),
@@ -33,10 +40,9 @@ Histogram::Histogram(QString name)
     m_barSet->setColor(HISTOGRAM_BAR_COLOR);
     barSeries->append(m_barSet);
     barSeries->setBarWidth(1);
-}
 
-Histogram::~Histogram() {
-    delete m_barSet;
+    // Initialize the first bar.
+    *m_barSet << 0;
 }
 
 void Histogram::update() {
@@ -46,11 +52,7 @@ void Histogram::update() {
     // That's why we update the value counter, to signal
     // that another unit of time has passed, and replace
     // the current bar set with this new value.
-    if (m_barSet->count() == 0) {
-        *m_barSet << ++m_valueCounter;
-    } else {
-        m_barSet->replace(m_barSet->count() - 1, ++m_valueCounter);
-    }
+    m_barSet->replace(m_barSet->count() - 1, ++m_valueCounter);
 }
 
 void Histogram::shift() {
@@ -110,187 +112,116 @@ void LineGraph::expandLineSeriesIfNeeded() {
     }
 }
 
-AnalyticsModel::AnalyticsModel() : histogramTickCount(0) {
-    m_analyticsData = new AnalyticsData;
-    initCharts();
+AnalyticsModel::AnalyticsModel(const AnalyticsCharts &charts) {
+    initChartsWithHistogram(charts);
+    initChartsWithLineGraph(charts);
 }
 
-AnalyticsModel::~AnalyticsModel() {
-    delete m_livingRoomLightChart;
-    delete m_bedroomLightChart;
-    delete m_kitchenLightChart;
-    delete m_ACOnChart;
-    delete m_ACTemperatureChart;
-    delete m_ACModeChart;
-    delete m_temperatureSensorChart;
-    delete m_humiditySensorChart;
-    delete m_brightnessSensorChart;
-
-    delete m_analyticsData;
+void AnalyticsModel::initChartsWithHistogram(const AnalyticsCharts &charts) {
+    m_analyticsData.histograms.livingRoomLight =
+        createChartWithHistogram(*charts.livingRoomLight, "Living room light on per hour",
+                                 HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
+    m_analyticsData.histograms.bedroomLight =
+        createChartWithHistogram(*charts.bedroomLight, "Bedroom light on per hour",
+                                 HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
+    m_analyticsData.histograms.kitchenLight =
+        createChartWithHistogram(*charts.kitchenLight, "Kitchen light on per hour",
+                                 HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
+    m_analyticsData.histograms.acOn = createChartWithHistogram(
+        *charts.ACOn, "AC on per hour", HISTOGRAM_X_AXIS, {0, MAX_HISTOGRAM_VALUE});
 }
 
-void AnalyticsModel::initCharts() {
-    initChartsWithHistogram();
-    initChartsWithLineGraph();
+void AnalyticsModel::initChartsWithLineGraph(const AnalyticsCharts &charts) {
+    // TODO: Set correct max sensor values.
+    m_analyticsData.lineGraphs.temperatureSensor =
+        createChartWithLineGraph(*charts.temperatureSensor, "Temperature sensor readings",
+                                 {0, MAX_LINE_GRAPH_POINTS_INITIAL}, {0, 100});
+    m_analyticsData.lineGraphs.humiditySensor =
+        createChartWithLineGraph(*charts.humiditySensor, "Humidity sensor readings",
+                                 {0, MAX_LINE_GRAPH_POINTS_INITIAL}, {0, 100});
+    m_analyticsData.lineGraphs.brightnessSensor =
+        createChartWithLineGraph(*charts.brightnessSensor, "Brightness sensor readings",
+                                 {0, MAX_LINE_GRAPH_POINTS_INITIAL}, {0, 100});
 }
 
-void AnalyticsModel::initChartsWithHistogram() {
-    {
-        auto livingRoomChartWithHistogram =
-            createChartWithHistogram("Living room light on per hour", HISTOGRAM_X_AXIS,
-                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
+std::unique_ptr<Histogram> AnalyticsModel::createChartWithHistogram(QtCharts::QChart &chart,
+                                                                    QString title,
+                                                                    const QStringList &rangeX,
+                                                                    QPair<size_t, size_t> rangeY) {
+    chart.setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
+    chart.setTitleBrush(QBrush(Qt::white));
+    auto histogram = std::make_unique<Histogram>(title);
 
-        m_livingRoomLightChart = livingRoomChartWithHistogram.first;
-        m_analyticsData->histograms->livingRoomLight = livingRoomChartWithHistogram.second;
-    }
-
-    {
-        auto bedroomChartWithHistogram =
-            createChartWithHistogram("Bedroom light on per hour", HISTOGRAM_X_AXIS,
-                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
-
-        m_bedroomLightChart = bedroomChartWithHistogram.first;
-        m_analyticsData->histograms->bedroomLight = bedroomChartWithHistogram.second;
-    }
-
-    {
-        auto kitchenChartWithHistogram =
-            createChartWithHistogram("Kitchen light on per hour", HISTOGRAM_X_AXIS,
-                                     QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
-
-        m_kitchenLightChart = kitchenChartWithHistogram.first;
-        m_analyticsData->histograms->kitchenLight = kitchenChartWithHistogram.second;
-    }
-
-    {
-        auto ACOnChartWithHistogram = createChartWithHistogram(
-            "AC on per hour", HISTOGRAM_X_AXIS, QPair<size_t, size_t>(0, MAX_HISTOGRAM_VALUE));
-
-        m_ACOnChart = ACOnChartWithHistogram.first;
-        m_analyticsData->histograms->ACOn = ACOnChartWithHistogram.second;
-    }
-}
-
-void AnalyticsModel::initChartsWithLineGraph() {
-    {
-        // FIXME:
-        // auto ACTemperatureChartWithLineGraph = createChartWithLineGraph(
-        //     "AC Temperature", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
-        //     QPair<size_t, size_t>(0, MAX_AC_TEMP));
-        // m_ACTemperatureChart = ACTemperatureChartWithLineGraph.first;
-        // m_analyticsData->lineGraphs->ACTemperature = ACTemperatureChartWithLineGraph.second;
-    }
-
-    // TODO: Set correct max sensor values
-    {
-        auto temperatureSensorChartWithLineGraph = createChartWithLineGraph(
-            "Temperature sensor readings", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
-            QPair<size_t, size_t>(0, 100));
-        m_temperatureSensorChart = temperatureSensorChartWithLineGraph.first;
-        m_analyticsData->lineGraphs->temperatureSensor = temperatureSensorChartWithLineGraph.second;
-    }
-
-    {
-        auto humiditySensorChartWithLineGraph = createChartWithLineGraph(
-            "Humidity sensor readings", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
-            QPair<size_t, size_t>(0, 100));
-        m_humiditySensorChart = humiditySensorChartWithLineGraph.first;
-        m_analyticsData->lineGraphs->humiditySensor = humiditySensorChartWithLineGraph.second;
-    }
-
-    {
-        auto brightnessSensorChartWithLineGraph = createChartWithLineGraph(
-            "Brightness sensor readings", QPair<size_t, size_t>(0, MAX_LINE_GRAPH_POINTS_INITIAL),
-            QPair<size_t, size_t>(0, 100));
-        m_brightnessSensorChart = brightnessSensorChartWithLineGraph.first;
-        m_analyticsData->lineGraphs->brightnessSensor = brightnessSensorChartWithLineGraph.second;
-    }
-}
-
-QPair<QtCharts::QChart *, Histogram *>
-AnalyticsModel::createChartWithHistogram(QString title, const QStringList &rangeX,
-                                         QPair<size_t, size_t> rangeY) {
-    QtCharts::QChart *chart = new QtCharts::QChart;
-    chart->setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
-    chart->setTitleBrush(QBrush(QColor("white")));
-    Histogram *histogram = new Histogram(title);
-
-    chart->setTitle(title);
+    chart.setTitle(title);
     auto axisX = new QtCharts::QBarCategoryAxis;
     auto axisY = new QtCharts::QValueAxis;
     axisX->append(rangeX);
-    axisX->setLabelsColor(QColor("white"));
+    axisX->setLabelsColor(Qt::white);
     axisY->setRange(rangeY.first, rangeY.second);
-    axisY->setLabelsColor(QColor("white"));
-    chart->addAxis(axisX, Qt::AlignBottom);
-    chart->addAxis(axisY, Qt::AlignLeft);
-    chart->addSeries(histogram->barSeries);
+    axisY->setLabelsColor(Qt::white);
+    chart.addAxis(axisX, Qt::AlignBottom);
+    chart.addAxis(axisY, Qt::AlignLeft);
+    chart.addSeries(histogram->barSeries);
     histogram->barSeries->attachAxis(axisX);
     histogram->barSeries->attachAxis(axisY);
-    chart->setAnimationOptions(QtCharts::QChart::NoAnimation);
-    chart->legend()->hide();
+    chart.setAnimationOptions(QtCharts::QChart::NoAnimation);
+    chart.legend()->hide();
 
-    return QPair<QtCharts::QChart *, Histogram *>(chart, histogram);
+    return histogram;
 }
 
-QPair<QtCharts::QChart *, LineGraph *>
-AnalyticsModel::createChartWithLineGraph(QString title, QPair<int, int> rangeX,
-                                         QPair<int, int> rangeY) {
-    QtCharts::QChart *chart = new QtCharts::QChart();
-    chart->setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
-    chart->setTitleBrush(QBrush(QColor("white")));
-    LineGraph *graph = new LineGraph(title, rangeX.second);
+std::unique_ptr<LineGraph> AnalyticsModel::createChartWithLineGraph(QtCharts::QChart &chart,
+                                                                    QString title,
+                                                                    QPair<int, int> rangeX,
+                                                                    QPair<int, int> rangeY) {
+    chart.setBackgroundBrush(QBrush(CHART_BACKGROUND_COLOR));
+    chart.setTitleBrush(QBrush(Qt::white));
+    auto graph = std::make_unique<LineGraph>(title, rangeX.second);
 
-    chart->setTitle(title);
+    chart.setTitle(title);
     auto axisX = new QtCharts::QValueAxis;
     auto axisY = new QtCharts::QValueAxis;
     axisX->setRange(rangeX.first, rangeX.second);
-    axisX->setLabelsColor(QColor("white"));
+    axisX->setLabelsColor(Qt::white);
     axisY->setRange(rangeY.first, rangeY.second);
-    axisY->setLabelsColor(QColor("white"));
-    chart->addAxis(axisX, Qt::AlignBottom);
-    chart->addAxis(axisY, Qt::AlignLeft);
-    chart->addSeries(graph->lineSeries);
+    axisY->setLabelsColor(Qt::white);
+    chart.addAxis(axisX, Qt::AlignBottom);
+    chart.addAxis(axisY, Qt::AlignLeft);
+    chart.addSeries(graph->lineSeries);
     graph->lineSeries->attachAxis(axisX);
     graph->lineSeries->attachAxis(axisY);
-    chart->setAnimationOptions(QtCharts::QChart::NoAnimation);
-    chart->legend()->hide();
+    chart.setAnimationOptions(QtCharts::QChart::NoAnimation);
+    chart.legend()->hide();
 
-    return QPair<QtCharts::QChart *, LineGraph *>(chart, graph);
+    return graph;
 }
 
 void AnalyticsModel::shiftHistograms() {
-    m_analyticsData->histograms->livingRoomLight->shift();
-    m_analyticsData->histograms->bedroomLight->shift();
-    m_analyticsData->histograms->kitchenLight->shift();
-    m_analyticsData->histograms->ACOn->shift();
+    m_analyticsData.histograms.livingRoomLight->shift();
+    m_analyticsData.histograms.bedroomLight->shift();
+    m_analyticsData.histograms.kitchenLight->shift();
+    m_analyticsData.histograms.acOn->shift();
 }
 
 void AnalyticsModel::updateHistograms(const HomeSettings &settings) {
     if (settings.lights().livingRoomLightOn) {
-        m_analyticsData->histograms->livingRoomLight->update();
+        m_analyticsData.histograms.livingRoomLight->update();
     }
     if (settings.lights().bedroomLightOn) {
-        m_analyticsData->histograms->bedroomLight->update();
+        m_analyticsData.histograms.bedroomLight->update();
     }
     if (settings.lights().kitchenLightOn) {
-        m_analyticsData->histograms->kitchenLight->update();
+        m_analyticsData.histograms.kitchenLight->update();
     }
     if (settings.ac().on) {
-        m_analyticsData->histograms->ACOn->update();
+        m_analyticsData.histograms.acOn->update();
     }
 }
 
 void AnalyticsModel::updateLineGraphs(const HomeSettings &settings) {
-    // if (settings.ac().on) {
-    //     m_analyticsData->lineGraphs->ACTemperature->update(settings.AC.temperature);
-    // } else {
-    //     m_analyticsData->lineGraphs->ACTemperature->update(0);
-    // }
-
-    m_analyticsData->lineGraphs->temperatureSensor->update(settings.sensors().temperature);
-    m_analyticsData->lineGraphs->humiditySensor->update(settings.sensors().humidity);
-    m_analyticsData->lineGraphs->brightnessSensor->update(settings.sensors().brightness);
+    m_analyticsData.lineGraphs.temperatureSensor->update(settings.sensors().temperature);
+    m_analyticsData.lineGraphs.humiditySensor->update(settings.sensors().humidity);
+    m_analyticsData.lineGraphs.brightnessSensor->update(settings.sensors().brightness);
 }
 
 void AnalyticsModel::updateAnalyticsData(const HomeSettings &settings) {
