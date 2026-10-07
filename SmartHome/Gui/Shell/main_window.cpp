@@ -8,10 +8,10 @@
 #include <QStatusBar>
 #include <QToolBar>
 
-#include "gui_app.h"
 #include "Pages/Analytics/analytics_page.h"
 #include "Pages/Devices/devices_page.h"
 #include "Pages/Media/media_page.h"
+#include "gui_app.h"
 #include "ui_main_window.h"
 using smart_home::gui::GuiApp;
 

@@ -5,8 +5,8 @@
 #include <filesystem>
 #include <iostream>
 
-#include "gui_app.h"
 #include "Shell/main_window.h"
+#include "gui_app.h"
 
 static void initializeResources() {
     Q_INIT_RESOURCE(gui);

@@ -6,9 +6,9 @@
 #include <QThread>
 #include <QTimer>
 
+#include "Pages/Analytics/analytics_model.h"
 #include "config_io.h"
 #include "gui_state.h"
-#include "Pages/Analytics/analytics_model.h"
 
 namespace smart_home::gui {
 
