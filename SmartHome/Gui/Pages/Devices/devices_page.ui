@@ -1,90 +1,92 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
- <class>DevicesPage</class>
- <widget class="QWidget" name="devicesPage">
-  <layout class="QVBoxLayout" name="verticalLayout_3">
-   <item>
-    <widget class="QWidget" name="devicesHeader" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
+  <class>DevicesPage</class>
+  <widget class="QWidget" name="devicesPage">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QLabel" name="devicesLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>24</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Device Dashboard</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QWidget" name="devicesBody" native="true">
-     <property name="styleSheet">
-      <string notr="true">#ACContainer, #lightsContainer, #sensorsContainer, #speakersContainer {
-	background-color: #343b47;
-	border-radius: 8px;
-}</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="LightsPanel" name="lightsContainer">
-                </widget>
+        <widget class="QWidget" name="devicesHeader" native="true">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+              <widget class="QLabel" name="devicesLabel">
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <property name="font">
+                  <font>
+                    <pointsize>24</pointsize>
+                  </font>
+                </property>
+                <property name="text">
+                  <string>Device Dashboard</string>
+                </property>
+              </widget>
+            </item>
+          </layout>
+        </widget>
       </item>
       <item>
-       <widget class="SensorsPanel" name="sensorsContainer">
-                </widget>
+        <widget class="QWidget" name="devicesBody" native="true">
+          <property name="styleSheet">
+            <string notr="true">
+              #ACContainer, #lightsContainer, #sensorsContainer, #speakersContainer {
+                background-color: #343b47;
+                border-radius: 8px;
+              }
+            </string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+              <widget class="LightsPanel" name="lightsContainer">
+              </widget>
+            </item>
+            <item>
+              <widget class="SensorsPanel" name="sensorsContainer">
+              </widget>
+            </item>
+            <item>
+              <widget class="AcPanel" name="ACContainer">
+              </widget>
+            </item>
+            <item>
+              <widget class="SpeakersPanel" name="speakersContainer">
+              </widget>
+            </item>
+          </layout>
+        </widget>
       </item>
-      <item>
-       <widget class="AcPanel" name="ACContainer">
-                </widget>
-      </item>
-      <item>
-       <widget class="SpeakersPanel" name="speakersContainer">
-                </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-  </layout>
- </widget>
- <customwidgets>
-  <customwidget>
-   <class>LightsPanel</class>
-   <extends>QWidget</extends>
-   <header>Pages/Devices/Components/lights_panel.h</header>
-  </customwidget>
-  <customwidget>
-   <class>AcPanel</class>
-   <extends>QWidget</extends>
-   <header>Pages/Devices/Components/ac_panel.h</header>
-  </customwidget>
-  <customwidget>
-   <class>SpeakersPanel</class>
-   <extends>QWidget</extends>
-   <header>Pages/Devices/Components/speakers_panel.h</header>
-  </customwidget>
-  <customwidget>
-   <class>SensorsPanel</class>
-   <extends>QWidget</extends>
-   <header>Pages/Devices/Components/sensors_panel.h</header>
-  </customwidget>
- </customwidgets>
- <resources />
- <connections />
+    </layout>
+  </widget>
+  <customwidgets>
+    <customwidget>
+      <class>LightsPanel</class>
+      <extends>QWidget</extends>
+      <header>Pages/Devices/Components/lights_panel.h</header>
+    </customwidget>
+    <customwidget>
+      <class>AcPanel</class>
+      <extends>QWidget</extends>
+      <header>Pages/Devices/Components/ac_panel.h</header>
+    </customwidget>
+    <customwidget>
+      <class>SpeakersPanel</class>
+      <extends>QWidget</extends>
+      <header>Pages/Devices/Components/speakers_panel.h</header>
+    </customwidget>
+    <customwidget>
+      <class>SensorsPanel</class>
+      <extends>QWidget</extends>
+      <header>Pages/Devices/Components/sensors_panel.h</header>
+    </customwidget>
+  </customwidgets>
+  <resources />
+  <connections />
 </ui>

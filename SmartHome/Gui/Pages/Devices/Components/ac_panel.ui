@@ -1,354 +1,356 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
- <class>AcPanel</class>
- <widget class="QWidget" name="ACContainer">
-  <layout class="QVBoxLayout" name="verticalLayout_11">
-   <item>
-    <widget class="QWidget" name="ACHeaderContainer" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
+  <class>AcPanel</class>
+  <widget class="QWidget" name="ACContainer">
+    <layout class="QVBoxLayout" name="verticalLayout_11">
       <item>
-       <widget class="QLabel" name="ACLabel">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>20</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Air Conditioner</string>
-        </property>
-       </widget>
+        <widget class="QWidget" name="ACHeaderContainer" native="true">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+              <widget class="QLabel" name="ACLabel">
+                <property name="enabled">
+                  <bool>true</bool>
+                </property>
+                <property name="font">
+                  <font>
+                    <pointsize>20</pointsize>
+                  </font>
+                </property>
+                <property name="text">
+                  <string>Air Conditioner</string>
+                </property>
+              </widget>
+            </item>
+          </layout>
+        </widget>
       </item>
-     </layout>
-    </widget>
-   </item>
-   <item alignment="Qt::AlignTop">
-    <widget class="QWidget" name="ACOptions" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">#ACOn, #ACTemperature, #ACMode {
-	border-radius: 8px;
-}
+      <item alignment="Qt::AlignTop">
+        <widget class="QWidget" name="ACOptions" native="true">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QPushButton {
+                border: none;
+                background-color: transparent;
+              }
 
-#ACOn:hover, #ACTemperature:hover, #ACMode:hover {
-	background-color: #434158;
-}
-</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_8">
-      <item>
-       <widget class="QWidget" name="ACOn" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout_13">
-         <item>
-          <widget class="QLabel" name="ACOnLabel">
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>On/Off</string>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignRight">
-          <widget class="QPushButton" name="ACOnBtn">
-           <property name="cursor">
-            <cursorShape>PointingHandCursor</cursorShape>
-           </property>
-           <property name="text">
-            <string />
-           </property>
-           <property name="icon">
-            <iconset>
-             <normaloff>:/icons/toggle-off-colored.svg</normaloff>:/icons/toggle-off-colored.svg</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>48</width>
-             <height>48</height>
-            </size>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+              #ACOn:hover, #ACTemperature:hover, #ACMode:hover {
+                background-color: #434158;
+              }
+            </string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+              <widget class="QWidget" name="ACOn" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_13">
+                  <item>
+                    <widget class="QLabel" name="ACOnLabel">
+                      <property name="font">
+                        <font>
+                          <pointsize>16</pointsize>
+                        </font>
+                      </property>
+                      <property name="text">
+                        <string>On/Off</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item alignment="Qt::AlignRight">
+                    <widget class="QPushButton" name="ACOnBtn">
+                      <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                      </property>
+                      <property name="text">
+                        <string />
+                      </property>
+                      <property name="icon">
+                        <iconset>
+                          <normaloff>:/icons/toggle-off-colored.svg</normaloff>:/icons/toggle-off-colored.svg</iconset>
+                      </property>
+                      <property name="iconSize">
+                        <size>
+                          <width>48</width>
+                          <height>48</height>
+                        </size>
+                      </property>
+                      <property name="checkable">
+                        <bool>true</bool>
+                      </property>
+                    </widget>
+                  </item>
+                </layout>
+              </widget>
+            </item>
+            <item>
+              <widget class="QFrame" name="ACTemperature">
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                  <string notr="true" />
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_14">
+                  <property name="leftMargin">
+                    <number>9</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>0</number>
+                  </property>
+                  <item>
+                    <widget class="QLabel" name="ACTemperatureLabel">
+                      <property name="font">
+                        <font>
+                          <pointsize>16</pointsize>
+                        </font>
+                      </property>
+                      <property name="text">
+                        <string>Temperature</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item alignment="Qt::AlignRight">
+                    <widget class="QWidget" name="ACTemperatureView" native="true">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout_15">
+                        <property name="leftMargin">
+                          <number>0</number>
+                        </property>
+                        <property name="topMargin">
+                          <number>0</number>
+                        </property>
+                        <property name="rightMargin">
+                          <number>0</number>
+                        </property>
+                        <property name="bottomMargin">
+                          <number>0</number>
+                        </property>
+                        <item alignment="Qt::AlignRight">
+                          <widget class="QWidget" name="ACTemperatureValue" native="true">
+                            <layout class="QHBoxLayout" name="horizontalLayout_16">
+                              <item>
+                                <widget class="QLabel" name="ACTemperatureValueLabel">
+                                  <property name="font">
+                                    <font>
+                                      <pointsize>16</pointsize>
+                                    </font>
+                                  </property>
+                                  <property name="text">
+                                    <string>20</string>
+                                  </property>
+                                </widget>
+                              </item>
+                            </layout>
+                          </widget>
+                        </item>
+                        <item alignment="Qt::AlignRight">
+                          <widget class="QWidget" name="ACTemperatureControls" native="true">
+                            <layout class="QVBoxLayout" name="verticalLayout_12">
+                              <item>
+                                <widget class="QPushButton" name="ACTemperatureUp">
+                                  <property name="cursor">
+                                    <cursorShape>PointingHandCursor</cursorShape>
+                                  </property>
+                                  <property name="text">
+                                    <string />
+                                  </property>
+                                  <property name="icon">
+                                    <iconset>
+                                      <normaloff>:/icons/chevron-up.svg</normaloff>:/icons/chevron-up.svg</iconset>
+                                  </property>
+                                  <property name="iconSize">
+                                    <size>
+                                      <width>24</width>
+                                      <height>24</height>
+                                    </size>
+                                  </property>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QPushButton" name="ACTemperatureDown">
+                                  <property name="cursor">
+                                    <cursorShape>PointingHandCursor</cursorShape>
+                                  </property>
+                                  <property name="text">
+                                    <string />
+                                  </property>
+                                  <property name="icon">
+                                    <iconset>
+                                      <normaloff>:/icons/chevron-down.svg</normaloff>:/icons/chevron-down.svg</iconset>
+                                  </property>
+                                  <property name="iconSize">
+                                    <size>
+                                      <width>24</width>
+                                      <height>24</height>
+                                    </size>
+                                  </property>
+                                </widget>
+                              </item>
+                            </layout>
+                          </widget>
+                        </item>
+                      </layout>
+                    </widget>
+                  </item>
+                </layout>
+              </widget>
+            </item>
+            <item>
+              <widget class="QFrame" name="ACMode">
+                <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                  </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                  <string notr="true" />
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_28">
+                  <property name="leftMargin">
+                    <number>9</number>
+                  </property>
+                  <property name="topMargin">
+                    <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                    <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                    <number>0</number>
+                  </property>
+                  <item>
+                    <widget class="QLabel" name="ACModeLabel">
+                      <property name="font">
+                        <font>
+                          <pointsize>16</pointsize>
+                        </font>
+                      </property>
+                      <property name="text">
+                        <string>Mode</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item alignment="Qt::AlignRight">
+                    <widget class="QWidget" name="ACModeView" native="true">
+                      <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout_29">
+                        <property name="leftMargin">
+                          <number>0</number>
+                        </property>
+                        <property name="topMargin">
+                          <number>0</number>
+                        </property>
+                        <property name="rightMargin">
+                          <number>0</number>
+                        </property>
+                        <property name="bottomMargin">
+                          <number>0</number>
+                        </property>
+                        <item alignment="Qt::AlignRight">
+                          <widget class="QWidget" name="ACModeValue" native="true">
+                            <layout class="QHBoxLayout" name="horizontalLayout_30">
+                              <item>
+                                <widget class="QLabel" name="ACModeValueLabel">
+                                  <property name="font">
+                                    <font>
+                                      <pointsize>16</pointsize>
+                                    </font>
+                                  </property>
+                                  <property name="text">
+                                    <string>Normal</string>
+                                  </property>
+                                </widget>
+                              </item>
+                            </layout>
+                          </widget>
+                        </item>
+                        <item alignment="Qt::AlignRight">
+                          <widget class="QWidget" name="ACModeControls" native="true">
+                            <layout class="QVBoxLayout" name="verticalLayout_15">
+                              <item>
+                                <widget class="QPushButton" name="ACModeUp">
+                                  <property name="cursor">
+                                    <cursorShape>PointingHandCursor</cursorShape>
+                                  </property>
+                                  <property name="text">
+                                    <string />
+                                  </property>
+                                  <property name="icon">
+                                    <iconset>
+                                      <normaloff>:/icons/chevron-up.svg</normaloff>:/icons/chevron-up.svg</iconset>
+                                  </property>
+                                  <property name="iconSize">
+                                    <size>
+                                      <width>24</width>
+                                      <height>24</height>
+                                    </size>
+                                  </property>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QPushButton" name="ACModeDown">
+                                  <property name="cursor">
+                                    <cursorShape>PointingHandCursor</cursorShape>
+                                  </property>
+                                  <property name="text">
+                                    <string />
+                                  </property>
+                                  <property name="icon">
+                                    <iconset>
+                                      <normaloff>:/icons/chevron-down.svg</normaloff>:/icons/chevron-down.svg</iconset>
+                                  </property>
+                                  <property name="iconSize">
+                                    <size>
+                                      <width>24</width>
+                                      <height>24</height>
+                                    </size>
+                                  </property>
+                                </widget>
+                              </item>
+                            </layout>
+                          </widget>
+                        </item>
+                      </layout>
+                    </widget>
+                  </item>
+                </layout>
+              </widget>
+            </item>
+          </layout>
+        </widget>
       </item>
-      <item>
-       <widget class="QFrame" name="ACTemperature">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true" />
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_14">
-         <property name="leftMargin">
-          <number>9</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="ACTemperatureLabel">
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Temperature</string>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignRight">
-          <widget class="QWidget" name="ACTemperatureView" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_15">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item alignment="Qt::AlignRight">
-             <widget class="QWidget" name="ACTemperatureValue" native="true">
-              <layout class="QHBoxLayout" name="horizontalLayout_16">
-               <item>
-                <widget class="QLabel" name="ACTemperatureValueLabel">
-                 <property name="font">
-                  <font>
-                   <pointsize>16</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>20</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item alignment="Qt::AlignRight">
-             <widget class="QWidget" name="ACTemperatureControls" native="true">
-              <layout class="QVBoxLayout" name="verticalLayout_12">
-               <item>
-                <widget class="QPushButton" name="ACTemperatureUp">
-                 <property name="cursor">
-                  <cursorShape>PointingHandCursor</cursorShape>
-                 </property>
-                 <property name="text">
-                  <string />
-                 </property>
-                 <property name="icon">
-                  <iconset>
-                   <normaloff>:/icons/chevron-up.svg</normaloff>:/icons/chevron-up.svg</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>24</width>
-                   <height>24</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="ACTemperatureDown">
-                 <property name="cursor">
-                  <cursorShape>PointingHandCursor</cursorShape>
-                 </property>
-                 <property name="text">
-                  <string />
-                 </property>
-                 <property name="icon">
-                  <iconset>
-                   <normaloff>:/icons/chevron-down.svg</normaloff>:/icons/chevron-down.svg</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>24</width>
-                   <height>24</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="ACMode">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="styleSheet">
-         <string notr="true" />
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_28">
-         <property name="leftMargin">
-          <number>9</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="ACModeLabel">
-           <property name="font">
-            <font>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Mode</string>
-           </property>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignRight">
-          <widget class="QWidget" name="ACModeView" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_29">
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item alignment="Qt::AlignRight">
-             <widget class="QWidget" name="ACModeValue" native="true">
-              <layout class="QHBoxLayout" name="horizontalLayout_30">
-               <item>
-                <widget class="QLabel" name="ACModeValueLabel">
-                 <property name="font">
-                  <font>
-                   <pointsize>16</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Normal</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item alignment="Qt::AlignRight">
-             <widget class="QWidget" name="ACModeControls" native="true">
-              <layout class="QVBoxLayout" name="verticalLayout_15">
-               <item>
-                <widget class="QPushButton" name="ACModeUp">
-                 <property name="cursor">
-                  <cursorShape>PointingHandCursor</cursorShape>
-                 </property>
-                 <property name="text">
-                  <string />
-                 </property>
-                 <property name="icon">
-                  <iconset>
-                   <normaloff>:/icons/chevron-up.svg</normaloff>:/icons/chevron-up.svg</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>24</width>
-                   <height>24</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="ACModeDown">
-                 <property name="cursor">
-                  <cursorShape>PointingHandCursor</cursorShape>
-                 </property>
-                 <property name="text">
-                  <string />
-                 </property>
-                 <property name="icon">
-                  <iconset>
-                   <normaloff>:/icons/chevron-down.svg</normaloff>:/icons/chevron-down.svg</iconset>
-                 </property>
-                 <property name="iconSize">
-                  <size>
-                   <width>24</width>
-                   <height>24</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-  </layout>
- </widget>
- <resources />
- <connections />
+    </layout>
+  </widget>
+  <resources />
+  <connections />
 </ui>
