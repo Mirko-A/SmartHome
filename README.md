@@ -55,7 +55,6 @@ The information that can be viewed on this page is:
 3. Sensors
     - stored sensor values (temperature, humidity, brightness) sampled on separate graphs
 
-
 # Building
 
 CMake requires a C++23 compiler with `std::expected`. The default build includes
@@ -77,4 +76,3 @@ cmake --build build-tui -j 2
 Requesting GUI mode in that build reports that GUI support is disabled and exits
 with an error. The supported build uses CMake; the media backend retains Qt 5's
 playlist API.
-

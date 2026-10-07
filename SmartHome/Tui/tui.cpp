@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     HomeControl home = std::move(*homeResult);
-    TuiApp app(home, homeConfigPath, std::move(*homeConfig));
+    App app(home, homeConfigPath, std::move(*homeConfig));
     app.run();
     return 0;
 }

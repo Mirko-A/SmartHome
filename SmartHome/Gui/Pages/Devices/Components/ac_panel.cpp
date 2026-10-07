@@ -3,8 +3,10 @@
 #include <QSignalBlocker>
 
 #include "ui_ac_panel.h"
+
 AcPanel::AcPanel(QWidget *parent) : QWidget(parent), m_ui(std::make_unique<Ui::AcPanel>()) {
     m_ui->setupUi(this);
+
     // Custom QWidget subclasses need this to paint their stylesheet background.
     setAttribute(Qt::WA_StyledBackground, true);
     m_ui->ACTemperatureUp->setEnabled(false);
@@ -16,7 +18,9 @@ AcPanel::AcPanel(QWidget *parent) : QWidget(parent), m_ui(std::make_unique<Ui::A
     connect(m_ui->ACModeUp, &QPushButton::clicked, this, [this] { emit modeStepRequested(1); });
     connect(m_ui->ACModeDown, &QPushButton::clicked, this, [this] { emit modeStepRequested(-1); });
 }
+
 AcPanel::~AcPanel() = default;
+
 void AcPanel::render(const AcSettings &snapshot, bool available) {
     const QSignalBlocker blocker(m_ui->ACOnBtn);
     m_ui->ACOnBtn->setEnabled(available);

@@ -11,15 +11,15 @@
 
 namespace smart_home::tui {
 
-class TuiApp {
+class App {
   public:
     // The caller keeps home alive throughout the session. All settings access stays on the UI
     // thread.
-    TuiApp(HomeControl &home, std::string homeConfigPath, app::ConfigSnapshot accepted);
-    TuiApp(const TuiApp &) = delete;
-    TuiApp &operator=(const TuiApp &) = delete;
-    TuiApp(TuiApp &&) = delete;
-    TuiApp &operator=(TuiApp &&) = delete;
+    App(HomeControl &home, std::string homeConfigPath, app::ConfigSnapshot accepted);
+    App(const App &) = delete;
+    App &operator=(const App &) = delete;
+    App(App &&) = delete;
+    App &operator=(App &&) = delete;
 
     void run();
 

@@ -3,7 +3,7 @@
 #include <QMetaObject>
 
 namespace smart_home::gui {
-GuiApp::GuiApp(std::string path, QObject *parent)
+App::App(std::string path, QObject *parent)
     : QObject(parent), m_path(std::move(path)), m_worker(new QObject) {
     m_worker->moveToThread(&m_thread);
     connect(&m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
@@ -16,18 +16,18 @@ GuiApp::GuiApp(std::string path, QObject *parent)
     m_timer.start(100);
 }
 
-GuiApp::~GuiApp() {
+App::~App() {
     // Finish any in-flight file operation before destroying its completion receiver.
     m_timer.stop();
     m_thread.quit();
     m_thread.wait();
 }
 
-bool GuiApp::dirty() const {
+bool App::dirty() const {
     return m_state.loaded && m_state.pending.serializeJson() != m_state.saved.serializeJson();
 }
 
-QString GuiApp::status() const {
+QString App::status() const {
     if (m_state.busy)
         return m_state.loading ? "Loading settings…" : "Saving settings…";
     if (!m_error.isEmpty())
@@ -38,7 +38,7 @@ QString GuiApp::status() const {
                    : "No unsaved settings — device application is unavailable.";
 }
 
-void GuiApp::edit(const HomeSettings &settings) {
+void App::edit(const HomeSettings &settings) {
     if (!editable())
         return;
     m_state.pending = settings;
@@ -47,12 +47,15 @@ void GuiApp::edit(const HomeSettings &settings) {
     emit changed();
 }
 
-void GuiApp::reload() {
-    if (m_state.busy)
+void App::reload() {
+    if (m_state.busy) {
         return;
+    }
+
     m_state.busy = m_state.loading = true;
     m_error.clear();
     emit changed();
+
     QMetaObject::invokeMethod(
         m_worker,
         [this, path = m_path] {
@@ -84,15 +87,19 @@ void GuiApp::reload() {
         Qt::QueuedConnection);
 }
 
-void GuiApp::save() {
-    if (m_state.busy || !m_state.loaded || !dirty())
+void App::save() {
+    if (m_state.busy || !m_state.loaded || !dirty()) {
         return;
+    }
+
     m_state.busy = true;
     m_error.clear();
+
     auto snapshot = m_state.pending;
     auto document = m_accepted.document;
     document.merge_patch(snapshot.serializeJson());
     emit changed();
+
     QMetaObject::invokeMethod(
         m_worker,
         [this, path = m_path, document = std::move(document), version = m_accepted.version,
@@ -116,12 +123,13 @@ void GuiApp::save() {
         },
         Qt::QueuedConnection);
 }
-void GuiApp::sampleAnalytics() {
-    if (m_state.loaded)
+void App::sampleAnalytics() {
+    if (m_state.loaded) {
         m_analytics.update(m_state.pending, m_clock.elapsed());
+    }
 }
 
-void GuiApp::setLight(Light light, bool on) {
+void App::setLight(Light light, bool on) {
     auto settings = m_state.pending;
     auto lights = settings.lights();
     switch (light) {
@@ -138,12 +146,14 @@ void GuiApp::setLight(Light light, bool on) {
     settings.setLights(lights.livingRoomLightOn, lights.bedroomLightOn, lights.kitchenLightOn);
     edit(settings);
 }
-void GuiApp::setAcOn(bool on) {
+
+void App::setAcOn(bool on) {
     auto settings = m_state.pending;
     settings.setAc(on, settings.ac().mode);
     edit(settings);
 }
-void GuiApp::stepAcMode(int direction) {
+
+void App::stepAcMode(int direction) {
     auto settings = m_state.pending;
     const int mode = static_cast<int>(settings.ac().mode) + (direction > 0 ? 1 : -1);
     if (direction == 0 || mode < static_cast<int>(Ac::Mode::NORMAL) ||
@@ -152,7 +162,8 @@ void GuiApp::stepAcMode(int direction) {
     settings.setAc(settings.ac().on, static_cast<Ac::Mode>(mode));
     edit(settings);
 }
-void GuiApp::setSpeaker(SpeakerControl control, int value) {
+
+void App::setSpeaker(SpeakerControl control, int value) {
     if (!editable())
         return;
     auto settings = m_state.pending;
@@ -167,4 +178,5 @@ void GuiApp::setSpeaker(SpeakerControl control, int value) {
     }
     edit(settings);
 }
+
 } // namespace smart_home::gui

@@ -12,18 +12,14 @@
 PlayerControls::PlayerControls(QWidget *parent)
     : QFrame(parent), m_ui(std::make_unique<Ui::PlayerControls>()) {
     m_ui->setupUi(this);
-    initializeUIElements();
-}
-PlayerControls::~PlayerControls() = default;
 
-void PlayerControls::initializeUIElements() {
-    if (m_uiInitialized)
-        return;
     Q_ASSERT(m_ui->mediaPlayerPlayBtn && m_ui->mediaPlayerStopBtn && m_ui->mediaPlayerNextBtn &&
              m_ui->mediaPlayerPrevBtn && m_ui->mediaPlayerMuteBtn && m_ui->mediaPlayerVolumeSlider);
     m_uiInitialized = true;
+
     setState(m_playerState);
     setMuted(m_playerMuted);
+
     m_ui->mediaPlayerVolumeSlider->setRange(0, 100);
 
     connect(m_ui->mediaPlayerPlayBtn, &QAbstractButton::clicked, this,
@@ -37,14 +33,17 @@ void PlayerControls::initializeUIElements() {
             &PlayerControls::changeVolume);
 }
 
+PlayerControls::~PlayerControls() = default;
+
 QMediaPlayer::State PlayerControls::state() const {
     return m_playerState;
 }
 
 void PlayerControls::setState(QMediaPlayer::State state) {
     m_playerState = state;
-    if (!m_uiInitialized)
+    if (!m_uiInitialized) {
         return;
+    }
 
     switch (state) {
     case QMediaPlayer::StoppedState:
@@ -68,7 +67,8 @@ int PlayerControls::volume() const {
 
 void PlayerControls::setVolume(int volume) {
     if (m_ui->mediaPlayerVolumeSlider) {
-        // Display player volume without emitting valueChanged and sending it back to the player.
+        // Display player volume without emitting valueChanged and
+        // sending it back to the player.
         const QSignalBlocker blocker(m_ui->mediaPlayerVolumeSlider);
         m_ui->mediaPlayerVolumeSlider->setValue(volume);
     }
@@ -80,9 +80,10 @@ bool PlayerControls::isMuted() const {
 
 void PlayerControls::setMuted(bool muted) {
     m_playerMuted = muted;
-    if (m_uiInitialized)
+    if (m_uiInitialized) {
         m_ui->mediaPlayerMuteBtn->setIcon(
             QIcon(muted ? ":/icons/volume-x.svg" : ":/icons/volume-2.svg"));
+    }
 }
 
 void PlayerControls::playClicked() {

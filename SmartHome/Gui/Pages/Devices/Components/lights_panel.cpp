@@ -3,9 +3,11 @@
 #include <QSignalBlocker>
 
 #include "ui_lights_panel.h"
+
 LightsPanel::LightsPanel(QWidget *parent)
     : QWidget(parent), m_ui(std::make_unique<Ui::LightsPanel>()) {
     m_ui->setupUi(this);
+
     // Custom QWidget subclasses need this to paint their stylesheet background.
     setAttribute(Qt::WA_StyledBackground, true);
     connect(m_ui->livingRoomLightBtn, &QPushButton::toggled, this,
@@ -15,7 +17,9 @@ LightsPanel::LightsPanel(QWidget *parent)
     connect(m_ui->kitchenLightBtn, &QPushButton::toggled, this,
             [this](bool on) { emit lightRequested(smart_home::gui::Light::KITCHEN, on); });
 }
+
 LightsPanel::~LightsPanel() = default;
+
 void LightsPanel::render(const LightSettings &snapshot, bool available) {
     const QSignalBlocker livingRoomLightBtnBlocker(m_ui->livingRoomLightBtn);
     m_ui->livingRoomLightBtn->setEnabled(available);

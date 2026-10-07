@@ -3,9 +3,11 @@
 #include <QSignalBlocker>
 
 #include "ui_speakers_panel.h"
+
 SpeakersPanel::SpeakersPanel(QWidget *parent)
     : QWidget(parent), m_ui(std::make_unique<Ui::SpeakersPanel>()) {
     m_ui->setupUi(this);
+
     // Custom QWidget subclasses need this to paint their stylesheet background.
     setAttribute(Qt::WA_StyledBackground, true);
     m_ui->volumeSlider->setRange(0, 100);
@@ -21,7 +23,9 @@ SpeakersPanel::SpeakersPanel(QWidget *parent)
         emit valueRequested(smart_home::gui::SpeakerControl::PITCH, value);
     });
 }
+
 SpeakersPanel::~SpeakersPanel() = default;
+
 void SpeakersPanel::render(const SpeakerSettings &snapshot, bool available) {
     const QSignalBlocker volumeBlocker(m_ui->volumeSlider);
     m_ui->volumeSlider->setEnabled(available);

@@ -1,20 +1,31 @@
 #pragma once
+
 #include <QWidget>
 #include <memory>
+
 namespace Ui {
+
 class DevicesPage;
-}
+
+} // namespace Ui
+
 namespace smart_home::gui {
-class GuiApp;
-}
+
+class App;
+
+} // namespace smart_home::gui
+
 class DevicesPage : public QWidget {
     Q_OBJECT
+
   public:
-    explicit DevicesPage(smart_home::gui::GuiApp &app, QWidget *parent = nullptr);
+    explicit DevicesPage(smart_home::gui::App &app, QWidget *parent = nullptr);
     ~DevicesPage() override;
 
   private:
     void render();
-    smart_home::gui::GuiApp &m_app;
+
+  private:
+    smart_home::gui::App &m_app;
     std::unique_ptr<Ui::DevicesPage> m_ui;
 };

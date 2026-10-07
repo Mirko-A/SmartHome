@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     QApplication app(qtArgc, qtArgv);
     initializeResources();
     // The session outlives the shell and all pages that borrow it.
-    GuiApp session((configDirectory / "home_cfg.json").string());
+    App session((configDirectory / "home_cfg.json").string());
     MainWindow window(session);
     session.reload();
     window.setWindowTitle("Smart Home");

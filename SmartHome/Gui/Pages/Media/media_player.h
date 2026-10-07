@@ -1,25 +1,31 @@
 #pragma once
+
 #include <QList>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QObject>
 #include <QUrl>
+
 class QVideoWidget;
 
 // Playback backend only. The page owns all widgets and the playlist model.
 class MediaPlayer : public QObject {
     Q_OBJECT
+
   public:
     explicit MediaPlayer(QObject *parent = nullptr);
     ~MediaPlayer() override;
-    bool isPlayerAvailable() const;
+
     QMediaPlaylist *playlist() const {
         return m_playlist;
     }
+
+    bool isPlayerAvailable() const;
     QStringList supportedMimeTypes() const;
     void setVideoOutput(QVideoWidget *video);
     void publishState();
     void addToPlaylist(const QList<QUrl> &urls);
+
   public slots:
     void play();
     void pause();
@@ -31,6 +37,7 @@ class MediaPlayer : public QObject {
     void remove(int row);
     void setVolume(int value);
     void setMuted(bool muted);
+
   signals:
     void availabilityChanged(bool available);
     void statusTextChanged(const QString &text);
@@ -52,6 +59,8 @@ class MediaPlayer : public QObject {
     void setStatusInfo(const QString &info);
     void renderStatus();
     void clearError();
+
+  private:
     QMediaPlayer *m_player;
     QMediaPlaylist *m_playlist;
     QString m_trackInfo;

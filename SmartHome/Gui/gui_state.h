@@ -1,9 +1,11 @@
 #pragma once
+
 #include <optional>
 
 #include "home_settings.h"
 
 namespace smart_home::gui {
+
 enum class Light { LIVING_ROOM, BEDROOM, KITCHEN };
 enum class SpeakerControl { VOLUME, BASS, PITCH };
 
@@ -16,4 +18,5 @@ struct GuiState {
     bool busy = false;
     bool loading = false;
 };
+
 } // namespace smart_home::gui

@@ -1,13 +1,20 @@
 #pragma once
+
 #include <QWidget>
 #include <memory>
+
 namespace Ui {
+
 class MediaPage;
-}
+
+} // namespace Ui
+
 class MediaPlayer;
 class PlaylistModel;
+
 class MediaPage : public QWidget {
     Q_OBJECT
+
   public:
     explicit MediaPage(QWidget *parent = nullptr);
     ~MediaPage() override;
@@ -15,6 +22,8 @@ class MediaPage : public QWidget {
   private:
     void open();
     void updateDuration();
+
+  private:
     std::unique_ptr<Ui::MediaPage> m_ui;
     MediaPlayer *m_player;
     PlaylistModel *m_playlistModel;

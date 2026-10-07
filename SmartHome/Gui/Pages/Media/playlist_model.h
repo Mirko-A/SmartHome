@@ -1,5 +1,4 @@
-#ifndef PLAYLIST_MODEL_H
-#define PLAYLIST_MODEL_H
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QMediaPlaylist>
@@ -40,5 +39,3 @@ class PlaylistModel : public QAbstractItemModel {
     QPointer<QMediaPlaylist> m_playlist;
     QMap<QModelIndex, QVariant> m_data;
 };
-
-#endif // PLAYLIST_MODEL_H

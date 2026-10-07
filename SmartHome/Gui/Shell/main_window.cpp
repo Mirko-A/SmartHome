@@ -13,18 +13,23 @@
 #include "Pages/Media/media_page.h"
 #include "gui_app.h"
 #include "ui_main_window.h"
-using smart_home::gui::GuiApp;
 
-MainWindow::MainWindow(GuiApp &app, QWidget *parent)
+using namespace smart_home;
+
+MainWindow::MainWindow(gui::App &app, QWidget *parent)
     : QMainWindow(parent), m_app(app), m_ui(std::make_unique<Ui::MainWindow>()) {
     m_ui->setupUi(this);
+
     m_ui->pages->addWidget(new DevicesPage(app, m_ui->pages));
     m_ui->pages->addWidget(new MediaPage(m_ui->pages));
     m_ui->pages->addWidget(new AnalyticsPage(app, m_ui->pages));
+
     connect(m_ui->devicesBtn, &QPushButton::clicked, this, [this] { selectPage(0); });
     connect(m_ui->mediaBtn, &QPushButton::clicked, this, [this] { selectPage(1); });
     connect(m_ui->analyticsBtn, &QPushButton::clicked, this, [this] { selectPage(2); });
+
     selectPage(0);
+
     auto *toolbar = addToolBar("Settings");
     toolbar->setObjectName("settingsToolbar");
     toolbar->setMovable(false);
@@ -35,21 +40,25 @@ MainWindow::MainWindow(GuiApp &app, QWidget *parent)
     m_configStatus->setWordWrap(true);
     m_configStatus->setTextFormat(Qt::PlainText);
     statusBar()->addWidget(m_configStatus, 1);
-    connect(m_saveAction, &QAction::triggered, &app, &GuiApp::save);
+
+    connect(m_saveAction, &QAction::triggered, &app, &gui::App::save);
     connect(m_reloadAction, &QAction::triggered, this, &MainWindow::reloadSettings);
-    connect(&app, &GuiApp::changed, this, &MainWindow::refreshSession);
+    connect(&app, &gui::App::changed, this, &MainWindow::refreshSession);
     auto updateClock = [this] {
         m_ui->dateTimeLabel->setText(QDateTime::currentDateTimeUtc().toString());
     };
-    connect(&app, &GuiApp::tick, this, updateClock);
+    connect(&app, &gui::App::tick, this, updateClock);
+
     updateClock();
     refreshSession();
 }
+
 MainWindow::~MainWindow() = default;
+
 void MainWindow::selectPage(int index) {
     m_ui->pages->setCurrentIndex(index);
-    m_ui->buttonsCurrentButton->setIcon(
-        QIcon(QString(":/icons/three-dots-%1-purple.svg").arg(index)));
+    QString fName = QString(QString(":/icons/three-dots-%1-purple.svg").arg(index));
+    m_ui->buttonsCurrentButton->setIcon(QIcon(fName));
 }
 void MainWindow::refreshSession() {
     m_configStatus->setText(m_app.status());
@@ -57,11 +66,14 @@ void MainWindow::refreshSession() {
     m_reloadAction->setEnabled(!m_app.busy());
 }
 void MainWindow::reloadSettings() {
-    if (m_app.dirty() &&
-        QMessageBox::question(
+    if (m_app.dirty()) {
+        const auto answer = QMessageBox::question(
             this, "Reload settings", "Discard pending edits if the configuration reload succeeds?",
-            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
-        return;
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if (answer != QMessageBox::Yes) {
+            return;
+        }
+    }
     m_app.reload();
 }
 
@@ -72,13 +84,15 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         event->ignore();
         return;
     }
-    if (m_app.dirty() &&
-        QMessageBox::question(
+    if (m_app.dirty()) {
+        const auto answer = QMessageBox::question(
             this, "Unsaved settings",
             "Discard pending edits and close? Use Save settings first to keep them.",
-            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes) {
-        event->ignore();
-        return;
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if (answer == QMessageBox::Yes) {
+            event->ignore();
+            return;
+        }
     }
     event->accept();
 }

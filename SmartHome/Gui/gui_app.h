@@ -13,11 +13,13 @@
 namespace smart_home::gui {
 
 // UI-thread state; only immutable snapshots cross to the I/O worker.
-class GuiApp : public QObject {
+class App : public QObject {
     Q_OBJECT
+
   public:
-    explicit GuiApp(std::string path, QObject *parent = nullptr);
-    ~GuiApp() override;
+    explicit App(std::string path, QObject *parent = nullptr);
+    ~App() override;
+
     const HomeSettings &settings() const {
         return m_state.pending;
     }
@@ -51,16 +53,19 @@ class GuiApp : public QObject {
     void tick();
 
   private:
+    void edit(const HomeSettings &settings);
+    void sampleAnalytics();
+
+  private:
     std::string m_path;
     GuiState m_state;
     app::ConfigSnapshot m_accepted;
     AnalyticsModel m_analytics;
     QTimer m_timer;
     QElapsedTimer m_clock;
-    void edit(const HomeSettings &settings);
-    void sampleAnalytics();
     QString m_error;
     QThread m_thread;
     QObject *m_worker;
 };
+
 } // namespace smart_home::gui

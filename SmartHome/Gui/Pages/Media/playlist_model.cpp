@@ -7,8 +7,9 @@
 PlaylistModel::PlaylistModel(QObject *parent) : QAbstractItemModel(parent) {}
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return 0;
+    }
 
     return (m_playlist != nullptr) ? m_playlist->mediaCount() : 0U;
 }
@@ -18,8 +19,9 @@ int PlaylistModel::columnCount(const QModelIndex &parent) const {
 }
 
 QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent) const {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return {};
+    }
 
     return ((m_playlist != nullptr) && (row >= 0 && row < m_playlist->mediaCount()) &&
             (column >= 0 && column < ColumnCount))
@@ -29,7 +31,6 @@ QModelIndex PlaylistModel::index(int row, int column, const QModelIndex &parent)
 
 QModelIndex PlaylistModel::parent(const QModelIndex &child) const {
     Q_UNUSED(child);
-
     return QModelIndex();
 }
 
@@ -66,8 +67,9 @@ QMediaPlaylist *PlaylistModel::playlist() const {
 }
 
 void PlaylistModel::setPlaylist(QMediaPlaylist *playlist) {
-    if (m_playlist)
+    if (m_playlist) {
         disconnect(m_playlist, nullptr, this, nullptr);
+    }
 
     beginResetModel();
     m_playlist = playlist;
