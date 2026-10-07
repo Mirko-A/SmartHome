@@ -5,6 +5,7 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <string>
 
+#include "config_io.h"
 #include "home_ctrl.h"
 #include "tui_state.h"
 
@@ -14,7 +15,7 @@ class TuiApp {
   public:
     // The caller keeps home alive throughout the session. All settings access stays on the UI
     // thread.
-    TuiApp(HomeControl &home, std::string homeConfigPath);
+    TuiApp(HomeControl &home, std::string homeConfigPath, app::ConfigSnapshot accepted);
     TuiApp(const TuiApp &) = delete;
     TuiApp &operator=(const TuiApp &) = delete;
     TuiApp(TuiApp &&) = delete;
@@ -27,9 +28,12 @@ class TuiApp {
     bool onEvent(ftxui::Event event);
     void saveAndQuit();
     void synchronizeState();
+    void reload();
 
   private:
     std::string m_homeConfigPath;
+    app::ConfigSnapshot m_accepted;
+    bool m_confirmReload = false;
 
     // State precedes components so borrowed widget values outlive the component tree.
     // Home settings own sensor readings; UI state owns pending control edits until saveAndQuit().

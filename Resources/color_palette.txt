@@ -6,4 +6,4 @@ accent3: #22252e;
 purple-accent: #434158;
 purple-graph: #a06eb5;
 dark-purple-accent: #221f2e;
-mint-graph: #82b59d; 
+mint-graph: #82b59d;

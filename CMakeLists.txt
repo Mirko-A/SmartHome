@@ -54,6 +54,7 @@ add_executable(SmartHome
     SmartHome/main.cpp
     # GUI
     SmartHome/Gui/gui.cpp
+    SmartHome/Gui/gui_session.cpp
     SmartHome/Gui/analytics_model.cpp
     SmartHome/Gui/main_window.cpp
     SmartHome/Gui/media_player.cpp
@@ -62,11 +63,12 @@ add_executable(SmartHome
     # TUI
     SmartHome/Tui/tui.cpp
     SmartHome/Tui/tui_app.cpp
-    SmartHome/Tui/config_io.cpp
     SmartHome/Tui/components/ac.cpp
     SmartHome/Tui/components/light.cpp
     SmartHome/Tui/components/sensors.cpp
     SmartHome/Tui/components/speaker.cpp
+    # Shared
+    SmartHome/Shared/config_io.cpp
     # Resources
     SmartHome/icons_resource.qrc
 )
@@ -78,6 +80,7 @@ set_target_properties(SmartHome PROPERTIES
 target_include_directories(SmartHome PRIVATE
     SmartHome/Gui/
     SmartHome/Tui/
+    SmartHome/Shared/
 )
 target_link_libraries(SmartHome PRIVATE
     # Internal

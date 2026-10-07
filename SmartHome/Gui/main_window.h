@@ -6,8 +6,12 @@
 #include <QTimer>
 
 #include "analytics_model.h"
-#include "home_settings.h"
+#include "gui_session.h"
 #include "media_player.h"
+
+class QAction;
+class QLabel;
+class QCloseEvent;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,7 +40,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
   public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(std::string configPath, QWidget *parent = nullptr);
     ~MainWindow() override;
 
   private slots:
@@ -55,20 +59,14 @@ class MainWindow : public QMainWindow {
     /* AC button callbacks */
     void acOnBtnToggled(bool checked);
 
-    void acTemperatureUpClicked();
-    void acTemperatureDownClicked();
-
     void acModeUpClicked();
     void acModeDownClicked();
 
     /* Speaker slider callbacks */
-    void volumeSliderMoved(int position);
     void volumeSliderValueChanged(int value);
 
-    void bassSliderMoved(int position);
     void bassSliderValueChanged(int value);
 
-    void pitchSliderMoved(int position);
     void pitchSliderValueChanged(int value);
 
     void analyticsPageLightsBtnClicked();
@@ -81,17 +79,16 @@ class MainWindow : public QMainWindow {
     void updateCurrentPage(PageIndex index);
     void updateDateTimeWidget();
 
-    nlohmann::json loadHomeSettings();
-    void saveHomeSettings();
+    void refreshSession();
+    void editControls();
+    void reloadSettings();
+    void closeEvent(QCloseEvent *event) override;
 
     void updateLightsUI();
     void updateSensorsUI();
     void updateACUI();
     void updateSpeakersUI();
     void updateHomeWidgets();
-
-    void loadHomeCfgWidgets();
-    void reloadHomeWidgetsIfDirty();
 
     void loadMediaPlayerWidgets();
     void loadMediaPlayerControlWidgets();
@@ -108,7 +105,10 @@ class MainWindow : public QMainWindow {
   private:
     Ui::MainWindow *ui;
 
-    HomeSettings *homeSettings;
+    smart_home::gui::GuiSession *m_session;
+    QAction *m_saveAction;
+    QAction *m_reloadAction;
+    QLabel *m_configStatus;
     MediaPlayer *mediaPlayer;
     std::unique_ptr<AnalyticsModel> analyticsModel;
 
