@@ -89,7 +89,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
             this, "Unsaved settings",
             "Discard pending edits and close? Use Save settings first to keep them.",
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-        if (answer == QMessageBox::Yes) {
+        if (answer != QMessageBox::Yes) {
             event->ignore();
             return;
         }
