@@ -5,7 +5,12 @@
 #include <filesystem>
 #include <iostream>
 
-#include "main_window.h"
+#include "Shell/main_window.h"
+#include "gui_app.h"
+
+static void initializeResources() {
+    Q_INIT_RESOURCE(gui);
+}
 
 namespace smart_home::gui {
 
@@ -21,7 +26,11 @@ int main(int argc, char *argv[]) {
     int qtArgc = 1;
     char *qtArgv[] = {argv[0], nullptr};
     QApplication app(qtArgc, qtArgv);
-    MainWindow window((configDirectory / "home_cfg.json").string());
+    initializeResources();
+    // The session outlives the shell and all pages that borrow it.
+    App session((configDirectory / "home_cfg.json").string());
+    MainWindow window(session);
+    session.reload();
     window.setWindowTitle("Smart Home");
 
     window.show();

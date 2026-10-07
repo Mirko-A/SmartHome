@@ -12,8 +12,8 @@ It is divided into three pages:
 
 ## Home configuration
 
-This page serves the purpose of viewing and controlling the state of all the sensors, actuators
-and other devices attached to SmartHome.
+This page displays stored sensor values and edits the requested settings for home devices.
+Saving settings does not apply them to hardware.
 
 ![alt text](resource/readme_imgs/home_cfg_page.png)
 
@@ -48,9 +48,31 @@ either a bar graph or a line graph.
 The information that can be viewed on this page is:
 
 1. Lights
-    - the amount of time each light was on each hour (within the past 24 hours)
+    - requested on-time for each light in up to 24 session-hour buckets
 2. AC
-    - the amount of time the AC was on each hour (within the past 24 hours)
-    - the AC temperature graph (whenever the AC is off, the temperature value is set to 0)
+    - requested AC on-time in up to 24 session-hour buckets
+    - target temperature is unsupported
 3. Sensors
-    - readings from each sensor (temperature, humidity, brightness) can be seen on a separate graph
+    - stored sensor values (temperature, humidity, brightness) sampled on separate graphs
+
+# Building
+
+CMake requires a C++23 compiler with `std::expected`. The default build includes
+Qt 5 (5.12 or later) Widgets, Multimedia, MultimediaWidgets, Charts, and Svg.
+CMake fetches FTXUI and nlohmann/json on initial configuration.
+
+```sh
+cmake -S . -B build
+cmake --build build -j 2
+```
+
+For a core/TUI build without Qt:
+
+```sh
+cmake -S . -B build-tui -DSMARTHOME_BUILD_GUI=OFF
+cmake --build build-tui -j 2
+```
+
+Requesting GUI mode in that build reports that GUI support is disabled and exits
+with an error. The supported build uses CMake; the media backend retains Qt 5's
+playlist API.

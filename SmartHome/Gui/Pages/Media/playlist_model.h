@@ -1,8 +1,8 @@
-#ifndef PLAYLIST_MODEL_H
-#define PLAYLIST_MODEL_H
+#pragma once
 
-#include <QAbstractButton>
 #include <QAbstractItemModel>
+#include <QMediaPlaylist>
+#include <QPointer>
 
 class QMediaPlaylist;
 
@@ -36,12 +36,6 @@ class PlaylistModel : public QAbstractItemModel {
     void changeItems(int start, int end);
 
   private:
-    QMediaPlaylist *m_playlist;
+    QPointer<QMediaPlaylist> m_playlist;
     QMap<QModelIndex, QVariant> m_data;
-
-  public:
-    QAbstractButton *m_openButton;
-    QAbstractButton *m_removeButton;
 };
-
-#endif // PLAYLIST_MODEL_H

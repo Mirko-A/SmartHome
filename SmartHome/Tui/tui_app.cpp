@@ -16,7 +16,7 @@
 
 namespace smart_home::tui {
 
-TuiApp::TuiApp(HomeControl &home, std::string homeConfigPath, app::ConfigSnapshot accepted)
+App::App(HomeControl &home, std::string homeConfigPath, app::ConfigSnapshot accepted)
     : m_homeConfigPath(std::move(homeConfigPath)), m_accepted(std::move(accepted)), m_home(home),
       m_state(home.settings()), m_screen(ftxui::ScreenInteractive::Fullscreen()),
       m_lightsPanel(components::makeLightsPanel(m_state)),
@@ -28,7 +28,7 @@ TuiApp::TuiApp(HomeControl &home, std::string homeConfigPath, app::ConfigSnapsho
     m_lightsPanel->TakeFocus();
 }
 
-void TuiApp::run() {
+void App::run() {
     std::jthread ticker([this](std::stop_token stop) {
         while (!stop.stop_requested()) {
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -40,7 +40,7 @@ void TuiApp::run() {
     m_screen.Loop(m_root);
 }
 
-ftxui::Element TuiApp::render() {
+ftxui::Element App::render() {
     return ftxui::vbox({
         ftxui::hbox({components::renderSensors(m_state)}),
         ftxui::hbox({m_lightsPanel->Render() | ftxui::flex, m_speakersPanel->Render() | ftxui::flex,
@@ -51,7 +51,7 @@ ftxui::Element TuiApp::render() {
     });
 }
 
-bool TuiApp::onEvent(ftxui::Event event) {
+bool App::onEvent(ftxui::Event event) {
     if (m_confirmReload && event != ftxui::Event::Custom) {
         m_confirmReload = false;
         if (event == ftxui::Event::Character('y'))
@@ -80,7 +80,7 @@ bool TuiApp::onEvent(ftxui::Event event) {
     return true;
 }
 
-void TuiApp::saveAndQuit() {
+void App::saveAndQuit() {
     m_saveError.clear();
     // Copy pending UI control edits into home settings, retaining the latest sensor readings.
     auto settings = m_home.settings();
@@ -104,7 +104,7 @@ void TuiApp::saveAndQuit() {
     m_screen.ExitLoopClosure()();
 }
 
-void TuiApp::reload() {
+void App::reload() {
     auto result = app::loadConfig(m_homeConfigPath);
     if (!result) {
         m_saveError = result.error().message;
@@ -121,7 +121,7 @@ void TuiApp::reload() {
     m_saveError.clear();
 }
 
-void TuiApp::synchronizeState() {
+void App::synchronizeState() {
     // TODO: remove randomized sensor updates.
     //
     // Synchronize sensor readings.
