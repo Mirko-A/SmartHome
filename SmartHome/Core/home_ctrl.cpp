@@ -89,6 +89,35 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
     return home;
 }
 
+std::expected<void, std::string> HomeControl::onUpdate() {
+    return onUpdate(m_Settings);
+}
+
+std::expected<void, std::string> HomeControl::onUpdate(const HomeSettings &settings) {
+    const auto lights = settings.lights();
+    std::string errors;
+    const auto apply = [&](bool on, Light::Location location, const char *name) {
+        if (auto result = m_Light.setOn(on, location); !result) {
+            if (!errors.empty()) {
+                errors += "; ";
+            }
+            errors += std::string(name) + ": " + result.error();
+        }
+    };
+    apply(lights.livingRoomLightOn, Light::Location::LIVING_ROOM, "Living room light");
+    apply(lights.bedroomLightOn, Light::Location::BEDROOM, "Bedroom light");
+    apply(lights.kitchenLightOn, Light::Location::KITCHEN, "Kitchen light");
+    // AC and speakers remain settings-only until their hardware operations exist.
+    if (!errors.empty()) {
+        return std::unexpected(errors);
+    }
+    return {};
+}
+
+std::expected<float, std::string> HomeControl::readSensor(Sensor::Type type) {
+    return m_Sensor.read(type);
+}
+
 std::expected<void, std::string> HomeControl::deserializeJson(const nlohmann::json &json) {
     return m_Settings.deserializeJson(json);
 }

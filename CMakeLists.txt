@@ -62,7 +62,7 @@ add_executable(SmartHome
     SmartHome/Tui/components/speaker.cpp
 )
 
-add_library(SmartHomeApp STATIC SmartHome/Shared/config_io.cpp)
+add_library(SmartHomeApp STATIC SmartHome/Shared/config_io.cpp SmartHome/Shared/app_session.cpp)
 target_include_directories(SmartHomeApp PUBLIC SmartHome/Shared/)
 target_link_libraries(SmartHomeApp PUBLIC SmartHomeCore Threads::Threads)
 

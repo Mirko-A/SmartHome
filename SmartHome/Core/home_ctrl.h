@@ -27,6 +27,9 @@ class HomeControl {
     HomeControl &operator=(HomeControl &&) = default;
 
     std::expected<void, std::string> onUpdate();
+    // Reapply every supported output; success does not imply physical readback.
+    std::expected<void, std::string> onUpdate(const HomeSettings &settings);
+    std::expected<float, std::string> readSensor(Sensor::Type type);
 
     std::expected<void, std::string> deserializeJson(const nlohmann::json &json);
     nlohmann::json serializeJson() const;
