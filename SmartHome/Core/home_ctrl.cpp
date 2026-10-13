@@ -8,7 +8,7 @@ std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, 
                                                   const char *key);
 
 HomeControl::HomeControl(Light light, Ac ac, Sensor sensor)
-    : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)) {}
+    : m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)) {}
 
 std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json &pinCfgJson,
                                                             const nlohmann::json &homeCfgJson) {
@@ -57,7 +57,7 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
         "sensors.humidity",   "sensors.brightness", "ac.pin1",        "ac.pin2"};
     std::unordered_map<uint8_t, const char *> seenPins;
     seenPins.reserve(pins.size());
-    for (size_t i = 0; i < pins.size(); ++i) {
+    for (size_t i = 0; i < pins.size(); i++) {
         const auto [seen, inserted] = seenPins.emplace(pins[i].number(), paths[i]);
         if (!inserted) {
             return std::unexpected(std::string(paths[i]) + ": GPIO pin already assigned to " +
@@ -84,17 +84,36 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
         return std::unexpected(acResult.error());
     }
 
-    HomeControl home(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
-    home.m_Settings = settings;
-    return home;
+    return HomeControl(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
 }
 
-std::expected<void, std::string> HomeControl::deserializeJson(const nlohmann::json &json) {
-    return m_Settings.deserializeJson(json);
+std::expected<void, std::string> HomeControl::onUpdate(const HomeSettings &settings) {
+    std::string errors;
+    const auto lights = settings.lights();
+    const auto appendErr = [&](std::expected<void, std::string> result, std::string name) {
+        if (result) {
+            return;
+        }
+
+        if (!errors.empty()) {
+            errors += "; ";
+        }
+        errors += std::string(name) + ": " + result.error();
+    };
+    appendErr(m_Light.setOn(lights.livingRoomLightOn, Light::Location::LIVING_ROOM),
+              "Living room light");
+    appendErr(m_Light.setOn(lights.bedroomLightOn, Light::Location::BEDROOM), "Bedroom light");
+    appendErr(m_Light.setOn(lights.kitchenLightOn, Light::Location::KITCHEN), "Kitchen light");
+
+    // AC and speakers remain settings-only until their hardware operations exist.
+    if (!errors.empty()) {
+        return std::unexpected(errors);
+    }
+    return {};
 }
 
-nlohmann::json HomeControl::serializeJson() const {
-    return m_Settings.serializeJson();
+std::expected<float, std::string> HomeControl::readSensor(Sensor::Type type) {
+    return m_Sensor.read(type);
 }
 
 std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group,

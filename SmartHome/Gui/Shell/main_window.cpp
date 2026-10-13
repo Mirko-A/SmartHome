@@ -44,6 +44,10 @@ MainWindow::MainWindow(gui::App &app, QWidget *parent)
     connect(m_saveAction, &QAction::triggered, &app, &gui::App::save);
     connect(m_reloadAction, &QAction::triggered, this, &MainWindow::reloadSettings);
     connect(&app, &gui::App::changed, this, &MainWindow::refreshSession);
+    connect(&app, &gui::App::shutdownReady, this, [this] {
+        m_savedForClose = true;
+        close();
+    });
     auto updateClock = [this] {
         m_ui->dateTimeLabel->setText(QDateTime::currentDateTimeUtc().toString());
     };
@@ -86,15 +90,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         event->ignore();
         return;
     }
-    if (m_app.hasUnsavedChanges()) {
-        auto answer = QMessageBox::question(
-            this, "Unsaved settings",
-            "Discard pending edits and close? Use Save settings first to keep them.",
-            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-        if (answer != QMessageBox::Yes) {
-            event->ignore();
-            return;
-        }
+    if (m_savedForClose || !m_app.loaded()) {
+        event->accept();
+        return;
     }
-    event->accept();
+    event->ignore();
+    m_app.saveAndClose();
 }

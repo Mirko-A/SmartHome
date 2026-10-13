@@ -7,12 +7,12 @@
 #include <QTimer>
 
 #include "Pages/Analytics/analytics_model.h"
-#include "config_io.h"
+#include "app_session.h"
 #include "gui_state.h"
 
 namespace smart_home::gui {
 
-// UI-thread state; only immutable snapshots cross to the I/O worker.
+// Devices and editable state stay on the UI thread; workers only perform file I/O.
 class App : public QObject {
     Q_OBJECT
 
@@ -20,22 +20,21 @@ class App : public QObject {
     explicit App(std::string path, QObject *parent = nullptr);
     ~App() override;
 
-    const HomeSettings &settings() const {
-        return m_state.pending;
-    }
     bool loaded() const {
-        return m_state.loaded;
+        return m_session.loaded();
     }
     bool busy() const {
-        return m_state.busy;
+        return m_busy;
     }
     bool editable() const {
-        return m_state.loaded && !m_state.loading;
+        return loaded() && !m_loading && !m_closing;
     }
-    bool hasUnsavedChanges() const;
+    bool hasUnsavedChanges() const {
+        return m_session.hasUnsavedChanges();
+    }
     QString status() const;
-    const GuiState &state() const {
-        return m_state;
+    const app::AppState &state() const {
+        return m_session.state();
     }
     const AnalyticsModel &analytics() const {
         return m_analytics;
@@ -44,22 +43,24 @@ class App : public QObject {
     void setAcOn(bool on);
     void stepAcMode(int direction);
     void setSpeaker(SpeakerControl control, int value);
-    // Caller confirms discarding pending edits before requesting reload.
     void reload();
     void save();
+    void saveAndClose();
 
   signals:
     void changed();
     void tick();
+    void shutdownReady();
 
   private:
-    void edit(const HomeSettings &settings);
+    void edited();
+    void startSave(bool closing);
     void sampleAnalytics();
 
-  private:
-    std::string m_path;
-    GuiState m_state;
-    app::ConfigSnapshot m_accepted;
+    app::AppSession m_session;
+    bool m_busy = false;
+    bool m_loading = false;
+    bool m_closing = false;
     AnalyticsModel m_analytics;
     QTimer m_timer;
     QElapsedTimer m_clock;

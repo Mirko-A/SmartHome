@@ -17,7 +17,7 @@ ftxui::Element sliderRow(const std::string &label, const ftxui::Component &slide
 
 } // namespace
 
-ftxui::Component makeSpeakersPanel(TuiState &state) {
+ftxui::Component makeSpeakersPanel(app::AppState &state) {
     auto volumeSlider = ftxui::Slider("", &state.speakers.volume, 0, 100, 1);
     auto bassSlider = ftxui::Slider("", &state.speakers.bass, 0, 100, 1);
     auto pitchSlider = ftxui::Slider("", &state.speakers.pitch, 0, 100, 1);

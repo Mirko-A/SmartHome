@@ -45,7 +45,7 @@ void AnalyticsPage::selectPage(int index) {
     const std::array<QPushButton *, 3> buttons{
         m_ui->analyticsPageLightsBtn, m_ui->analyticsPageACBtn, m_ui->analyticsPageSensorsBtn};
 
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; i++) {
         auto fName = ":/icons/analytics-" + names[i] + (i == index ? "-on.svg" : "-off.svg");
         buttons[i]->setIcon(QIcon(fName));
     }
@@ -54,7 +54,7 @@ void AnalyticsPage::selectPage(int index) {
 
 void AnalyticsPage::render() {
     const auto &model = m_app.analytics();
-    for (size_t i = 0; i < m_histograms.size(); ++i) {
+    for (size_t i = 0; i < m_histograms.size(); i++) {
         m_histograms[i]->render(model.onTime()[i]);
     }
     for (auto &graph : m_graphs) {

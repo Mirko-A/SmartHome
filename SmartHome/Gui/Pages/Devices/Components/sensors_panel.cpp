@@ -14,11 +14,8 @@ SensorsPanel::SensorsPanel(QWidget *parent)
 
 SensorsPanel::~SensorsPanel() = default;
 
-void SensorsPanel::render(const SensorReadings &snapshot, bool available) {
-    m_ui->temperatureSensorValueLabel->setText(available ? QString::number(snapshot.temperature)
-                                                         : QStringLiteral("—"));
-    m_ui->humiditySensorValueLabel->setText(available ? QString::number(snapshot.humidity)
-                                                      : QStringLiteral("—"));
-    m_ui->brightnessSensorValueLabel->setText(available ? QString::number(snapshot.brightness)
-                                                        : QStringLiteral("—"));
+void SensorsPanel::render(const SensorReadings &snapshot) {
+    m_ui->temperatureSensorValueLabel->setText(QString::number(snapshot.temperature));
+    m_ui->humiditySensorValueLabel->setText(QString::number(snapshot.humidity));
+    m_ui->brightnessSensorValueLabel->setText(QString::number(snapshot.brightness));
 }

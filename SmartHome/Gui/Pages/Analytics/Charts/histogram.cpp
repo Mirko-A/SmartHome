@@ -22,7 +22,7 @@ Histogram::Histogram(QtCharts::QChart &chart, const QString &title)
 
     auto *x = new QtCharts::QBarCategoryAxis;
     QStringList categories;
-    for (int i = 1; i <= 24; ++i) {
+    for (int i = 1; i <= 24; i++) {
         categories.append(QString::number(i));
     }
     x->append(categories);
@@ -47,7 +47,7 @@ Histogram::Histogram(QtCharts::QChart &chart, const QString &title)
 
 void Histogram::render(const OnTimeHistory &history) {
     const int existing = m_bars->count();
-    for (size_t i = 0; i < history.minutes.size(); ++i) {
+    for (size_t i = 0; i < history.minutes.size(); i++) {
         if (static_cast<int>(i) < existing) {
             m_bars->replace(static_cast<int>(i), history.minutes[i]);
         } else {

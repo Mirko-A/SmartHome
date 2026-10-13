@@ -17,7 +17,7 @@ namespace hal {
 
 Gpio::Gpio() {
     m_Initialized = (wiringPiSetup() >= 0);
-    for (uint8_t number = 0; number < GpioPin::COUNT; ++number) {
+    for (uint8_t number = 0; number < GpioPin::COUNT; number++) {
         m_AvailablePins[number] = *GpioPin::create(number);
     }
 }

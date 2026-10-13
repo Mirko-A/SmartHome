@@ -5,17 +5,14 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <string>
 
-#include "config_io.h"
-#include "home_ctrl.h"
-#include "tui_state.h"
+#include "app_session.h"
 
 namespace smart_home::tui {
 
 class App {
   public:
-    // The caller keeps home alive throughout the session. All settings access stays on the UI
-    // thread.
-    App(HomeControl &home, std::string homeConfigPath, app::ConfigSnapshot accepted);
+    // The caller keeps the shared session alive; all device access stays on the UI thread.
+    explicit App(app::AppSession &session);
     App(const App &) = delete;
     App &operator=(const App &) = delete;
     App(App &&) = delete;
@@ -31,14 +28,9 @@ class App {
     void reload();
 
   private:
-    std::string m_homeConfigPath;
-    app::ConfigSnapshot m_accepted;
     bool m_confirmReload = false;
 
-    // State precedes components so borrowed widget values outlive the component tree.
-    // Home settings own sensor readings; UI state owns pending control edits until saveAndQuit().
-    HomeControl &m_home;
-    TuiState m_state;
+    app::AppSession &m_session;
 
     ftxui::ScreenInteractive m_screen;
     ftxui::Component m_lightsPanel;

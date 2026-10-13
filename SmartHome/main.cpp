@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 
     // Copy the mode argument, then remove it from argv.
     std::string mode = argv[1];
-    for (int i = 2; i < argc; ++i) {
+    for (int i = 2; i < argc; i++) {
         argv[i - 1] = argv[i];
     }
     argc -= 1;

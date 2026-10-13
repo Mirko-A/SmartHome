@@ -5,85 +5,68 @@
 namespace smart_home::gui {
 
 App::App(std::string path, QObject *parent)
-    : QObject(parent), m_path(std::move(path)), m_worker(new QObject) {
+    : QObject(parent), m_session(std::move(path)), m_worker(new QObject) {
     m_worker->moveToThread(&m_thread);
     connect(&m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
     m_thread.start();
     m_clock.start();
     connect(&m_timer, &QTimer::timeout, this, [this] {
+        m_session.update();
         sampleAnalytics();
+        emit changed();
         emit tick();
     });
     m_timer.start(100);
 }
 
 App::~App() {
-    // Finish any in-flight file operation before destroying its completion receiver.
     m_timer.stop();
     m_thread.quit();
     m_thread.wait();
 }
 
-bool App::hasUnsavedChanges() const {
-    return m_state.loaded && m_state.pending.serializeJson() != m_state.saved.serializeJson();
-}
-
 QString App::status() const {
-    if (m_state.busy) {
-        return m_state.loading ? "Loading settings…" : "Saving settings…";
+    if (m_busy) {
+        return m_loading ? "Loading settings…" : "Saving settings…";
     }
-    if (!m_error.isEmpty()) {
-        return m_error;
+    QString status = m_error;
+    if (!status.isEmpty()) {
+        status += " ";
     }
-    if (!m_state.loaded) {
-        return "No valid configuration loaded. Use Reload to retry.";
+    if (loaded()) {
+        status += hasUnsavedChanges() ? "Unsaved edits. " : "No unsaved edits. ";
     }
-    return hasUnsavedChanges() ? "Unsaved settings — device application is unavailable."
-                               : "No unsaved settings — device application is unavailable.";
+    return status + QString::fromStdString(m_session.deviceStatus());
 }
 
-void App::edit(const HomeSettings &settings) {
-    if (!editable()) {
-        return;
-    }
-    m_state.pending = settings;
+void App::edited() {
+    m_session.edited();
     sampleAnalytics();
-    // Keep an outstanding I/O error visible even when the user continues editing.
     emit changed();
 }
 
 void App::reload() {
-    if (m_state.busy) {
+    if (m_busy || m_closing) {
         return;
     }
-
-    m_state.busy = m_state.loading = true;
+    m_busy = m_loading = true;
     m_error.clear();
     emit changed();
-
     QMetaObject::invokeMethod(
         m_worker,
-        [this, path = m_path] {
-            auto result = app::loadConfig(path);
-            HomeSettings candidate;
-            if (result) {
-                if (auto valid = candidate.deserializeJson(result->document); !valid) {
-                    result = std::unexpected(
-                        app::ConfigError{app::ConfigErrorKind::VALIDATION,
-                                         "Invalid settings (" + path + "): " + valid.error()});
-                }
-            }
+        [this, path = m_session.path(), readPins = !loaded()] {
+            auto result = app::AppSession::readConfig(path, readPins);
             QMetaObject::invokeMethod(
                 this,
-                [this, result = std::move(result), candidate] {
-                    m_state.busy = m_state.loading = false;
+                [this, result = std::move(result)]() mutable {
+                    m_busy = m_loading = false;
                     if (result) {
-                        m_accepted = std::move(*result);
-                        m_state.pending = m_state.saved = candidate;
-                        m_state.loaded = true;
+                        if (auto accepted = m_session.acceptLoad(std::move(*result)); !accepted) {
+                            m_error = QString::fromStdString(accepted.error());
+                        }
                         sampleAnalytics();
                     } else {
-                        m_error = QString::fromStdString(result.error().message);
+                        m_error = QString::fromStdString(result.error());
                     }
                     emit changed();
                 },
@@ -93,36 +76,46 @@ void App::reload() {
 }
 
 void App::save() {
-    if (m_state.busy || !m_state.loaded || !hasUnsavedChanges()) {
+    startSave(false);
+}
+
+void App::saveAndClose() {
+    startSave(true);
+}
+
+void App::startSave(bool closing) {
+    if (m_busy || !loaded() || m_closing) {
         return;
     }
-
-    m_state.busy = true;
+    auto request = m_session.prepareSave();
+    if (!request) {
+        m_error = QString::fromStdString(request.error());
+        emit changed();
+        return;
+    }
+    m_busy = true;
+    m_closing = closing;
     m_error.clear();
-
-    auto snapshot = m_state.pending;
-    auto document = m_accepted.document;
-    document.merge_patch(snapshot.serializeJson());
     emit changed();
-
     QMetaObject::invokeMethod(
         m_worker,
-        [this, path = m_path, document = std::move(document), version = m_accepted.version,
-         snapshot] {
-            auto result = app::saveConfig(path, document, version);
+        [this, path = m_session.path(), request = std::move(*request)] {
+            auto result = app::AppSession::writeConfig(path, request);
             QMetaObject::invokeMethod(
                 this,
-                [this, result = std::move(result), snapshot] {
-                    m_state.busy = false;
+                [this, result = std::move(result), revision = request.revision]() mutable {
+                    m_busy = false;
+                    const bool close = m_closing && result.has_value();
                     if (result) {
-                        m_accepted = std::move(*result);
-                        // Newer UI edits remain pending; never replace them with this saved
-                        // snapshot.
-                        m_state.saved = snapshot;
+                        m_session.acceptSave(std::move(*result), revision);
                     } else {
-                        m_error = QString::fromStdString(result.error().message);
+                        m_error = "Save failed: " + QString::fromStdString(result.error().message);
+                        m_closing = false;
                     }
                     emit changed();
+                    if (close) {
+                        emit shutdownReady();
+                    }
                 },
                 Qt::QueuedConnection);
         },
@@ -130,61 +123,76 @@ void App::save() {
 }
 
 void App::sampleAnalytics() {
-    if (m_state.loaded) {
-        m_analytics.update(m_state.pending, m_clock.elapsed());
+    if (loaded()) {
+        if (auto settings = m_session.state().snapshot()) {
+            const auto &state = m_session.state();
+            m_analytics.update(*settings, m_clock.elapsed());
+        }
     }
 }
 
 void App::setLight(Light light, bool on) {
-    auto settings = m_state.pending;
-    auto lights = settings.lights();
+    if (!editable()) {
+        return;
+    }
+    auto &lights = m_session.state().lights;
     switch (light) {
     case Light::LIVING_ROOM:
-        lights.livingRoomLightOn = on;
+        lights.livingRoom = on;
         break;
     case Light::BEDROOM:
-        lights.bedroomLightOn = on;
+        lights.bedroom = on;
         break;
     case Light::KITCHEN:
-        lights.kitchenLightOn = on;
+        lights.kitchen = on;
         break;
     }
-    settings.setLights(lights.livingRoomLightOn, lights.bedroomLightOn, lights.kitchenLightOn);
-    edit(settings);
+    edited();
 }
 
 void App::setAcOn(bool on) {
-    auto settings = m_state.pending;
-    settings.setAc(on, settings.ac().mode);
-    edit(settings);
+    if (!editable()) {
+        return;
+    }
+    m_session.state().ac.on = on;
+    edited();
 }
 
 void App::stepAcMode(int direction) {
-    auto settings = m_state.pending;
-    const int mode = static_cast<int>(settings.ac().mode) + (direction > 0 ? 1 : -1);
-    if (direction == 0 || mode < static_cast<int>(Ac::Mode::NORMAL) ||
-        mode > static_cast<int>(Ac::Mode::TURBO)) {
+    if (!editable() || direction == 0) {
         return;
     }
-    settings.setAc(settings.ac().on, static_cast<Ac::Mode>(mode));
-    edit(settings);
+    auto &mode = m_session.state().ac.modeIndex;
+    const int next = mode + (direction > 0 ? 1 : -1);
+    if (next < 0 || next > static_cast<int>(Ac::Mode::TURBO)) {
+        return;
+    }
+    mode = next;
+    edited();
 }
 
 void App::setSpeaker(SpeakerControl control, int value) {
     if (!editable()) {
         return;
     }
-    auto settings = m_state.pending;
-    const auto speakers = settings.speakers();
-    auto result = settings.setSpeakers(control == SpeakerControl::VOLUME ? value : speakers.volume,
-                                       control == SpeakerControl::BASS ? value : speakers.bass,
-                                       control == SpeakerControl::PITCH ? value : speakers.pitch);
-    if (!result) {
-        m_error = QString::fromStdString(result.error());
+    if (value < 0 || value > 100) {
+        m_error = "Speaker values must be from 0 to 100";
         emit changed();
         return;
     }
-    edit(settings);
+    auto &speakers = m_session.state().speakers;
+    switch (control) {
+    case SpeakerControl::VOLUME:
+        speakers.volume = value;
+        break;
+    case SpeakerControl::BASS:
+        speakers.bass = value;
+        break;
+    case SpeakerControl::PITCH:
+        speakers.pitch = value;
+        break;
+    }
+    edited();
 }
 
 } // namespace smart_home::gui

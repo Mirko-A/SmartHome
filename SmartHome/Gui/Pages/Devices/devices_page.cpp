@@ -22,8 +22,10 @@ DevicesPage::~DevicesPage() = default;
 
 void DevicesPage::render() {
     const auto &state = m_app.state();
-    m_ui->lightsContainer->render(state.pending.lights(), m_app.editable());
-    m_ui->ACContainer->render(state.pending.ac(), m_app.editable());
-    m_ui->speakersContainer->render(state.pending.speakers(), m_app.editable());
-    m_ui->sensorsContainer->render(state.pending.sensors(), state.loaded);
+    if (auto settings = state.snapshot()) {
+        m_ui->lightsContainer->render(settings->lights(), m_app.editable());
+        m_ui->ACContainer->render(settings->ac(), m_app.editable());
+        m_ui->speakersContainer->render(settings->speakers(), m_app.editable());
+        m_ui->sensorsContainer->render(settings->sensors());
+    }
 }

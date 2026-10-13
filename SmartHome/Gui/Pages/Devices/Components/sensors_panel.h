@@ -18,7 +18,7 @@ class SensorsPanel : public QWidget {
     explicit SensorsPanel(QWidget *parent = nullptr);
     ~SensorsPanel() override;
 
-    void render(const SensorReadings &snapshot, bool available);
+    void render(const SensorReadings &snapshot);
   signals:
 
   private:

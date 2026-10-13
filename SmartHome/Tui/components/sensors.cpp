@@ -20,12 +20,12 @@ ftxui::Element sensorGauge(const std::string &label, int value, int min, int max
 
 } // namespace
 
-ftxui::Element renderSensors(const TuiState &state) {
+ftxui::Element renderSensors(const app::AppState &state) {
     return ftxui::window(ftxui::text(" Sensors "),
                          ftxui::vbox({
                              sensorGauge("Temperature", state.sensors.temperature, -10, 50, " C"),
                              sensorGauge("Humidity", state.sensors.humidity, 0, 100, " %"),
-                             sensorGauge("Brightness", state.sensors.brightness, 0, 1000, ""),
+                             sensorGauge("Brightness", state.sensors.brightness, 0, 1023, ""),
                          }));
 }
 

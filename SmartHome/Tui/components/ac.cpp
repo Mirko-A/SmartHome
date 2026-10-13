@@ -4,7 +4,7 @@
 
 namespace smart_home::tui::components {
 
-ftxui::Component makeAcPanel(TuiState &state) {
+ftxui::Component makeAcPanel(app::AppState &state) {
     static const std::vector<std::string> modes{"NORMAL", "FAST", "TURBO"};
 
     auto toggle = ftxui::Checkbox("On", &state.ac.on);

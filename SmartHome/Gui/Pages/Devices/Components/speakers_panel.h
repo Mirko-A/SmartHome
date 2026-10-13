@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "gui_state.h"
+#include "home_settings.h"
 
 namespace Ui {
 
