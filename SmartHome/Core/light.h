@@ -1,5 +1,4 @@
-#ifndef LIGHT_H
-#define LIGHT_H
+#pragma once
 
 #include <cstdint>
 #include <expected>
@@ -39,5 +38,3 @@ class Light {
 
     Pins m_Pins;
 };
-
-#endif // LIGHT_H

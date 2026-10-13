@@ -1,5 +1,4 @@
-#ifndef SENSOR_H
-#define SENSOR_H
+#pragma once
 
 #include <expected>
 #include <string>
@@ -37,5 +36,3 @@ class Sensor {
 
     Pins m_Pins;
 };
-
-#endif // SENSOR_H

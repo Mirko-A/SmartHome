@@ -1,5 +1,4 @@
-#ifndef OWNED_PIN_H
-#define OWNED_PIN_H
+#pragma once
 
 #include "gpio_pin.h"
 
@@ -43,5 +42,3 @@ class OwnedPin {
 };
 
 } // namespace hal
-
-#endif // OWNED_PIN_H

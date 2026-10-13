@@ -54,10 +54,11 @@ ftxui::Element App::render() {
 bool App::onEvent(ftxui::Event event) {
     if (m_confirmReload && event != ftxui::Event::Custom) {
         m_confirmReload = false;
-        if (event == ftxui::Event::Character('y'))
+        if (event == ftxui::Event::Character('y')) {
             reload();
-        else
+        } else {
             m_saveError.clear();
+        }
         return true;
     }
     if (event == ftxui::Event::Character('r')) {

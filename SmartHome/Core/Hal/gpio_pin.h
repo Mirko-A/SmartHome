@@ -1,5 +1,4 @@
-#ifndef GPIO_PIN_H
-#define GPIO_PIN_H
+#pragma once
 
 #include <cstdint>
 #include <expected>
@@ -43,5 +42,3 @@ enum class PinState : uint8_t {
 };
 
 } // namespace hal
-
-#endif // GPIO_PIN_H

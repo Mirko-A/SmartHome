@@ -60,14 +60,16 @@ void MainWindow::selectPage(int index) {
     QString fName = QString(QString(":/icons/three-dots-%1-purple.svg").arg(index));
     m_ui->buttonsCurrentButton->setIcon(QIcon(fName));
 }
+
 void MainWindow::refreshSession() {
     m_configStatus->setText(m_app.status());
-    m_saveAction->setEnabled(m_app.loaded() && m_app.dirty() && !m_app.busy());
+    m_saveAction->setEnabled(m_app.loaded() && m_app.hasUnsavedChanges() && !m_app.busy());
     m_reloadAction->setEnabled(!m_app.busy());
 }
+
 void MainWindow::reloadSettings() {
-    if (m_app.dirty()) {
-        const auto answer = QMessageBox::question(
+    if (m_app.hasUnsavedChanges()) {
+        auto answer = QMessageBox::question(
             this, "Reload settings", "Discard pending edits if the configuration reload succeeds?",
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if (answer != QMessageBox::Yes) {
@@ -84,8 +86,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         event->ignore();
         return;
     }
-    if (m_app.dirty()) {
-        const auto answer = QMessageBox::question(
+    if (m_app.hasUnsavedChanges()) {
+        auto answer = QMessageBox::question(
             this, "Unsaved settings",
             "Discard pending edits and close? Use Save settings first to keep them.",
             QMessageBox::Yes | QMessageBox::No, QMessageBox::No);

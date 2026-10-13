@@ -8,8 +8,7 @@ std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, 
                                                   const char *key);
 
 HomeControl::HomeControl(Light light, Ac ac, Sensor sensor)
-    : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)),
-      m_Dirty(false) {}
+    : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)) {}
 
 std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json &pinCfgJson,
                                                             const nlohmann::json &homeCfgJson) {
@@ -95,9 +94,7 @@ std::expected<void, std::string> HomeControl::deserializeJson(const nlohmann::js
 }
 
 nlohmann::json HomeControl::serializeJson() const {
-    auto serialized = m_Settings.serializeJson();
-    serialized["dirty"] = m_Dirty;
-    return serialized;
+    return m_Settings.serializeJson();
 }
 
 std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group,

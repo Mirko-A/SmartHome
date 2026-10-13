@@ -73,10 +73,11 @@ MediaPage::MediaPage(QWidget *parent)
     connect(m_player, &MediaPlayer::availabilityChanged, m_ui->mediaPlayer, &QWidget::setEnabled);
     connect(m_player, &MediaPlayer::statusTextChanged, m_ui->mediaStatusLabel, &QLabel::setText);
     connect(m_player, &MediaPlayer::busyChanged, this, [this](bool busy) {
-        if (busy)
+        if (busy) {
             m_ui->mediaPlayer->setCursor(Qt::BusyCursor);
-        else
+        } else {
             m_ui->mediaPlayer->unsetCursor();
+        }
     });
 
     m_player->publishState();

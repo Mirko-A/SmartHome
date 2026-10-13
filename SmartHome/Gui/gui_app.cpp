@@ -3,6 +3,7 @@
 #include <QMetaObject>
 
 namespace smart_home::gui {
+
 App::App(std::string path, QObject *parent)
     : QObject(parent), m_path(std::move(path)), m_worker(new QObject) {
     m_worker->moveToThread(&m_thread);
@@ -23,24 +24,28 @@ App::~App() {
     m_thread.wait();
 }
 
-bool App::dirty() const {
+bool App::hasUnsavedChanges() const {
     return m_state.loaded && m_state.pending.serializeJson() != m_state.saved.serializeJson();
 }
 
 QString App::status() const {
-    if (m_state.busy)
+    if (m_state.busy) {
         return m_state.loading ? "Loading settings…" : "Saving settings…";
-    if (!m_error.isEmpty())
+    }
+    if (!m_error.isEmpty()) {
         return m_error;
-    if (!m_state.loaded)
+    }
+    if (!m_state.loaded) {
         return "No valid configuration loaded. Use Reload to retry.";
-    return dirty() ? "Unsaved settings — device application is unavailable."
-                   : "No unsaved settings — device application is unavailable.";
+    }
+    return hasUnsavedChanges() ? "Unsaved settings — device application is unavailable."
+                               : "No unsaved settings — device application is unavailable.";
 }
 
 void App::edit(const HomeSettings &settings) {
-    if (!editable())
+    if (!editable()) {
         return;
+    }
     m_state.pending = settings;
     sampleAnalytics();
     // Keep an outstanding I/O error visible even when the user continues editing.
@@ -88,7 +93,7 @@ void App::reload() {
 }
 
 void App::save() {
-    if (m_state.busy || !m_state.loaded || !dirty()) {
+    if (m_state.busy || !m_state.loaded || !hasUnsavedChanges()) {
         return;
     }
 
@@ -123,6 +128,7 @@ void App::save() {
         },
         Qt::QueuedConnection);
 }
+
 void App::sampleAnalytics() {
     if (m_state.loaded) {
         m_analytics.update(m_state.pending, m_clock.elapsed());
@@ -157,15 +163,17 @@ void App::stepAcMode(int direction) {
     auto settings = m_state.pending;
     const int mode = static_cast<int>(settings.ac().mode) + (direction > 0 ? 1 : -1);
     if (direction == 0 || mode < static_cast<int>(Ac::Mode::NORMAL) ||
-        mode > static_cast<int>(Ac::Mode::TURBO))
+        mode > static_cast<int>(Ac::Mode::TURBO)) {
         return;
+    }
     settings.setAc(settings.ac().on, static_cast<Ac::Mode>(mode));
     edit(settings);
 }
 
 void App::setSpeaker(SpeakerControl control, int value) {
-    if (!editable())
+    if (!editable()) {
         return;
+    }
     auto settings = m_state.pending;
     const auto speakers = settings.speakers();
     auto result = settings.setSpeakers(control == SpeakerControl::VOLUME ? value : speakers.volume,

@@ -35,8 +35,9 @@ MediaPlayer::MediaPlayer(QObject *parent)
     connect(m_playlist, &QMediaPlaylist::loadFailed, this, [this] {
         m_serviceError = false;
         m_errorInfo = m_playlist->errorString();
-        if (m_errorInfo.isEmpty())
+        if (m_errorInfo.isEmpty()) {
             m_errorInfo = tr("Unable to load playlist.");
+        }
         renderStatus();
     });
 

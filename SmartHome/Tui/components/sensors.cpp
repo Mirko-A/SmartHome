@@ -4,6 +4,7 @@
 #include <string>
 
 namespace smart_home::tui::components {
+
 namespace {
 
 ftxui::Element sensorGauge(const std::string &label, int value, int min, int max,

@@ -1,5 +1,4 @@
-#ifndef HOME_CTRL_H
-#define HOME_CTRL_H
+#pragma once
 
 #include <stdint.h>
 
@@ -29,7 +28,6 @@ class HomeControl {
 
     std::expected<void, std::string> onUpdate();
 
-    void loadDirtyFlag(const nlohmann::json &thisAsJson);
     std::expected<void, std::string> deserializeJson(const nlohmann::json &json);
     nlohmann::json serializeJson() const;
 
@@ -49,9 +47,4 @@ class HomeControl {
     Light m_Light;
     Ac m_Ac;
     Sensor m_Sensor;
-
-  public:
-    bool m_Dirty;
 };
-
-#endif // HOME_CTRL_H
