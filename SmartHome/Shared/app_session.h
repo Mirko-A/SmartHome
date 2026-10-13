@@ -41,7 +41,7 @@ class AppSession {
         return m_revision != m_savedRevision;
     }
     void edited() {
-        ++m_revision;
+        m_revision++;
     }
     const std::string &path() const {
         return m_path;

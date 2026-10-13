@@ -52,7 +52,7 @@ void AnalyticsModel::update(const HomeSettings &settings, int64_t elapsedMs) {
     const std::array<bool, 4> requests{lights.livingRoomLightOn, lights.bedroomLightOn,
                                        lights.kitchenLightOn, settings.ac().on};
 
-    for (size_t i = 0; i < requests.size(); ++i) {
+    for (size_t i = 0; i < requests.size(); i++) {
         m_onTime[i].update(requests[i], elapsedMs);
     }
 

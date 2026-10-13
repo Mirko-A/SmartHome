@@ -43,7 +43,7 @@ std::expected<void, std::string> AppSession::acceptLoad(LoadedConfig config) {
     }
     m_state = AppState(config.settings);
     m_accepted = std::move(config.home);
-    m_savedRevision = ++m_revision;
+    m_savedRevision = m_revision++;
     // Loading succeeded even when application/acquisition fails; report those separately.
     update();
     return {};

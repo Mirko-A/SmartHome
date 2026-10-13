@@ -57,7 +57,7 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
         "sensors.humidity",   "sensors.brightness", "ac.pin1",        "ac.pin2"};
     std::unordered_map<uint8_t, const char *> seenPins;
     seenPins.reserve(pins.size());
-    for (size_t i = 0; i < pins.size(); ++i) {
+    for (size_t i = 0; i < pins.size(); i++) {
         const auto [seen, inserted] = seenPins.emplace(pins[i].number(), paths[i]);
         if (!inserted) {
             return std::unexpected(std::string(paths[i]) + ": GPIO pin already assigned to " +

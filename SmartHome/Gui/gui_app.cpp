@@ -78,6 +78,7 @@ void App::reload() {
 void App::save() {
     startSave(false);
 }
+
 void App::saveAndClose() {
     startSave(true);
 }
