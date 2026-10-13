@@ -4,7 +4,7 @@
 
 namespace smart_home::tui::components {
 
-ftxui::Component makeLightsPanel(TuiState &state) {
+ftxui::Component makeLightsPanel(app::AppState &state) {
     auto livingRoom = ftxui::Checkbox("Living Room", &state.lights.livingRoom);
     auto bedroom = ftxui::Checkbox("Bedroom", &state.lights.bedroom);
     auto kitchen = ftxui::Checkbox("Kitchen", &state.lights.kitchen);

@@ -2,10 +2,10 @@
 
 #include <ftxui/dom/elements.hpp>
 
-#include "tui_state.h"
+#include "app_state.h"
 
 namespace smart_home::tui::components {
 
-ftxui::Element renderSensors(const TuiState &state);
+ftxui::Element renderSensors(const app::AppState &state);
 
 } // namespace smart_home::tui::components

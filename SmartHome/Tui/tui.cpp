@@ -4,8 +4,7 @@
 #include <iostream>
 #include <utility>
 
-#include "config_io.h"
-#include "home_ctrl.h"
+#include "app_session.h"
 #include "tui_app.h"
 
 namespace smart_home::tui {
@@ -18,26 +17,12 @@ int main(int argc, char *argv[]) {
         std::cerr << "Usage: " << argv[0] << " tui [--config-dir DIRECTORY]" << std::endl;
         return 1;
     }
-    const auto pinConfigPath = (configDirectory / "pin_cfg.json").string();
-    const auto homeConfigPath = (configDirectory / "home_cfg.json").string();
-
-    auto pinConfig = app::loadConfig(pinConfigPath);
-    if (!pinConfig) {
-        std::cerr << "Error: " << pinConfig.error().message << std::endl;
-        return -1;
+    app::AppSession session((configDirectory / "home_cfg.json").string());
+    if (auto result = session.reload(); !result) {
+        std::cerr << "Error initializing home: " << result.error() << std::endl;
+        return 1;
     }
-    auto homeConfig = app::loadConfig(homeConfigPath);
-    if (!homeConfig) {
-        std::cerr << "Error: " << homeConfig.error().message << std::endl;
-        return -1;
-    }
-    auto homeResult = HomeControl::create(pinConfig->document, homeConfig->document);
-    if (!homeResult) {
-        std::cerr << "Error initializing home: " << homeResult.error() << std::endl;
-        return -1;
-    }
-    HomeControl home = std::move(*homeResult);
-    App app(home, homeConfigPath, std::move(*homeConfig));
+    App app(session);
     app.run();
     return 0;
 }
