@@ -124,6 +124,7 @@ void AppSession::update() {
     read(Sensor::Type::BRIGHTNESS, m_state.sensors.brightness);
 }
 
+// TODO: Debug only part of the status. Remove once support is added for all devices.
 std::string AppSession::deviceStatus() const {
     if (!loaded()) {
         return "No valid configuration loaded.";
