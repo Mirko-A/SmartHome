@@ -33,11 +33,6 @@ struct AppState {
         return result;
     }
 
-    // Availability describes the latest acquisition, never values restored from disk.
-    bool temperatureAvailable = false;
-    bool humidityAvailable = false;
-    bool brightnessAvailable = false;
-
     struct Lights {
         bool livingRoom;
         bool bedroom;

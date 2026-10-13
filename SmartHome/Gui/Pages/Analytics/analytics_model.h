@@ -20,13 +20,12 @@ struct OnTimeHistory {
 struct SensorSample {
     double seconds;
     SensorReadings readings;
-    std::array<bool, 3> available;
 };
 
 // Value-only history: no charts, series, axes, or widget lifetime dependencies.
 class AnalyticsModel {
   public:
-    void update(const HomeSettings &settings, int64_t elapsedMs, std::array<bool, 3> available);
+    void update(const HomeSettings &settings, int64_t elapsedMs);
 
     const std::array<OnTimeHistory, 4> &onTime() const {
         return m_onTime;

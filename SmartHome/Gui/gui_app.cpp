@@ -16,7 +16,7 @@ App::App(std::string path, QObject *parent)
         emit changed();
         emit tick();
     });
-    m_timer.start(500);
+    m_timer.start(100);
 }
 
 App::~App() {
@@ -125,9 +125,7 @@ void App::sampleAnalytics() {
     if (loaded()) {
         if (auto settings = m_session.state().snapshot()) {
             const auto &state = m_session.state();
-            m_analytics.update(
-                *settings, m_clock.elapsed(),
-                {state.temperatureAvailable, state.humidityAvailable, state.brightnessAvailable});
+            m_analytics.update(*settings, m_clock.elapsed());
         }
     }
 }

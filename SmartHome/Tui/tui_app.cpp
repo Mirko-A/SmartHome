@@ -1,10 +1,8 @@
 #include "tui_app.h"
 
 #include <chrono>
-#include <cstdint>
 #include <ftxui/dom/elements.hpp>
 #include <thread>
-#include <utility>
 
 #include "components/ac.h"
 #include "components/light.h"
@@ -35,7 +33,7 @@ App::App(app::AppSession &session)
 void App::run() {
     std::jthread ticker([this](std::stop_token stop) {
         while (!stop.stop_requested()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             if (!stop.stop_requested()) {
                 m_screen.PostEvent(ftxui::Event::Custom);
             }

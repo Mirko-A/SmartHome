@@ -26,7 +26,6 @@ void DevicesPage::render() {
         m_ui->lightsContainer->render(settings->lights(), m_app.editable());
         m_ui->ACContainer->render(settings->ac(), m_app.editable());
         m_ui->speakersContainer->render(settings->speakers(), m_app.editable());
-        m_ui->sensorsContainer->render(settings->sensors(), state.temperatureAvailable,
-                                       state.humidityAvailable, state.brightnessAvailable);
+        m_ui->sensorsContainer->render(settings->sensors());
     }
 }

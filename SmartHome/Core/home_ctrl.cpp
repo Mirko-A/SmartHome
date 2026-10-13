@@ -88,19 +88,23 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
 }
 
 std::expected<void, std::string> HomeControl::onUpdate(const HomeSettings &settings) {
-    const auto lights = settings.lights();
     std::string errors;
-    const auto apply = [&](bool on, Light::Location location, const char *name) {
-        if (auto result = m_Light.setOn(on, location); !result) {
-            if (!errors.empty()) {
-                errors += "; ";
-            }
-            errors += std::string(name) + ": " + result.error();
+    const auto lights = settings.lights();
+    const auto appendErr = [&](std::expected<void, std::string> result, std::string name) {
+        if (result) {
+            return;
         }
+
+        if (!errors.empty()) {
+            errors += "; ";
+        }
+        errors += std::string(name) + ": " + result.error();
     };
-    apply(lights.livingRoomLightOn, Light::Location::LIVING_ROOM, "Living room light");
-    apply(lights.bedroomLightOn, Light::Location::BEDROOM, "Bedroom light");
-    apply(lights.kitchenLightOn, Light::Location::KITCHEN, "Kitchen light");
+    appendErr(m_Light.setOn(lights.livingRoomLightOn, Light::Location::LIVING_ROOM),
+              "Living room light");
+    appendErr(m_Light.setOn(lights.bedroomLightOn, Light::Location::BEDROOM), "Bedroom light");
+    appendErr(m_Light.setOn(lights.kitchenLightOn, Light::Location::KITCHEN), "Kitchen light");
+
     // AC and speakers remain settings-only until their hardware operations exist.
     if (!errors.empty()) {
         return std::unexpected(errors);

@@ -105,12 +105,12 @@ void AppSession::update() {
         m_applyError = result ? "" : result.error();
     }
     m_sensorError.clear();
-    const auto read = [&](Sensor::Type type, int16_t &value, bool &available) {
+    const auto read = [&](Sensor::Type type, int16_t &value) {
         auto result = m_home->readSensor(type);
-        available = result && std::isfinite(*result) &&
-                    *result >= std::numeric_limits<int16_t>::min() &&
-                    *result <= std::numeric_limits<int16_t>::max();
-        if (available) {
+        bool valid = result && std::isfinite(*result) &&
+                     *result >= std::numeric_limits<int16_t>::min() &&
+                     *result <= std::numeric_limits<int16_t>::max();
+        if (valid) {
             value = static_cast<int16_t>(*result);
         } else {
             if (!m_sensorError.empty()) {
@@ -119,9 +119,9 @@ void AppSession::update() {
             m_sensorError += result ? "Sensor reading is out of range" : result.error();
         }
     };
-    read(Sensor::Type::TEMPERATURE, m_state.sensors.temperature, m_state.temperatureAvailable);
-    read(Sensor::Type::HUMIDITY, m_state.sensors.humidity, m_state.humidityAvailable);
-    read(Sensor::Type::BRIGHTNESS, m_state.sensors.brightness, m_state.brightnessAvailable);
+    read(Sensor::Type::TEMPERATURE, m_state.sensors.temperature);
+    read(Sensor::Type::HUMIDITY, m_state.sensors.humidity);
+    read(Sensor::Type::BRIGHTNESS, m_state.sensors.brightness);
 }
 
 std::string AppSession::deviceStatus() const {
