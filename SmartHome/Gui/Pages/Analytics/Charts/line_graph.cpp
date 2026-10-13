@@ -41,13 +41,10 @@ void LineGraph::render(const std::deque<SensorSample> &samples) {
 
     QVector<QPointF> points;
     points.reserve(static_cast<int>(samples.size()));
-    double minimum = 0;
-    double maximum = 0;
+    double minimum = samples.front().readings.*m_reading;
+    double maximum = minimum;
     for (const auto &sample : samples) {
         const double value = sample.readings.*m_reading;
-        if (points.empty()) {
-            minimum = maximum = value;
-        }
         points.append(QPointF(sample.seconds, value));
         minimum = std::min(minimum, value);
         maximum = std::max(maximum, value);
