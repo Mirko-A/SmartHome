@@ -14,11 +14,12 @@ SensorsPanel::SensorsPanel(QWidget *parent)
 
 SensorsPanel::~SensorsPanel() = default;
 
-void SensorsPanel::render(const SensorReadings &snapshot, bool available) {
-    m_ui->temperatureSensorValueLabel->setText(available ? QString::number(snapshot.temperature)
-                                                         : QStringLiteral("—"));
-    m_ui->humiditySensorValueLabel->setText(available ? QString::number(snapshot.humidity)
-                                                      : QStringLiteral("—"));
-    m_ui->brightnessSensorValueLabel->setText(available ? QString::number(snapshot.brightness)
-                                                        : QStringLiteral("—"));
+void SensorsPanel::render(const SensorReadings &snapshot, bool temperatureAvailable,
+                          bool humidityAvailable, bool brightnessAvailable) {
+    m_ui->temperatureSensorValueLabel->setText(
+        temperatureAvailable ? QString::number(snapshot.temperature) : QStringLiteral("—"));
+    m_ui->humiditySensorValueLabel->setText(humidityAvailable ? QString::number(snapshot.humidity)
+                                                              : QStringLiteral("—"));
+    m_ui->brightnessSensorValueLabel->setText(
+        brightnessAvailable ? QString::number(snapshot.brightness) : QStringLiteral("—"));
 }

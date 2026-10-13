@@ -36,6 +36,7 @@ class MainWindow : public QMainWindow {
     smart_home::gui::App &m_app;
     std::unique_ptr<Ui::MainWindow> m_ui;
 
+    bool m_savedForClose = false;
     QAction *m_saveAction;
     QAction *m_reloadAction;
     QLabel *m_configStatus;
