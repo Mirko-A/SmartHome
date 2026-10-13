@@ -8,7 +8,7 @@ std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, 
                                                   const char *key);
 
 HomeControl::HomeControl(Light light, Ac ac, Sensor sensor)
-    : m_Settings(), m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)) {}
+    : m_Light(std::move(light)), m_Ac(std::move(ac)), m_Sensor(std::move(sensor)) {}
 
 std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json &pinCfgJson,
                                                             const nlohmann::json &homeCfgJson) {
@@ -84,13 +84,7 @@ std::expected<HomeControl, std::string> HomeControl::create(const nlohmann::json
         return std::unexpected(acResult.error());
     }
 
-    HomeControl home(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
-    home.m_Settings = settings;
-    return home;
-}
-
-std::expected<void, std::string> HomeControl::onUpdate() {
-    return onUpdate(m_Settings);
+    return HomeControl(std::move(*lightResult), std::move(*acResult), std::move(*sensorResult));
 }
 
 std::expected<void, std::string> HomeControl::onUpdate(const HomeSettings &settings) {
@@ -116,14 +110,6 @@ std::expected<void, std::string> HomeControl::onUpdate(const HomeSettings &setti
 
 std::expected<float, std::string> HomeControl::readSensor(Sensor::Type type) {
     return m_Sensor.read(type);
-}
-
-std::expected<void, std::string> HomeControl::deserializeJson(const nlohmann::json &json) {
-    return m_Settings.deserializeJson(json);
-}
-
-nlohmann::json HomeControl::serializeJson() const {
-    return m_Settings.serializeJson();
 }
 
 std::expected<hal::GpioPin, std::string> parsePin(const nlohmann::json &config, const char *group,

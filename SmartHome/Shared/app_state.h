@@ -6,7 +6,6 @@ namespace smart_home::app {
 
 // Canonical editable state shared by both interfaces. Keep its address stable for widget bindings.
 struct AppState {
-
     explicit AppState(const HomeSettings &settings = {})
         : lights{.livingRoom = settings.lights().livingRoomLightOn,
                  .bedroom = settings.lights().bedroomLightOn,

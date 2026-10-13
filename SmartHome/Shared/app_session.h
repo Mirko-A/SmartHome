@@ -64,6 +64,7 @@ class AppSession {
     AppState m_state;
     std::optional<HomeControl> m_home;
     ConfigSnapshot m_accepted;
+    // Save acknowledgements only; hardware updates never consult edit revisions.
     uint64_t m_revision = 0;
     uint64_t m_savedRevision = 0;
     std::string m_applyError;
