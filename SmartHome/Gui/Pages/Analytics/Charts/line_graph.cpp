@@ -41,15 +41,29 @@ void LineGraph::render(const std::deque<SensorSample> &samples) {
 
     QVector<QPointF> points;
     points.reserve(static_cast<int>(samples.size()));
-    double minimum = samples.front().readings.*m_reading;
-    double maximum = minimum;
+    double minimum = 0;
+    double maximum = 0;
+    const size_t index = m_reading == &SensorReadings::temperature ? 0
+                         : m_reading == &SensorReadings::humidity  ? 1
+                                                                   : 2;
     for (const auto &sample : samples) {
+        if (!sample.available[index]) {
+            // Draw only the latest continuous run; never bridge missing readings.
+            points.clear();
+            continue;
+        }
         const double value = sample.readings.*m_reading;
+        if (points.empty()) {
+            minimum = maximum = value;
+        }
         points.append(QPointF(sample.seconds, value));
         minimum = std::min(minimum, value);
         maximum = std::max(maximum, value);
     }
     m_series->replace(points);
+    if (points.empty()) {
+        return;
+    }
 
     const double padding = std::max(1.0, (maximum - minimum) * 0.05);
     m_x->setRange(std::max(0.0, m_lastSample - 3600), std::max(3600.0, m_lastSample));

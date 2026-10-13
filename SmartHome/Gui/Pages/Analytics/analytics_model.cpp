@@ -47,7 +47,8 @@ bool shouldDiscardSample(const std::deque<SensorSample> &samples, const double e
     return (samples.size() >= MAX_SAMPLES) || (samples.front().seconds <= (elapsedSecs - 3600));
 }
 
-void AnalyticsModel::update(const HomeSettings &settings, int64_t elapsedMs) {
+void AnalyticsModel::update(const HomeSettings &settings, int64_t elapsedMs,
+                            std::array<bool, 3> available) {
     const auto lights = settings.lights();
     const std::array<bool, 4> requests{lights.livingRoomLightOn, lights.bedroomLightOn,
                                        lights.kitchenLightOn, settings.ac().on};
@@ -66,5 +67,5 @@ void AnalyticsModel::update(const HomeSettings &settings, int64_t elapsedMs) {
     while (shouldDiscardSample(m_samples, elapsedSecs)) {
         m_samples.pop_front();
     }
-    m_samples.push_back({elapsedSecs, settings.sensors()});
+    m_samples.push_back({elapsedSecs, settings.sensors(), available});
 }

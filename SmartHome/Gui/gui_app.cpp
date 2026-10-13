@@ -124,7 +124,10 @@ void App::startSave(bool closing) {
 void App::sampleAnalytics() {
     if (loaded()) {
         if (auto settings = m_session.state().snapshot()) {
-            m_analytics.update(*settings, m_clock.elapsed());
+            const auto &state = m_session.state();
+            m_analytics.update(
+                *settings, m_clock.elapsed(),
+                {state.temperatureAvailable, state.humidityAvailable, state.brightnessAvailable});
         }
     }
 }
