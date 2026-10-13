@@ -2,10 +2,13 @@
 
 #include <utility>
 
+#include "gpio_pin.h"
+
 #if __has_include(<wiringPi.h>)
 #include <wiringPi.h>
 #define HAL_HAS_WIRINGPI 1
 #else
+#include <random>
 #define HAL_HAS_WIRINGPI 0
 #endif
 
@@ -72,7 +75,10 @@ std::expected<PinState, std::string> OwnedPin::digitalRead() {
 #if HAL_HAS_WIRINGPI
     return (::digitalRead(m_Pin.number()) == 0) ? PinState::LOW : PinState::HIGH;
 #else
-    return PinState::LOW;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::bernoulli_distribution dist(0.5);
+    return dist(gen) ? PinState::HIGH : PinState::LOW;
 #endif
 }
 std::expected<void, std::string> OwnedPin::digitalWrite(PinState state) {
@@ -99,7 +105,10 @@ std::expected<int, std::string> OwnedPin::analogRead() {
 #if HAL_HAS_WIRINGPI
     return ::analogRead(m_Pin.number());
 #else
-    return 0;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(0, 1023);
+    return dist(gen);
 #endif
 }
 std::expected<void, std::string> OwnedPin::pwmWrite(uint16_t value) {

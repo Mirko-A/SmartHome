@@ -29,25 +29,19 @@ Sensor::create(hal::GpioPin temperaturePin, hal::GpioPin humidityPin, hal::GpioP
                        std::move(*brightnessResult)});
 }
 
-float Sensor::read(Type type) {
-    float sensorValue = 0.0f;
-
-    // m_DHT22->Fetch();
-
+std::expected<float, std::string> Sensor::read(Type type) {
     switch (type) {
-    case Type::TEMPERATURE: {
-        // sensorValue = m_DHT22->Temp;
-    } break;
-    case Type::HUMIDITY: {
-        // sensorValue = m_DHT22->Hum;
-    } break;
+    case Type::TEMPERATURE:
+        return std::unexpected("Temperature reading is unsupported (DHT22 HAL unavailable)");
+    case Type::HUMIDITY:
+        return std::unexpected("Humidity reading is unsupported (DHT22 HAL unavailable)");
     case Type::BRIGHTNESS: {
-        // TODO: Brightness sensor
-        break;
+        auto reading = m_Pins.brightness.analogRead();
+        if (!reading) {
+            return std::unexpected(reading.error());
+        }
+        return static_cast<float>(*reading);
     }
-    default: {
-    } break;
     }
-
-    return sensorValue;
+    return std::unexpected("Invalid sensor type");
 }

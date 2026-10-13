@@ -2,7 +2,6 @@
 
 #include <expected>
 #include <string>
-// #include "DHT22.h"
 
 #include "owned_pin.h"
 
@@ -29,7 +28,8 @@ class Sensor {
     Sensor(Sensor &&) = default;
     Sensor &operator=(Sensor &&) = default;
 
-    float read(Type type);
+    // Temperature and humidity require a DHT22 HAL operation, which is not implemented.
+    std::expected<float, std::string> read(Type type);
 
   private:
     explicit Sensor(Pins pins);
