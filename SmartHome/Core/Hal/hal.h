@@ -1,6 +1,3 @@
-#ifndef HAL_H
-#define HAL_H
+#pragma once
 
 #include "gpio.h"
-
-#endif // HAL_H

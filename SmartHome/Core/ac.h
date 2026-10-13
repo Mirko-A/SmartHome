@@ -1,5 +1,4 @@
-#ifndef AC_H
-#define AC_H
+#pragma once
 
 #include <cstdint>
 #include <expected>
@@ -56,5 +55,3 @@ class Ac {
     Ac::Mode m_Mode;
     uint8_t m_Speed;
 };
-
-#endif // AC_H

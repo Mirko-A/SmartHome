@@ -4,6 +4,7 @@
 #include <string>
 
 namespace smart_home::tui::components {
+
 namespace {
 
 ftxui::Element sliderRow(const std::string &label, const ftxui::Component &slider, int value) {

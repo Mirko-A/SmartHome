@@ -116,4 +116,5 @@ std::expected<void, std::string> OwnedPin::pwmWrite(uint16_t value) {
 #endif
     return std::expected<void, std::string>();
 }
+
 } // namespace hal

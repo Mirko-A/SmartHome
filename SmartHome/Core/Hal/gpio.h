@@ -1,5 +1,4 @@
-#ifndef GPIO_H
-#define GPIO_H
+#pragma once
 
 #include <array>
 #include <expected>
@@ -44,5 +43,3 @@ class Gpio {
 };
 
 } // namespace hal
-
-#endif // GPIO_H

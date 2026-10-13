@@ -1,5 +1,4 @@
-#ifndef HOME_CTRL_H
-#define HOME_CTRL_H
+#pragma once
 
 #include <stdint.h>
 
@@ -49,5 +48,3 @@ class HomeControl {
     Ac m_Ac;
     Sensor m_Sensor;
 };
-
-#endif // HOME_CTRL_H

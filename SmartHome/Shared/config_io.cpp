@@ -49,8 +49,9 @@ class Lock {
 std::expected<Lock, ConfigError> lockConfig(const std::string &path, int mode) {
     const auto lockPath = path + ".lock";
     int fd = ::open(lockPath.c_str(), O_CREAT | O_RDWR | O_CLOEXEC, 0600);
-    if (fd < 0)
+    if (fd < 0) {
         return std::unexpected(ioError(path, "Cannot open config lock"));
+    }
     if (::flock(fd, mode | LOCK_NB) != 0) {
         auto error = ioError(path, "Cannot lock config; retry after the other operation finishes");
         ::close(fd);
@@ -159,10 +160,12 @@ std::expected<ConfigSnapshot, ConfigError> saveConfig(const std::string &path,
     }
     struct TemporaryFile {
         ~TemporaryFile() {
-            if (stream)
+            if (stream) {
                 std::fclose(stream);
-            if (!committed)
+            }
+            if (!committed) {
                 ::unlink(path.c_str());
+            }
         }
         std::FILE *stream;
         const std::string &path;

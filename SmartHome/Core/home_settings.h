@@ -1,5 +1,4 @@
-#ifndef HOME_SETTINGS_H
-#define HOME_SETTINGS_H
+#pragma once
 
 #include <cstdint>
 #include <expected>
@@ -62,5 +61,3 @@ class HomeSettings {
     SensorReadings m_Sensors;
     SpeakerSettings m_Speakers;
 };
-
-#endif // HOME_SETTINGS_H
